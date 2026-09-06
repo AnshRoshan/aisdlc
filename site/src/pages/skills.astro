@@ -6,27 +6,30 @@ const skills = getSkills();
 const stages = [...new Set(skills.map((s) => s.stage))];
 ---
 <Base title="Skills">
-  <section class="wrap section" style="padding-top:3rem;">
-    <p class="kicker">{skills.length} skills</p>
-    <h1 style="font-size:clamp(2rem,5vw,3rem);margin:0;">Every stage, one skill.</h1>
+  <section class="wrap" style="padding-top:3.5rem;">
+    <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700;max-width:24ch;">Every stage has one skill. Every skill is one file.</h1>
     <p class="lede">
-      Each skill is a single SKILL.md in the open Agent Skills format. They work in any harness that reads them; the CLI
-      (<code>npx aisdlc</code>) is the referee that derives state and enforces gates.
+      Each skill is a single <code>SKILL.md</code> in the open Agent Skills format — read identically by Claude Code,
+      Codex, Cursor, Gemini, Copilot, Windsurf and OpenCode. The CLI (<code>npx aisdlc</code>) is the referee that derives
+      state and enforces the gates; the skills are the behaviour.
     </p>
     {stages.map((stage) => (
-      <div style="margin-top:3rem;">
-        <p class="kicker">{stage === "any" ? "cross-cutting" : `stage: ${stage}`}</p>
-        <table class="skill">
-          <thead><tr><th>skill</th><th>what it does</th></tr></thead>
-          <tbody>
-            {skills.filter((s) => s.stage === stage).map((s) => (
-              <tr>
-                <td><a href={`/skills/${skillSlug(s.name)}`}>/{s.name}</a></td>
-                <td style="color:var(--fog);">{s.description.split(/(?<=\.)\s/).slice(0, 2).join(" ")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div class="skillet">
+        <h3 style="font-family:var(--mono);font-size:0.8rem;font-weight:500;text-transform:uppercase;letter-spacing:0.1em;color:var(--faint);margin:3rem 0 0.8rem;">
+          {stage === "any" ? "cross-cutting" : `stage · ${stage}`}
+        </h3>
+        <div class="panel" style="padding:0.4rem 1.4rem;">
+          <table class="skill">
+            <tbody>
+              {skills.filter((s) => s.stage === stage).map((s) => (
+                <tr>
+                  <td><a href={`/skills/${skillSlug(s.name)}`}>{s.name}</a></td>
+                  <td>{s.description.split(/(?<=\.)\s/)[0]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     ))}
   </section>

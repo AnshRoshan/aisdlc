@@ -7,21 +7,32 @@ export function getStaticPaths() {
 }
 
 const { skill } = Astro.props;
-const body = skill.description.split(/(?<=\.)\s/).slice(1).join(" ");
+const rest = skill.description.split(/(?<=\.)\s/).slice(1).join(" ");
 ---
-<Base title={`/${skill.name}`}>
-  <article class="wrap section" style="padding-top:3rem;max-width:50rem;">
-    <p class="kicker"><a href="/skills">← all skills</a></p>
-    <h1 style="font-family:var(--mono);font-size:clamp(1.6rem,4vw,2.4rem);margin:0;">/{skill.name}</h1>
-    <span class="pill" style="margin-top:1rem;">stage: {skill.stage}</span>
-    <p class="lede">{skill.description}</p>
-    {body && <p class="lede">{body}</p>}
-    <div class="card" style="margin-top:2.5rem;">
-      <h3>Install just this skill</h3>
-      <div class="copy" style="margin-top:1rem;">
-        <code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code>
-      </div>
-      <p style="font-size:.85rem;">Or install everything at once with <code>npx aisdlc init</code>. Source: <a href={`https://github.com/AnshRoshan/aisdlc/blob/main/skills/${skill.name}/SKILL.md`}>skills/{skill.name}/SKILL.md</a></p>
+<Base title={`/${skill.name}`} description={skill.description.slice(0, 150)}>
+  <article class="wrap" style="padding-top:3.5rem;max-width:50rem;">
+    <p class="hashline"><a href="/skills">← all skills</a></p>
+    <h1 style="font-family:var(--mono);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:500;margin-top:1rem;">{skill.name}</h1>
+    <p class="hashline" style="margin-top:0.5rem;">stage: <b>{skill.stage}</b> · source: <b>skills/{skill.name}/SKILL.md</b></p>
+    <p class="lede" style="margin-top:1.8rem;font-size:1.05rem;">{skill.description}</p>
+    {rest && <p class="lede">{rest}</p>}
+
+    <div class="panel" style="margin-top:2.5rem;padding:1.6rem 1.6rem;">
+      <h2 style="font-size:1.05rem;font-weight:600;">Install everything, or just this one</h2>
+      <div class="cmdline" style="margin-top:1.1rem;"><code>npx aisdlc init</code><button data-copy="c1">copy</button></div>
+      <div class="cmdline" style="margin-top:0.7rem;"><code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code><button data-copy="c2">copy</button></div>
+      <p class="hashline" style="margin-top:1rem;">skills work without the CLI; the CLI is what makes “done” mean something.</p>
     </div>
   </article>
+  <script>
+    document.querySelectorAll("button[data-copy]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = btn.closest("div").querySelector("code");
+        if (el) navigator.clipboard.writeText(el.textContent.replace(/^ \$ /, "").trim());
+        const t = btn.textContent;
+        btn.textContent = "copied ✓";
+        setTimeout(() => (btn.textContent = t), 1400);
+      });
+    });
+  </script>
 </Base>

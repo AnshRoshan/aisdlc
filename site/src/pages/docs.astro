@@ -2,64 +2,66 @@
 import Base from "../layouts/Base.astro";
 ---
 <Base title="Docs">
-  <article class="wrap section" style="padding-top:3rem;max-width:50rem;">
-    <p class="kicker">Ten-minute tour</p>
-    <h1 style="font-size:clamp(2rem,5vw,3rem);margin:0;">From idea to production, with receipts.</h1>
+  <article class="wrap" style="padding-top:3.5rem;max-width:52rem;">
+    <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700;max-width:22ch;">From idea to production, with receipts.</h1>
+    <p class="lede">The ten-minute tour. Everything below is the real CLI; nothing is mocked.</p>
 
-    <section style="margin-top:3rem;">
-      <h2>1 · Install</h2>
+    <section style="margin-top:3.5rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Install into the repo you are already in</h2>
       <pre class="term">cd /path/to/your/repo
 <span class="p">npx aisdlc init</span></pre>
       <p class="lede">This writes the skills into your harness's skill directories, a <code>docs/</code> process tree, and an <code>aisdlc.json</code> marker.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>2 · Start a feature</h2>
+    <section style="margin-top:3rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Open a feature with a lane</h2>
       <pre class="term"><span class="p">npx aisdlc new</span> "Payment retries" --kind backend</pre>
-      <p class="lede">Pick a lane: <strong>spike</strong> (a question), <strong>quick</strong> (bounded change), <strong>standard</strong> (new capability), <strong>regulated</strong> (money, PII, auth). The lane decides which gates apply.</p>
+      <p class="lede">Pick a lane: <strong>spike</strong> (a question), <strong>quick</strong> (bounded change), <strong>standard</strong> (new capability), <strong>regulated</strong> (money, PII, auth). The lane decides which gates apply, and only moves up.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>3 · Talk to your agent</h2>
+    <section style="margin-top:3rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Talk to your agent</h2>
       <pre class="term">use aisdlc-brainstorm, I want to build payment retries</pre>
-      <p class="lede">The brainstorm skill classifies the work, interviews you with recommended answers, and routes to <code>aisdlc-discover</code> → <code>aisdlc-spec</code>. The spec is EARS-format; you sign §5.</p>
+      <p class="lede">The brainstorm skill classifies the work, interviews you with recommended answers, and routes to <code>aisdlc-discover</code> → <code>aisdlc-spec</code>. The spec is EARS-format; you sign §5. No one signs it for you.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>4 · Let the gates referee</h2>
+    <section style="margin-top:3rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Let the gates referee</h2>
       <pre class="term"><span class="p">npx aisdlc next</span> payment-retries --json</pre>
       <p class="lede">Every stage ends with this. It reads the files, derives the state, names the blocking items and the one skill to load next. The agent obeys the disk, not the chat.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>5 · Approve as a human</h2>
-      <pre class="term"><span class="p">npx aisdlc approve</span> G1 payment-retries</pre>
+    <section style="margin-top:3rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Approve as a human</h2>
+      <pre class="term"><span class="p">npx aisdlc approve</span> G1 payment-retries
+<span class="e">refused: you authored plan.md</span></pre>
       <p class="lede">Approvals are bound to the hash of the artifact. Edit the plan afterwards and the approval goes stale — the CLI sends the state backwards. Agents can never approve; the approver can never be the author.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>6 · Verify, don't trust</h2>
-      <pre class="term"><span class="e">$ npm test</span>
-<span class="c"># 41 passed, exit code 0</span>
-<span class="p">npx aisdlc verify</span> payment-retries -- npm test</pre>
+    <section style="margin-top:3rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">Verify, don't trust</h2>
+      <pre class="term"><span class="p">npx aisdlc verify</span> payment-retries -- npm test
+<span class="c">… 41 passed (41), exit 0, 8.2s</span>
+<span class="p">evidence/20260906T154412-full.json</span> recorded</pre>
       <p class="lede"><code>aisdlc verify</code> runs the command itself and records a hash-chained evidence file. "Tests pass" without a recorded run is not a state the process accepts.</p>
     </section>
 
-    <section style="margin-top:2.5rem;">
-      <h2>The full command set</h2>
-      <table class="skill" style="margin-top:1rem;">
-        <thead><tr><th>command</th><th>purpose</th></tr></thead>
-        <tbody>
-          <tr><td>aisdlc init</td><td>install skills + process scaffolding into a repo</td></tr>
-          <tr><td>aisdlc new</td><td>open a feature with a lane</td></tr>
-          <tr><td>aisdlc next</td><td>derive state; print blocking items and the next skill</td></tr>
-          <tr><td>aisdlc status</td><td>list every feature and its state</td></tr>
-          <tr><td>aisdlc verify</td><td>run a command and record evidence</td></tr>
-          <tr><td>aisdlc approve</td><td>human gate approval (G1, G5, acceptance)</td></tr>
-          <tr><td>aisdlc lane</td><td>raise a feature's lane (never lowers)</td></tr>
-          <tr><td>aisdlc doctor</td><td>check installation health</td></tr>
-        </tbody>
-      </table>
+    <section style="margin-top:3.5rem;">
+      <h2 style="font-size:1.35rem;font-weight:650;">The full command set</h2>
+      <div class="panel" style="padding:0.4rem 1.4rem;margin-top:1rem;">
+        <table class="skill">
+          <tbody>
+            <tr><td>aisdlc init</td><td>install skills + process scaffolding into a repo</td></tr>
+            <tr><td>aisdlc new</td><td>open a feature with a lane</td></tr>
+            <tr><td>aisdlc next</td><td>derive state; print blocking items and the next skill</td></tr>
+            <tr><td>aisdlc status</td><td>list every feature and its state</td></tr>
+            <tr><td>aisdlc verify</td><td>run a command and record evidence</td></tr>
+            <tr><td>aisdlc approve</td><td>human gate approval (G1, G5, acceptance)</td></tr>
+            <tr><td>aisdlc lane</td><td>raise a feature's lane (never lowers)</td></tr>
+            <tr><td>aisdlc doctor</td><td>check installation health</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </article>
 </Base>

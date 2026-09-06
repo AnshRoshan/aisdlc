@@ -1,0 +1,10 @@
+{
+  "name": "aisdlc",
+  "description": "Agents write code, aisdlc runs the process. EARS specs, six evidence gates (G1-G6), hash-bound human approvals, recorded evidence and segregation of duties - enforced from disk, in any harness.",
+  "version": "0.1.0",
+  "author": { "name": "Ansh Roshan" },
+  "homepage": "https://anshroshan.github.io/aisdlc/",
+  "repository": "https://github.com/AnshRoshan/aisdlc",
+  "license": "MIT",
+  "keywords": ["sdlc", "spec-driven", "ears", "gates", "evidence", "agent-skills"]
+}

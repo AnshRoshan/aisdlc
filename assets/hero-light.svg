@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <rect x="16" y="16" width="1168" height="268" rx="22" fill="#ffffff" stroke="#dde3da"/>
+
+  <!-- wordmark -->
+  <polygon points="64,86 80,96 64,106" fill="#477a2a"/>
+  <text x="92" y="106" font-size="52" font-weight="600" fill="#16201a" letter-spacing="-1">aisdlc</text>
+
+  <!-- evidence line, top right -->
+  <text x="1152" y="72" font-size="13" fill="#77836f" text-anchor="end">docs/features/payment-retries/</text>
+  <text x="1152" y="94" font-size="13" fill="#77836f" text-anchor="end">state: <tspan fill="#477a2a" font-weight="600">BUILD</tspan>, next: aisdlc-implement</text>
+
+  <!-- tagline -->
+  <text x="64" y="152" font-size="21" fill="#4d584a" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif">Agents write code. <tspan fill="#16201a" font-weight="600">aisdlc runs the process.</tspan></text>
+  <text x="64" y="180" font-size="14" fill="#77836f" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif">EARS specs, six evidence gates, hash-bound approvals, and an evidence log your agent cannot fake.</text>
+
+  <!-- pipeline -->
+  <g font-size="13" text-anchor="middle">
+    <rect x="64"  y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="113" y="228" fill="#4d584a">discover</text>
+    <rect x="176" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="225" y="228" fill="#4d584a">spec</text>
+    <rect x="288" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="337" y="228" fill="#4d584a">plan</text>
+    <rect x="400" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="449" y="228" fill="#4d584a">tasks</text>
+    <rect x="512" y="206" width="98" height="34" rx="8" fill="#477a2a" stroke="#477a2a">
+      <animate attributeName="opacity" values="1;0.78;1" dur="2.4s" repeatCount="indefinite"/>
+    </rect>
+    <text x="561" y="228" fill="#ffffff" font-weight="600">build</text>
+    <rect x="624" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="673" y="228" fill="#4d584a">verify</text>
+    <rect x="736" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="785" y="228" fill="#4d584a">accept</text>
+    <rect x="848" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="897" y="228" fill="#4d584a">release</text>
+    <rect x="960" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dde3da"/>
+    <text x="1009" y="228" fill="#4d584a">operate</text>
+  </g>
+
+  <!-- evidence footer -->
+  <text x="1152" y="268" font-size="12" fill="#77836f" text-anchor="end">evidence/20260906T154412-full.json · exit 0 · sha256:e3f1…9b7c</text>
+</svg>

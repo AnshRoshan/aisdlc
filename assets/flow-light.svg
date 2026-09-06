@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <rect x="16" y="16" width="1168" height="268" rx="22" fill="#ffffff" stroke="#dde3da"/>
+
+  <text x="64" y="60" font-size="11" letter-spacing="2" fill="#77836f">THE GATE MODEL</text>
+  <text x="64" y="86" font-size="16" fill="#16201a" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif" font-weight="600">Nine states. Six gates. No evidence, no progress.</text>
+
+  <!-- gate chips over their transitions -->
+  <g font-size="11" text-anchor="middle">
+    <g fill="none" stroke="#477a2a">
+      <rect x="395" y="104" width="32" height="22" rx="6"/><rect x="521" y="104" width="32" height="22" rx="6"/>
+      <rect x="647" y="104" width="32" height="22" rx="6"/><rect x="773" y="104" width="32" height="22" rx="6"/>
+      <rect x="899" y="104" width="32" height="22" rx="6"/><rect x="1025" y="104" width="32" height="22" rx="6"/>
+    </g>
+    <g fill="#477a2a">
+      <text x="411" y="119">G1</text><text x="537" y="119">G2</text><text x="663" y="119">G3</text>
+      <text x="789" y="119">G4</text><text x="915" y="119">G5</text><text x="1041" y="119">G6</text>
+    </g>
+    <g stroke="#477a2a" opacity="0.5">
+      <line x1="411" y1="126" x2="411" y2="140"/><line x1="537" y1="126" x2="537" y2="140"/>
+      <line x1="663" y1="126" x2="663" y2="140"/><line x1="789" y1="126" x2="789" y2="140"/>
+      <line x1="915" y1="126" x2="915" y2="140"/><line x1="1041" y1="126" x2="1041" y2="140"/>
+    </g>
+  </g>
+
+  <!-- states -->
+  <g font-size="12.5" text-anchor="middle">
+    <g fill="#f7f9f5" stroke="#dde3da">
+      <rect x="48" y="140" width="96" height="44" rx="8"/><rect x="174" y="140" width="96" height="44" rx="8"/>
+      <rect x="300" y="140" width="96" height="44" rx="8"/><rect x="426" y="140" width="96" height="44" rx="8"/>
+      <rect x="552" y="140" width="96" height="44" rx="8"/><rect x="678" y="140" width="96" height="44" rx="8"/>
+      <rect x="804" y="140" width="96" height="44" rx="8"/><rect x="930" y="140" width="96" height="44" rx="8"/>
+      <rect x="1056" y="140" width="96" height="44" rx="8"/>
+    </g>
+    <g fill="#4d584a">
+      <text x="96" y="167">discover</text><text x="222" y="167">spec</text><text x="348" y="167">plan</text>
+      <text x="474" y="167">tasks</text><text x="726" y="167">verify</text><text x="852" y="167">accept</text>
+      <text x="978" y="167">release</text><text x="1104" y="167">operate</text>
+    </g>
+    <rect x="552" y="140" width="96" height="44" rx="8" fill="#477a2a" stroke="#477a2a">
+      <animate attributeName="opacity" values="1;0.8;1" dur="2.6s" repeatCount="indefinite"/>
+    </rect>
+    <text x="600" y="167" fill="#ffffff" font-weight="600">build</text>
+    <g fill="#77836f" font-size="14">
+      <text x="159" y="167">→</text><text x="285" y="167">→</text><text x="411" y="167">→</text>
+      <text x="537" y="167">→</text><text x="663" y="167">→</text><text x="789" y="167">→</text>
+      <text x="915" y="167">→</text><text x="1041" y="167">→</text>
+    </g>
+  </g>
+
+  <!-- legend -->
+  <g font-size="12">
+    <text x="64" y="228"><tspan fill="#477a2a">G1</tspan><tspan fill="#4d584a"> plan approval</tspan></text>
+    <text x="340" y="228"><tspan fill="#477a2a">G2</tspan><tspan fill="#4d584a"> artifact consistency</tspan></text>
+    <text x="660" y="228"><tspan fill="#477a2a">G3</tspan><tspan fill="#4d584a"> merge safety</tspan></text>
+    <text x="64" y="252"><tspan fill="#477a2a">G4</tspan><tspan fill="#4d584a"> acceptance proof</tspan></text>
+    <text x="340" y="252"><tspan fill="#477a2a">G5</tspan><tspan fill="#4d584a"> release approval</tspan></text>
+    <text x="660" y="252"><tspan fill="#477a2a">G6</tspan><tspan fill="#4d584a"> runtime guardrails</tspan></text>
+    <text x="1136" y="252" fill="#77836f" text-anchor="end">lane decides which gates apply</text>
+  </g>
+</svg>

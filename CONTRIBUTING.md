@@ -24,7 +24,7 @@ Thanks for looking under the hood. The project is small and opinionated; here is
 
 ## Reporting bugs
 
-Open an issue with: the harness you used, `npx aisdlc doctor` output, and the smallest repo state that reproduces (the `aisdlc/` and `docs/features/` files are enough — no need for your code).
+Open an issue with: the harness you used, `npx aisdlc-cli doctor` output, and the smallest repo state that reproduces (the `aisdlc/` and `docs/features/` files are enough — no need for your code).
 
 ## Releasing the CLI
 

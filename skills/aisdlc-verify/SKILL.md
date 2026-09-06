@@ -23,7 +23,7 @@ If you have not run the command in this session and recorded it, you cannot say 
 ## The gate function (before any status claim, every time)
 
 1. **IDENTIFY** the command that would prove the claim.
-2. **RUN** it, fresh and complete, through `npx aisdlc evidence` so the run is recorded.
+2. **RUN** it, fresh and complete, through `npx aisdlc-cli evidence` so the run is recorded.
 3. **READ** the entire output: exit code, failure count, skipped count, warnings that are really errors.
 4. **VERIFY** the output supports the claim. If not, state the actual status with the evidence file. If yes, state the claim *with* the evidence file.
 5. Only then make the claim.
@@ -37,7 +37,7 @@ If you have not run the command in this session and recorded it, you cannot say 
 | migration safe | applied to a copy and rolled back, recorded | "it's just an add column" |
 | subagent finished | diff on disk + its evidence files | the subagent said "done" |
 
-## What G3 checks (`npx aisdlc gate G3 <slug>`)
+## What G3 checks (`npx aisdlc-cli gate G3 <slug>`)
 
 1. **Secrets scan clean** across tracked files (8 pattern families, placeholders ignored).
 2. **Test evidence present**: at least one `evidence/*.json` with `label: green` (or `full`) and a real command.
@@ -47,7 +47,7 @@ If you have not run the command in this session and recorded it, you cannot say 
 ## Procedure
 
 1. Run the **whole** suite, not just the tests you wrote:
-   `npx aisdlc evidence <slug> --label full -- <full test command from plan.md Verification strategy>`
+   `npx aisdlc-cli evidence <slug> --label full -- <full test command from plan.md Verification strategy>`
 2. Run kind-specific verification and record each as evidence with a descriptive label:
 
    | kind | required extra evidence |
@@ -62,8 +62,8 @@ If you have not run the command in this session and recorded it, you cannot say 
    | lib | API contract tests, semver check, back-compat test against the previous version |
 
 3. Static checks the repo already has (typecheck, lint, build): run and record them too; a green suite on code that does not compile is not green.
-4. `npx aisdlc scan`. Findings block; fix and re-run.
-5. `npx aisdlc gate G3 <slug>`. Paste the output verbatim.
+4. `npx aisdlc-cli scan`. Findings block; fix and re-run.
+5. `npx aisdlc-cli gate G3 <slug>`. Paste the output verbatim.
 6. Scenario sweep: for every `#### Scenario:` in the spec, name the evidence file that exercises it. Missing one? That is a missing test: go back to BUILD via a new task, do not proceed.
 7. Write `acceptance.md` rows for each spec scenario, linking the evidence file names (see `aisdlc-review`).
 
@@ -77,4 +77,4 @@ If you have not run the command in this session and recorded it, you cannot say 
 
 ## Hand off
 
-When G3 is green, run `npx aisdlc next <slug>`; the state moves to ACCEPT. Load `aisdlc-review`. Prefer a fresh session for the review (segregation of duties); if you must continue, say so.
+When G3 is green, run `npx aisdlc-cli next <slug>`; the state moves to ACCEPT. Load `aisdlc-review`. Prefer a fresh session for the review (segregation of duties); if you must continue, say so.

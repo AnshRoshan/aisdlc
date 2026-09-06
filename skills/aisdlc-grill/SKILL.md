@@ -17,7 +17,7 @@ Most work fails in specification, not execution. The human has the full picture 
 
 1. If a skill named `grilling` (mattpocock/skills) is available to you, invoke it and then **apply the aisdlc overlay** in §4 (decisions land on disk, not just in chat).
 2. Otherwise check the repo: `.agents/skills/grilling/SKILL.md`, `.claude/skills/grilling/SKILL.md`, `.cursor/skills/grilling/SKILL.md`. If found, read it and follow it plus §4.
-3. Otherwise run the embedded procedure below. It is a faithful superset; nothing is lost. Tell the user once: "official `grilling` not installed; using aisdlc's built-in interview. Install with `npx aisdlc addon grilling`."
+3. Otherwise run the embedded procedure below. It is a faithful superset; nothing is lost. Tell the user once: "official `grilling` not installed; using aisdlc's built-in interview. Install with `npx aisdlc-cli addon grilling`."
 
 ## 1. The design tree and the frontier
 

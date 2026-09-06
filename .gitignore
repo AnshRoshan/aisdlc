@@ -12,3 +12,17 @@ next-env.d.ts
 # aisdlc cli: skills are synced from /skills at pack time
 packages/cli/skills/
 packages/cli/node_modules/
+
+# aisdlc init artifacts (this repo installs into itself when tested)
+.claude/
+.agents/
+.cursor/
+.gemini/
+.windsurf/
+.opencode/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.github/prompts/
+.github/skills/
+.github/copilot-instructions.md

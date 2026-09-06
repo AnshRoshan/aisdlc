@@ -19,7 +19,7 @@ Agents accelerate entropy. Ponytail is the brake. The best code is the code neve
 Use the official skill whenever you can; it is maintained upstream and benchmarked, and this bridge only mirrors it.
 
 1. If a skill named `ponytail` is available (Claude Code plugin `ponytail@ponytail`, Codex plugin, Copilot `/ponytail:ponytail`, Gemini extension, OpenCode plugin, or a `.agents/skills/ponytail/SKILL.md` copy), invoke it at the level from `docs/taste.md` (`laziness: lite|full|ultra`, default `full`). Then apply §4 of this file (the aisdlc never-lazy list).
-2. If not installed, apply §1-§3 below. Tell the user once per session: "official `ponytail` not installed; using aisdlc's embedded ladder. Install with `npx aisdlc addon ponytail` for the maintained version."
+2. If not installed, apply §1-§3 below. Tell the user once per session: "official `ponytail` not installed; using aisdlc's embedded ladder. Install with `npx aisdlc-cli addon ponytail` for the maintained version."
 3. Never install anything without asking.
 
 ## 1. The ladder (stop at the first rung that holds)

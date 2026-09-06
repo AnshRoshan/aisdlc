@@ -1,6 +1,6 @@
 ---
 name: aisdlc-spec
-description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc check spec`. Use when `aisdlc next` reports SPECIFY, when the user says "write the spec", "spec it", "requirements", "to-spec", or when a spec has [NEEDS CLARIFICATION] markers, requirements without SHALL, or requirements without scenarios. Covers happy, failure and edge scenarios, non-functional requirements, test seams and the project's glossary terms; uses aisdlc-grill to close open questions; has a compact mode for the quick lane. The spec is the source of truth for everything downstream.
+description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc-cli check spec`. Use when `aisdlc next` reports SPECIFY, when the user says "write the spec", "spec it", "requirements", "to-spec", or when a spec has [NEEDS CLARIFICATION] markers, requirements without SHALL, or requirements without scenarios. Covers happy, failure and edge scenarios, non-functional requirements, test seams and the project's glossary terms; uses aisdlc-grill to close open questions; has a compact mode for the quick lane. The spec is the source of truth for everything downstream.
 license: MIT
 metadata:
   author: aisdlc
@@ -26,7 +26,7 @@ One SHALL per requirement. No "and/or", no "quickly", no "user-friendly", no "et
 
 ## File contract: `docs/features/<slug>/spec.md`
 
-The validator (`npx aisdlc check spec docs/features/<slug>/spec.md`) enforces exactly this:
+The validator (`npx aisdlc-cli check spec docs/features/<slug>/spec.md`) enforces exactly this:
 
 ```markdown
 # Spec: <title>
@@ -86,12 +86,12 @@ Rules the validator cannot check but the reviewer will:
 2. Draft requirements from the brief's must-haves: one requirement per must-have, one scenario per observable path (happy, failure, edge). Add ubiquitous requirements for the non-functional needs.
 3. For each unknown write `[NEEDS CLARIFICATION: <question>]` inline and add a §6 row. Then load `aisdlc-grill` in "grill the spec" mode: work the open questions as a frontier, one round at a time, each with a recommended answer. Resolve the markers with the answers; leave nothing implicit.
 4. **Adversarial pass** (do this yourself before asking a human): for each requirement ask "what input breaks this?", "what if it happens twice?", "what if it happens while <other state>?", "who must not be able to do this?". Add scenarios or mark clarifications.
-5. Run `npx aisdlc check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
-6. Ask the human to sign §5 (name + date) or run `npx aisdlc approve`-equivalent in their tool. Do not proceed to `aisdlc-plan` until `aisdlc next` moves to PLAN (or to TASKS/BUILD in the quick lane).
+5. Run `npx aisdlc-cli check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
+6. Ask the human to sign §5 (name + date) or run `npx aisdlc-cli approve`-equivalent in their tool. Do not proceed to `aisdlc-plan` until `aisdlc next` moves to PLAN (or to TASKS/BUILD in the quick lane).
 
 ## Compact mode (lane `quick`)
 
-1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx aisdlc lane <slug> standard`.
+1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx aisdlc-cli lane <slug> standard`.
 
 ## Spike mode (lane `spike`)
 

@@ -1,4 +1,0 @@
-description = "Write or repair an EARS specification (spec"
-prompt = """
-Load and follow the aisdlc-spec skill in this repository (.gemini/skills/aisdlc-spec/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
-"""

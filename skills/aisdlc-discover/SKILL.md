@@ -103,7 +103,7 @@ auth: ... · privacy: ... · performance: <number> · scale: <number> · durabil
 
 Then:
 1. Append new terms to `docs/glossary.md` (create it if missing: `# Glossary` then `- **term**: meaning`).
-2. Run `npx aisdlc new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet.
+2. Run `npx aisdlc-cli new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet.
 3. Paste the seed requirements into `spec.md` §3 and the non-functional needs into §4 Constraints.
 4. Load `aisdlc-taste` once per project if `docs/taste.md` is missing (six questions max).
 5. Hand off to `aisdlc-spec`.

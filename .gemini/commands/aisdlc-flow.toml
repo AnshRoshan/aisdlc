@@ -1,4 +1,0 @@
-description = "The aisdlc router"
-prompt = """
-Load and follow the aisdlc-flow skill in this repository (.gemini/skills/aisdlc-flow/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
-"""

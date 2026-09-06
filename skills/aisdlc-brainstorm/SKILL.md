@@ -19,7 +19,7 @@ Do not write code, scaffold files, run migrations, or invoke `aisdlc-implement` 
 ## Step 1: Look before you ask (2 minutes, silent)
 
 - Read `docs/constitution.md`, `docs/taste.md`, `docs/glossary.md`, `docs/brief.md` if they exist.
-- Run `npx aisdlc status` (if the CLI is unavailable, list `docs/features/*/feature.json`). An existing feature may already own this request; if so, hand to `aisdlc-flow` and stop.
+- Run `npx aisdlc-cli status` (if the CLI is unavailable, list `docs/features/*/feature.json`). An existing feature may already own this request; if so, hand to `aisdlc-flow` and stop.
 - Skim the code the request touches: entrypoints, existing flow, tests, recent `git log -20 --oneline`.
 - Note facts you found so you never ask the human for them.
 
@@ -35,7 +35,7 @@ Do not write code, scaffold files, run migrations, or invoke `aisdlc-implement` 
 Rules:
 - **Bounded measures the repo, not your familiarity.** If there is no existing flow to change, it is not `quick`.
 - **When in doubt, take the heavier lane.** Reaching for a lighter label to skip work *is* the doubt.
-- **The ratchet is one-way.** Hidden complexity discovered mid-task upgrades the lane: stop, say so, run `npx aisdlc lane <slug> <lane>`. Nothing downgrades mid-task.
+- **The ratchet is one-way.** Hidden complexity discovered mid-task upgrades the lane: stop, say so, run `npx aisdlc-cli lane <slug> <lane>`. Nothing downgrades mid-task.
 - A bug report is `quick` if it reproduces in one existing flow; otherwise it is `standard` with `aisdlc-debug` in the loop.
 
 Announce: "This looks **quick**: it changes the existing `/export` route only. I'll write a 2-requirement spec and skip plan approval. Override?"
@@ -72,9 +72,9 @@ Presenting the intent and starting work in the same message is skipping the gate
 ## Step 6: Route
 
 On yes:
-- `spike` → `npx aisdlc new "<question>" --kind <kind> --lane spike`; write the question as the single requirement (`THE SYSTEM SHALL answer: <question>` with a scenario naming the measurement); run the probe with `npx aisdlc evidence <slug> --label spike -- <command>`; write the answer and recommendation into `spec.md` §1. State becomes DONE once evidence exists.
-- `quick` → `npx aisdlc new "<title>" --kind <kind> --lane quick`; load `aisdlc-spec` (compact mode).
-- `standard` / `regulated` → if `docs/brief.md` for this idea is missing load `aisdlc-discover`, else `npx aisdlc new ... --lane <lane>` then `aisdlc-spec`. Brownfield repo? Load `aisdlc-brownfield` first.
+- `spike` → `npx aisdlc-cli new "<question>" --kind <kind> --lane spike`; write the question as the single requirement (`THE SYSTEM SHALL answer: <question>` with a scenario naming the measurement); run the probe with `npx aisdlc-cli evidence <slug> --label spike -- <command>`; write the answer and recommendation into `spec.md` §1. State becomes DONE once evidence exists.
+- `quick` → `npx aisdlc-cli new "<title>" --kind <kind> --lane quick`; load `aisdlc-spec` (compact mode).
+- `standard` / `regulated` → if `docs/brief.md` for this idea is missing load `aisdlc-discover`, else `npx aisdlc-cli new ... --lane <lane>` then `aisdlc-spec`. Brownfield repo? Load `aisdlc-brownfield` first.
 - Existing repo without `docs/taste.md`? Run `aisdlc-taste` once (≤6 questions) before the spec.
 
 ## Red flags (stop and re-read the gate)

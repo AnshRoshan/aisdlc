@@ -14,7 +14,7 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 
 ## Before touching code
 
-1. `npx aisdlc next <slug> --json` → confirm state is BUILD and read `nextTask`. If a `handoff.md` is newer than the last evidence, read it for gotchas.
+1. `npx aisdlc-cli next <slug> --json` → confirm state is BUILD and read `nextTask`. If a `handoff.md` is newer than the last evidence, read it for gotchas.
 2. Read `docs/taste.md` (laziness level, style, DoD), `docs/glossary.md`, and the requirement(s) referenced by the task. **Quote the SHALL line and the scenario you are implementing.**
 3. Identify the seam from the task's `{seam:}` or the plan. The test attaches there and only there.
 4. **Trace the flow end to end** through the code the change touches (callers, callees, tests, migrations). Understanding is never lazy.
@@ -24,14 +24,14 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 ## The loop (per task, one vertical slice)
 
 1. **Red:** write the smallest test that fails for the right reason, at the seam, named after the scenario (`Scenario: ...`). Expected values come from the spec or a worked example, never from re-running the code under test (no tautologies). Run it and record:
-   `npx aisdlc evidence <slug> --task T<n> --label red -- <test command>`
+   `npx aisdlc-cli evidence <slug> --task T<n> --label red -- <test command>`
    (a non-zero exit is expected and is recorded honestly). Read the failure message; it must be the assertion you meant, not a syntax error.
 2. **Ladder:** load `aisdlc-ponytail` (or the official `ponytail`). Does the repo already have it? stdlib? platform? installed dependency? one line? Pick the highest rung that turns the test green while respecting the never-lazy list (trust boundaries, data loss, security, a11y, anything the spec says).
 3. **Green:** write the minimum code to pass. Run:
-   `npx aisdlc evidence <slug> --task T<n> --label green -- <test command>`
+   `npx aisdlc-cli evidence <slug> --task T<n> --label green -- <test command>`
 4. **Refactor:** only with the suite green, only inside the files this task touched, only to remove duplication or clarify names from the glossary; re-run evidence if you touched behaviour. Broader refactors are review findings or new tasks.
 5. **Check off:** change `- [ ] T<n>` to `- [x] T<n>` in `tasks.md`. Do not reorder or delete tasks.
-6. **Secrets:** `npx aisdlc scan` before you finish. Any finding blocks the task.
+6. **Secrets:** `npx aisdlc-cli scan` before you finish. Any finding blocks the task.
 7. **Verify before you claim** (the gate function):
    - IDENTIFY the command that proves the claim → RUN it fresh, in full → READ the whole output and the exit code → only THEN state the claim, with the evidence file name.
    - Any of "should pass", "probably works", "looks good" in your draft = go back to RUN.
@@ -57,4 +57,4 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 
 ## When all tasks are checked
 
-Run `npx aisdlc next <slug>`. State should be VERIFY. Hand off to `aisdlc-verify`.
+Run `npx aisdlc-cli next <slug>`. State should be VERIFY. Hand off to `aisdlc-verify`.

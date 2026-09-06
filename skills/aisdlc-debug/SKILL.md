@@ -23,14 +23,14 @@ If you cannot make it fail on purpose, you do not understand it yet, and a fix y
 ## Step 0: Route it into the process (1 minute)
 
 - Existing feature owns the flow? Add a task to its `tasks.md`: `- [ ] T<n> [R:<Requirement>] fix: <symptom>` (must reference the requirement whose scenario is broken; if none exists, that is a delta, see Step 6).
-- No feature owns it? `npx aisdlc new "fix: <symptom>" --kind <kind> --lane quick`. The spec gets one requirement: the behaviour that should have held, with the repro as its scenario. Bugs in auth, money, PII or data integrity are `--lane regulated`.
+- No feature owns it? `npx aisdlc-cli new "fix: <symptom>" --kind <kind> --lane quick`. The spec gets one requirement: the behaviour that should have held, with the repro as its scenario. Bugs in auth, money, PII or data integrity are `--lane regulated`.
 - Read `docs/taste.md`, the requirement, and `docs/glossary.md` so the test is named in the project's language.
 
 ## Step 1: Reproduce (build the feedback loop)
 
 1. Get the exact symptom: command, input, environment, expected vs. actual, frequency. If any of these is missing, ask for that one thing (load `aisdlc-grill` for a one-round session if the report is vague).
 2. Write the smallest automated test that goes **red on this exact symptom**. Name it after the scenario: `Scenario: <what should happen>`. Prefer the highest seam that still reproduces it (HTTP, CLI, public function) over poking internals.
-3. Record it: `npx aisdlc evidence <slug> --task T<n> --label red -- <test command>`. A non-zero exit is the point.
+3. Record it: `npx aisdlc-cli evidence <slug> --task T<n> --label red -- <test command>`. A non-zero exit is the point.
 4. Cannot reproduce? Record the attempt with `--label blocked`, list what you tried, and ask for the missing variable (data, version, timezone, locale, concurrency). Do not "fix" what you cannot see.
 
 Flaky? Run it ten times in a loop and record the run. Three greens out of ten is a bug, not noise.
@@ -53,9 +53,9 @@ Shrink the repro until removing anything more makes it pass: fewer inputs, fewer
 
 ## Step 5: Prove it
 
-1. Green run on the regression test: `npx aisdlc evidence <slug> --task T<n> --label green -- <test command>`.
-2. Full suite: `npx aisdlc evidence <slug> --label full -- <full test command>`. A fix that breaks a sibling is not a fix.
-3. `npx aisdlc scan`.
+1. Green run on the regression test: `npx aisdlc-cli evidence <slug> --task T<n> --label green -- <test command>`.
+2. Full suite: `npx aisdlc-cli evidence <slug> --label full -- <full test command>`. A fix that breaks a sibling is not a fix.
+3. `npx aisdlc-cli scan`.
 4. Check the task off. Report: root cause (one sentence), why it was not caught (missing scenario / missing test / infra), files changed, evidence file names, the exact command a human can re-run.
 
 ## Step 6: When the bug reveals the spec was wrong

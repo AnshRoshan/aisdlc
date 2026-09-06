@@ -9,7 +9,7 @@
 <br>
 
 [![CI](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/aisdlc)](https://www.npmjs.com/package/aisdlc)
+[![npm](https://img.shields.io/npm/v/aisdlc-cli)](https://www.npmjs.com/package/aisdlc)
 [![Node](https://img.shields.io/node/v/aisdlc)](packages/cli/package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![docs](https://img.shields.io/badge/docs-anshroshan.github.io%2Faisdlc-0c100d)](https://anshroshan.github.io/aisdlc/)
@@ -35,10 +35,10 @@ your agent cannot fake with prose. Local-first: no server, no account, no teleme
 <td valign="top">
 
 ```bash
-npx aisdlc init
+npx aisdlc-cli init
 ```
 
-Skills + instructions + slash commands, detected for your harness. Also: `aisdlc new`, `next`, `verify`, `approve`, `doctor`.
+Skills + instructions + slash commands, detected for your harness. The npm package is `aisdlc-cli`; it installs the `aisdlc` command, so `aisdlc new`, `next`, `verify`, `approve`, `doctor` work after install.
 
 </td>
 <td valign="top">
@@ -69,7 +69,7 @@ The skills only, symlinked into every harness it finds. One skill: `--skill aisd
 use aisdlc-brainstorm, I want to build payment retries
 ```
 
-> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx aisdlc next`, and the agent obeys the disk, not the chat.
+> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx aisdlc-cli next`, and the agent obeys the disk, not the chat.
 
 ## Why
 
@@ -88,7 +88,7 @@ use aisdlc-brainstorm, I want to build payment retries
   <img src="assets/flow-dark.svg" alt="Nine states (discover, spec, plan, tasks, build, verify, accept, release, operate) with gates G1-G6 hanging over their transitions." width="100%">
 </picture>
 
-The agent runs `npx aisdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
+The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
 
 <details open>
 <summary><strong>Lanes: how much process a feature carries</strong> (set by <code>aisdlc-brainstorm</code>, ratchets only up)</summary>
@@ -167,7 +167,7 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 | path | what |
 |---|---|
 | [`skills/`](skills/) | the 18 canonical skills (source of truth) |
-| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18), installed as `npx aisdlc` |
+| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18), installed as `npx aisdlc-cli` |
 | [`commands/`](commands/) | Claude Code plugin slash commands (`/aisdlc-next`, `/aisdlc-status`) |
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |
 | [`site/`](site/) | Astro static site, deployed to GitHub Pages |

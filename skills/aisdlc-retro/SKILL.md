@@ -16,7 +16,7 @@ A retro that ends in feelings changes nothing. This one ends in diffs to the fil
 
 - `spec.md`, `plan.md`, `tasks.md`, `acceptance.md`, `deltas/*.md`, `evidence/*.json`, `approvals.json`, `handoff.md` if present.
 - `git log --stat` for the feature's commits; count files touched, lines added vs. deleted, dependencies added (`package.json`, lockfiles, `requirements*.txt`, `go.mod`...).
-- `npx aisdlc audit <slug>` for the approval chain and stale approvals.
+- `npx aisdlc-cli audit <slug>` for the approval chain and stale approvals.
 - For incidents: the runbook, alerts, and the timeline the human gives you.
 
 ## Procedure (20 minutes, one pass)

@@ -1,4 +1,0 @@
-description = "Compact the current session into a handoff document so a fresh session, a different agent, or a human can continue without loss"
-prompt = """
-Load and follow the aisdlc-handoff skill in this repository (.gemini/skills/aisdlc-handoff/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
-"""

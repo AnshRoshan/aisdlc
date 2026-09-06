@@ -1,4 +1,0 @@
-description = "Close the loop on a finished feature, incident, or sprint so the process gets better instead of just longer"
-prompt = """
-Load and follow the aisdlc-retro skill in this repository (.gemini/skills/aisdlc-retro/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
-"""

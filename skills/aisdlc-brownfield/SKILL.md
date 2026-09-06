@@ -20,7 +20,7 @@ Everything in the baseline that a command can answer, you answer: stack, build/t
 
 Produce `docs/features/<slug>/baseline.md`:
 
-- **Stack & entrypoints:** languages, frameworks, build & test commands that actually work today (run them, record exit codes with `npx aisdlc evidence <slug> -- <command>`).
+- **Stack & entrypoints:** languages, frameworks, build & test commands that actually work today (run them, record exit codes with `npx aisdlc-cli evidence <slug> -- <command>`).
 - **Hotspots:** top 10 files by churn (`git log --format= --name-only | sort | uniq -c | sort -rn | head`), plus TODO/FIXME density.
 - **Pain points** from the user, verbatim.
 - **Must-never-change list:** public APIs, data formats, schedules, integrations. Each becomes a golden-master candidate.
@@ -31,7 +31,7 @@ Produce `docs/features/<slug>/baseline.md`:
 For each must-never-change item, write a test that pins **current** behaviour, even if that behaviour looks wrong. The purpose is detection, not judgement.
 
 - Prefer snapshot/approval style at the boundary (HTTP response, CLI output, file output, DB row shape).
-- Record the first green run as evidence: `npx aisdlc evidence <slug> -- <test command>`.
+- Record the first green run as evidence: `npx aisdlc-cli evidence <slug> -- <test command>`.
 - Add a spec requirement per golden master: `WHILE the migration is in progress THE SYSTEM SHALL preserve <behaviour>.`
 
 ## Step 3: Seams (choose the laziest safe one)

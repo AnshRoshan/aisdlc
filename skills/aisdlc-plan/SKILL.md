@@ -69,12 +69,12 @@ Rules:
 
 1. Present 2-3 architectures in chat, each ≤5 lines with the biggest risk and what it makes hard later, plus your recommendation (skip if `aisdlc-brainstorm` already did this; reuse its choice). Load `aisdlc-grill` in "grill the plan" mode for the decisions that remain open; one round is usually enough.
 2. Draft the plan. Keep architecture boring unless the spec forces otherwise; note the exception in Decisions.
-3. Write `tasks.md` from the breakdown (or hand to `aisdlc-tasks`) and run `npx aisdlc trace <slug>`. Zero uncovered requirements, zero unknown references.
-4. Run `npx aisdlc gate G1 <slug>`. It will fail on the approval check; that is expected.
+3. Write `tasks.md` from the breakdown (or hand to `aisdlc-tasks`) and run `npx aisdlc-cli trace <slug>`. Zero uncovered requirements, zero unknown references.
+4. Run `npx aisdlc-cli gate G1 <slug>`. It will fail on the approval check; that is expected.
 5. Ask a human who is **not** the author to review and run:
-   `npx aisdlc approve G1 <slug> --by "<their name>" --note "<why>"`
+   `npx aisdlc-cli approve G1 <slug> --by "<their name>" --note "<why>"`
    Approvals bind to the plan's hash. If you edit the plan after approval, the approval becomes stale and G1 fails again. Say so proactively. Regulated lane needs two distinct approvers.
-6. Confirm with `npx aisdlc next <slug>` that state is TASKS or BUILD.
+6. Confirm with `npx aisdlc-cli next <slug>` that state is TASKS or BUILD.
 
 ## Quick lane
 

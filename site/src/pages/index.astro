@@ -49,7 +49,7 @@ const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
     </p>
     <div class="cta-block">
       <div>
-        <div class="cmdline"><code>npx aisdlc init</code><button data-copy="cmd-main">copy</button></div>
+        <div class="cmdline"><code>npx aisdlc-cli init</code><button data-copy="cmd-main">copy</button></div>
       </div>
       <div class="cta-row">
         <a href={`${base}/docs`} class="btn btn-primary">Read the ten-minute tour</a>
@@ -83,16 +83,16 @@ const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
       </p>
     </div>
     <pre class="term" aria-label="Example terminal session"><span class="c"># example session: the author tried to approve their own plan; the tool said no</span>
-$ <span class="p">npx aisdlc verify</span> payment-retries -- npm test
+$ <span class="p">npx aisdlc-cli verify</span> payment-retries -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
 <span class="p">evidence/20260906T154412-full.json</span> recorded
 sha256:e3f1…9b7c · label: full
 
-$ <span class="p">npx aisdlc approve</span> G1 payment-retries
+$ <span class="p">npx aisdlc-cli approve</span> G1 payment-retries
 <span class="e">refused: you authored plan.md</span>
 <span class="c">segregation of duties: approver ≠ author</span>
 
-$ <span class="p">npx aisdlc next</span> payment-retries --json
+$ <span class="p">npx aisdlc-cli next</span> payment-retries --json
 state: VERIFY · blocking: acceptance.md unsigned
 next skill: aisdlc-verify · owner: agent</pre>
   </section>
@@ -100,7 +100,7 @@ next skill: aisdlc-verify · owner: agent</pre>
   <section id="how" class="section wrap">
     <h2 class="h2">Six gates between an idea and production. Each one is a file check.</h2>
     <p class="lede">
-      The agent runs <code>npx aisdlc next</code>, gets the state and the skill to load, does the work, and runs it again.
+      The agent runs <code>npx aisdlc-cli next</code>, gets the state and the skill to load, does the work, and runs it again.
       Humans are asked for exactly two things: signatures and approvals. Skipped lanes show as <code>skipped</code>, and they
       are not failures.
     </p>
@@ -174,7 +174,7 @@ next skill: aisdlc-verify · owner: agent</pre>
         changes the outcome, and hands you a spec you can sign.
       </p>
       <div class="cmdline" style="margin:2rem auto 0;text-align:left;">
-        <code>npx aisdlc init</code><button data-copy="cmd-cta">copy</button>
+        <code>npx aisdlc-cli init</code><button data-copy="cmd-cta">copy</button>
       </div>
     </div>
   </section>

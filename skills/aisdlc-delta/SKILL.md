@@ -22,7 +22,7 @@ Specs change. Silent changes are the problem, not change itself. A delta makes t
 ## Before writing the delta
 
 - Load `aisdlc-grill` for one round if the change is not crisp: what exactly changes, for whom, what must keep working, what is the rejection criterion for the new behaviour. Give recommended answers.
-- Check the lane. A delta that adds a subsystem, touches auth/money/PII, or changes a public contract upgrades the lane (`npx aisdlc lane <slug> standard|regulated`); say so in the delta's Impact.
+- Check the lane. A delta that adds a subsystem, touches auth/money/PII, or changes a public contract upgrades the lane (`npx aisdlc-cli lane <slug> standard|regulated`); say so in the delta's Impact.
 - Ponytail check: is the lazier response to the trigger to *remove* scope rather than add it? Offer that option explicitly.
 
 ## Procedure
@@ -50,8 +50,8 @@ Specs change. Silent changes are the problem, not change itself. A delta makes t
    ```
 
 2. Apply the change to `spec.md` exactly as the table says. Update `plan.md` traceability and `tasks.md` (reopen affected tasks by unchecking them; add new ones).
-3. Run `npx aisdlc check spec` and `npx aisdlc trace <slug>`. Both clean.
-4. Tell the human, explicitly: "D<n> changes the plan/spec hash; G1 and G4 approvals are now stale and must be re-signed." Then run `npx aisdlc next <slug>`; the state will move backwards. That is correct behaviour, not a bug.
+3. Run `npx aisdlc-cli check spec` and `npx aisdlc-cli trace <slug>`. Both clean.
+4. Tell the human, explicitly: "D<n> changes the plan/spec hash; G1 and G4 approvals are now stale and must be re-signed." Then run `npx aisdlc-cli next <slug>`; the state will move backwards. That is correct behaviour, not a bug.
 
 ## Bug-driven deltas
 

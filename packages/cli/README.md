@@ -5,7 +5,7 @@
 A harness-agnostic process kit for AI-assisted engineering: eighteen [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, Windsurf, OpenCode and any agent that reads `AGENTS.md`. Bring your own model and your own subscription; nothing leaves your machine.
 
 ```bash
-npx aisdlc init            # installs skills + instructions into every harness it detects
+npx aisdlc-cli init            # installs skills + instructions into every harness it detects
 ```
 
 or, skills only, via the open skills CLI:
@@ -30,15 +30,15 @@ npx skills add AnshRoshan/aisdlc
 ## Ten-minute tour
 
 ```bash
-npx aisdlc init
-npx aisdlc new "Magic link login" --kind backend
-npx aisdlc next                              # → SPECIFY, load aisdlc-spec
+npx aisdlc-cli init
+npx aisdlc-cli new "Magic link login" --kind backend
+npx aisdlc-cli next                              # → SPECIFY, load aisdlc-spec
 # ... agent writes spec.md; you sign §5 ...
-npx aisdlc next                              # → PLAN (owner: human)
-npx aisdlc approve G1 magic-link-login --by "Priya"
-npx aisdlc next                              # → BUILD, next task T1, load aisdlc-implement
-npx aisdlc evidence magic-link-login --label full -- npm test
-npx aisdlc gates magic-link-login
+npx aisdlc-cli next                              # → PLAN (owner: human)
+npx aisdlc-cli approve G1 magic-link-login --by "Priya"
+npx aisdlc-cli next                              # → BUILD, next task T1, load aisdlc-implement
+npx aisdlc-cli evidence magic-link-login --label full -- npm test
+npx aisdlc-cli gates magic-link-login
 ```
 
 ## The eight invariants

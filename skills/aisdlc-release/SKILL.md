@@ -14,7 +14,7 @@ Shipping is a reversible decision or it is a gamble. This skill makes it reversi
 
 ## Lane check first
 
-`npx aisdlc next <slug> --json` → read `lane`. Lanes `spike` and `quick` do not require G5/G6; they show as `skipped` and the feature is DONE after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
+`npx aisdlc-cli next <slug> --json` → read `lane`. Lanes `spike` and `quick` do not require G5/G6; they show as `skipped` and the feature is DONE after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc-cli lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
 
 ## G5: Release approval
 
@@ -43,7 +43,7 @@ Approved-by: ______  Date: ______
 ```
 
 G5 requires a `## Rollback` section with concrete steps and a human approval bound to the current rollout hash:
-`npx aisdlc approve G5 <slug> --by "<release owner>"` (never the author, never you).
+`npx aisdlc-cli approve G5 <slug> --by "<release owner>"` (never the author, never you).
 
 ## G6: Runtime guardrails
 
@@ -88,6 +88,6 @@ The smallest rollout that is still reversible wins: one flag, one canary step, o
 
 ## After release
 
-- Record the deploy as evidence: `npx aisdlc evidence <slug> --label deploy -- <deploy or smoke command>`.
+- Record the deploy as evidence: `npx aisdlc-cli evidence <slug> --label deploy -- <deploy or smoke command>`.
 - Schedule the guardrails review (`review_after_days`). Budget breaches are new deltas, not silent tuning.
-- Run `npx aisdlc next <slug>`; when it says DONE, load `aisdlc-retro`.
+- Run `npx aisdlc-cli next <slug>`; when it says DONE, load `aisdlc-retro`.

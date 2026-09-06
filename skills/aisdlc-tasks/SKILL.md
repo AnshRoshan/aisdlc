@@ -22,7 +22,7 @@ Tasks are the unit of agent work and the unit of evidence. One task, one failing
 - [x] T3 [R:<Requirement Name>] <done tasks are checked, never deleted>
 ```
 
-Parser rules (`npx aisdlc trace` and G2 rely on these):
+Parser rules (`npx aisdlc-cli trace` and G2 rely on these):
 - Line starts with `- [ ]` or `- [x]`, then `T<n>`, then one `[R:...]` group with comma-separated requirement names, then the title.
 - Requirement names must match `### Requirement:` headings in `spec.md` exactly (case-insensitive, whitespace-trimmed). Unknown references fail G2.
 - Every requirement needs at least one task. Uncovered requirements fail G2.
@@ -41,10 +41,10 @@ Parser rules (`npx aisdlc trace` and G2 rely on these):
 ## Procedure
 
 1. Copy the plan's work breakdown into `tasks.md` in the exact format above. Add `{seam:}` from the plan's Seams section and `{after:}` edges.
-2. Run `npx aisdlc trace <slug>`; fix unknown/uncovered until clean.
-3. Run `npx aisdlc gate G2 <slug>`; G2 also re-validates the spec, checks it is signed, and checks the plan has `## Traceability`. Paste the result.
+2. Run `npx aisdlc-cli trace <slug>`; fix unknown/uncovered until clean.
+3. Run `npx aisdlc-cli gate G2 <slug>`; G2 also re-validates the spec, checks it is signed, and checks the plan has `## Traceability`. Paste the result.
 4. Hand off to `aisdlc-implement` starting with the first unchecked task, unless `aisdlc next` says otherwise.
 
 ## Quick lane
 
-Usually 1-4 tasks. Same format, same G2. If you are writing task eight, the lane is wrong: `npx aisdlc lane <slug> standard`.
+Usually 1-4 tasks. Same format, same G2. If you are writing task eight, the lane is wrong: `npx aisdlc-cli lane <slug> standard`.

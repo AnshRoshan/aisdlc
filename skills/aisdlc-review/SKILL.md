@@ -69,14 +69,14 @@ Finding classes:
 - Every changed file maps to a task; every task maps to a requirement; every scenario maps to evidence.
 - No behaviour exists that the spec does not describe.
 - Error paths have scenarios and tests; negative-auth path tested where relevant.
-- `npx aisdlc scan` is clean; no credentials in fixtures.
+- `npx aisdlc-cli scan` is clean; no credentials in fixtures.
 - Migrations are reversible; flags default off; contract steps are separate tasks.
 - Lines added vs. deleted and new dependencies are proportionate to the requirements.
 - Evidence timestamps are after the last code change (`git log -1 --format=%cI` vs. `startedAt`); stale evidence is not evidence.
 
 ## Hand off
 
-1. Run `npx aisdlc gate G4 <slug>`. It will fail on the signature; that is expected.
+1. Run `npx aisdlc-cli gate G4 <slug>`. It will fail on the signature; that is expected.
 2. Hand the human a two-line summary and the exact command:
-   "A1-A6 pass with evidence; F3, F4 advisory only. To accept, sign `Approved-by` in acceptance.md (name + date) or run `npx aisdlc approve G4 <slug> --by "<name>"`."
-3. If there are blocking findings, say instead: "Not acceptable: F1, F2. Reopened T3; state is BUILD." and run `npx aisdlc next <slug>` to prove it.
+   "A1-A6 pass with evidence; F3, F4 advisory only. To accept, sign `Approved-by` in acceptance.md (name + date) or run `npx aisdlc-cli approve G4 <slug> --by "<name>"`."
+3. If there are blocking findings, say instead: "Not acceptable: F1, F2. Reopened T3; state is BUILD." and run `npx aisdlc-cli next <slug>` to prove it.

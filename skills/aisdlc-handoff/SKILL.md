@@ -22,7 +22,7 @@ Everything the process needs is already on disk (spec, plan, tasks, evidence). W
 
 ## Procedure
 
-1. Run `npx aisdlc next <slug> --json` (or read `tasks.md`/`spec.md` directly if the CLI is unavailable). The **state comes from disk**; do not write a state that the files do not support.
+1. Run `npx aisdlc-cli next <slug> --json` (or read `tasks.md`/`spec.md` directly if the CLI is unavailable). The **state comes from disk**; do not write a state that the files do not support.
 2. Write `docs/features/<slug>/handoff.md` (overwrite; git keeps history). If there is no feature yet, write `docs/handoff.md`.
 3. Keep it under ~80 lines. Facts, not narrative. Paths, not descriptions. Commands, not intentions.
 4. Reply with the path and the single next action.
@@ -58,7 +58,7 @@ Written: <ISO timestamp> · by: <agent/model or human> · lane: <lane> · state 
 2. ...
 
 ## Waiting on humans
-- <who> to <do what> (`npx aisdlc approve G1 <slug> --by "<name>"` / sign §5 / provide <credential name, never the value>)
+- <who> to <do what> (`npx aisdlc-cli approve G1 <slug> --by "<name>"` / sign §5 / provide <credential name, never the value>)
 
 ## Open questions
 - [NEEDS CLARIFICATION: ...]
@@ -67,7 +67,7 @@ Written: <ISO timestamp> · by: <agent/model or human> · lane: <lane> · state 
 ## Rules
 
 - **Never invent progress.** If a test was not run in this session, it is not "passing" in the handoff; link the evidence file or say `IMPLEMENTED-NOT-VERIFIED`.
-- **No secrets.** Names of environment variables, never values. `npx aisdlc scan` before you finish.
+- **No secrets.** Names of environment variables, never values. `npx aisdlc-cli scan` before you finish.
 - **Record decisions in their home too.** The handoff is a pointer; `plan.md`, deltas, and ADRs are the record. If a decision lives only in the handoff, move it now.
 - **Prefer the project's language.** Use terms from `docs/glossary.md` so the next reader (human or agent) decodes it fast.
 

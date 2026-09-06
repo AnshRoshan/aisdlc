@@ -12,7 +12,7 @@ const stages = [...new Set(skills.map((s) => s.stage))].sort((a, b) => ORDER.ind
     <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700;max-width:24ch;">Every stage has one skill. Every skill is one file.</h1>
     <p class="lede">
       Each skill is a single <code>SKILL.md</code> in the open Agent Skills format, read identically by Claude Code,
-      Codex, Cursor, Gemini, Copilot, Windsurf and OpenCode. The CLI (<code>npx aisdlc</code>) is the referee that derives
+      Codex, Cursor, Gemini, Copilot, Windsurf and OpenCode. The CLI (<code>npx aisdlc-cli</code>) is the referee that derives
       state and enforces the gates; the skills are the behaviour.
     </p>
     {stages.map((stage) => (

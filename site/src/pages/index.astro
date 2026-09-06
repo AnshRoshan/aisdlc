@@ -1,0 +1,181 @@
+---
+import Base from "../layouts/Base.astro";
+import { getSkills, shortDesc, skillSlug } from "../lib/skills";
+
+const skills = getSkills();
+
+const HARNESSES = ["Claude Code", "Codex CLI", "Cursor", "Gemini CLI", "GitHub Copilot", "Windsurf", "OpenCode", "any AGENTS.md agent"];
+
+const GATES = [
+  { id: "G1", name: "Plan approval", checks: ["plan.md is real, not a stub", "human approval bound to the plan's hash", "approver ≠ author"] },
+  { id: "G2", name: "Artifact consistency", checks: ["spec passes EARS validation", "§5 signed by a human", "every requirement traced to a task"] },
+  { id: "G3", name: "Merge safety", checks: ["secrets scan clean", "full test run recorded as evidence", "latest run exit code 0"] },
+  { id: "G4", name: "Acceptance proof", checks: ["every scenario has an evidence file", "every row passes", "independent human sign-off"] },
+  { id: "G5", name: "Release approval", checks: ["rollout has concrete rollback steps", "release owner approval on rollout hash"] },
+  { id: "G6", name: "Runtime guardrails", checks: ["budgets: latency, errors, cost", "named kill switch", "runbook with symptoms → actions"] },
+];
+
+const INVARIANTS = [
+  ["The spec is the source of truth", "Code is generated output. Intent changes go through a delta, never a quiet edit."],
+  ["Gates are transitions, not suggestions", "No evidence, no progress. The CLI refuses to move the state forward."],
+  ["Approver is never the author", "Segregation of duties is enforced by the tool, and agents cannot approve at all."],
+  ["Humans own the acceptance bar", "Approved-by lines are human-signed. Underscores mean unsigned."],
+  ["Done means a recorded run", "Every test run is captured with command, exit code and output hash. Claims without artifacts do not count."],
+  ["Disk is state, chat is not", "aisdlc next derives the truth from files. Same files, same answer, any machine, any model."],
+  ["Secrets never land in files", "Eight pattern families, placeholder-aware, blocks G3."],
+  ["Fail loud, never fake green", "Infra down means IMPLEMENTED-NOT-VERIFIED, not PASS."],
+];
+
+const FAQ = [
+  ["Is this a SaaS? Do I need an account?", "No. It is a folder of SKILL.md files and a zero-dependency Node CLI. Everything runs on your machine against your own repo. There is no server, no telemetry and nothing to sign up for."],
+  ["Which model or subscription do I need?", "Whatever you already have. The skills are plain Markdown in the open Agent Skills format, so Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot, Windsurf, OpenCode and local open-weight models all read them the same way."],
+  ["What is the difference between the skills and the CLI?", "Skills tell the agent how to behave at each stage (brainstorm, discover, spec, plan, implement, debug, verify, review, release, retro) and across stages (grill, ponytail, delta, handoff). The CLI is the referee: it validates EARS specs, derives the state, runs the six gates, records evidence and holds the approval chain. Skills without the CLI still work; the CLI is what makes “done” mean something."],
+  ["How is this different from Spec Kit or BMAD?", "Those give you excellent templates and advice. aisdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, an evidence log that cannot be faked by prose, and segregation of duties the agent cannot bypass."],
+  ["Can I use it on an existing codebase?", "Yes, that is what aisdlc-brownfield is for: baseline, characterization tests and named seams before any delta-only change is allowed."],
+  ["Is it free?", "MIT licensed. Fork it, vendor it, ship it inside your company. If you find it useful, star the repo and file issues."],
+];
+---
+<Base>
+  <section class="hero wrap">
+    <span class="pill"><span class="dot"></span> Open source · MIT · v0.1 · works with {HARNESSES.length - 1} harnesses</span>
+    <h1>Agents write code.<br /><span class="grad">aisdlc runs the process.</span></h1>
+    <p class="sub">
+      A process kit for AI-assisted engineering that installs into any coding agent. EARS specs, six evidence gates,
+      segregation of duties and an approval chain that goes stale when you edit. Your laptop is the sandbox.
+    </p>
+    <div class="cta-row">
+      <div class="copy">
+        <div>
+          <div class="label">skills + instructions + slash commands</div>
+          <code id="cmd">npx aisdlc init</code>
+        </div>
+        <button data-copy="cmd">copy</button>
+      </div>
+      <div class="copy">
+        <div>
+          <div class="label">skills only, via skills.sh</div>
+          <code>npx skills add AnshRoshan/aisdlc</code>
+        </div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a href="/docs" class="btn btn-primary">Read the ten-minute tour →</a>
+      <a href="https://github.com/AnshRoshan/aisdlc" class="btn btn-ghost">★ Star on GitHub</a>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="marquee" style="display:flex;flex-wrap:wrap;gap:.5rem;">
+      {HARNESSES.map((h) => <span class="pill"><span class="dot"></span> {h}</span>)}
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>“All tests pass.”</h3>
+        <p>Nothing ran. The agent wrote the sentence it predicted you wanted. aisdlc only counts a run it recorded itself: command, exit code, output hash.</p>
+      </div>
+      <div class="card">
+        <h3>The spec drifted at 2 a.m.</h3>
+        <p>A requirement was quietly rewritten to match the code. aisdlc turns that into a delta, invalidates stale approvals, and moves the state backwards on purpose.</p>
+      </div>
+      <div class="card">
+        <h3>The agent approved its own plan.</h3>
+        <p>Segregation of duties is a policy nobody enforces on a Friday. aisdlc refuses approvals from the author, and refuses agents entirely.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how" class="section wrap">
+    <p class="kicker">How it works</p>
+    <h2 class="h2">Six gates between an idea and production.<br />Each one is a file check, not a vibe.</h2>
+    <p class="lede">
+      The agent runs <code>npx aisdlc next</code>, gets the state and the skill to load, does the work, and runs it again.
+      Humans are asked for exactly two things: signatures and approvals.
+    </p>
+    <ol class="flow">
+      {["Discover", "Spec", "Plan", "Tasks", "Build", "Verify", "Accept", "Release", "Operate"].map((s, i) => (
+        <li class={i === 4 ? "hot" : ""}>{s}</li>
+      ))}
+    </ol>
+    <div class="grid grid-3">
+      {GATES.map((g) => (
+        <div class="gate">
+          <span class="gid">{g.id}</span><strong>{g.name}</strong>
+          <ul>{g.checks.map((c) => <li>{c}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <p class="kicker">{skills.length} skills</p>
+    <h2 class="h2">An entry point for every scenario: idea, bug, spike, refactor, regulated change.</h2>
+    <p class="lede">
+      Plain Markdown in the open Agent Skills format, installed into <code>.claude/skills</code>, <code>.agents/skills</code>,
+      <code>.cursor/skills</code>, <code>.gemini/skills</code> and friends. Bridges to the official ponytail and grilling
+      skills when they are installed; works without them.
+    </p>
+    <div class="grid grid-3" style="margin-top:2rem;">
+      {skills.map((s) => (
+        <a href={`/skills/${skillSlug(s.name)}`} style="color:inherit;text-decoration:none;">
+          <div class="card" style="height:100%;">
+            <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;">
+              <h3 style="font-family:var(--mono);">/{s.name}</h3>
+              <span class="tag">{s.stage}</span>
+            </div>
+            <p>{shortDesc(s.description)}.</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <p class="kicker">The constitution</p>
+    <h2 class="h2">Eight invariants. The tool enforces them so you do not have to remember to.</h2>
+    <ol style="margin-top:2rem;padding:0;list-style:none;">
+      {INVARIANTS.map(([h, p], i) => (
+        <li class="card" style="margin-bottom:.6rem;display:flex;gap:1.2rem;">
+          <span style="font-family:var(--mono);color:var(--lime);">0{i + 1}</span>
+          <div><strong>{h}.</strong><p>{p}</p></div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section id="faq" class="section wrap" style="max-width:48rem;">
+    <p class="kicker">FAQ</p>
+    <h2 class="h2">Short answers.</h2>
+    <div style="margin-top:2rem;">
+      {FAQ.map(([q, a]) => (
+        <details class="faq"><summary>{q}</summary><p>{a}</p></details>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap" style="max-width:44rem;">
+    <div class="card" style="text-align:center;padding:3rem 1.5rem;">
+      <h2 class="h2">Install it in the repo you are working on right now.</h2>
+      <p class="lede" style="margin-inline:auto;">
+        Then tell your agent: <code>use aisdlc-brainstorm, I want to build …</code>. It picks the lane, asks only what
+        changes the outcome, and hands you a spec you can sign.
+      </p>
+      <div class="copy" style="margin:2rem auto 0;text-align:left;">
+        <code>npx aisdlc init</code>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll("button[data-copy]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = document.getElementById(btn.dataset.copy);
+        if (el) navigator.clipboard.writeText(el.textContent.trim());
+        btn.textContent = "copied";
+        setTimeout(() => (btn.textContent = "copy"), 1500);
+      });
+    });
+  </script>
+</Base>

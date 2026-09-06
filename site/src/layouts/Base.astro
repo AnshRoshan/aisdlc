@@ -1,0 +1,34 @@
+---
+const { title, description = "Agents write code. aisdlc runs the process." } = Astro.props;
+const REPO = "https://github.com/AnshRoshan/aisdlc";
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title ? `${title} · aisdlc` : "aisdlc — agents write code, aisdlc runs the process"}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav">
+        <a href="/" class="brand">aisdlc</a>
+        <div class="nav-links">
+          <a href="/skills">Skills</a>
+          <a href="/docs">Docs</a>
+          <a href="/#faq">FAQ</a>
+          <a href={REPO} class="nav-cta">GitHub ↗</a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>MIT licensed · <a href={REPO}>AnshRoshan/aisdlc</a> · built by agents, run by aisdlc</p>
+    </footer>
+  </body>
+</html>

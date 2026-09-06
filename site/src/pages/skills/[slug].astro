@@ -1,0 +1,27 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getSkills, skillSlug } from "../../lib/skills";
+
+export function getStaticPaths() {
+  return getSkills().map((s) => ({ params: { slug: skillSlug(s.name) }, props: { skill: s } }));
+}
+
+const { skill } = Astro.props;
+const body = skill.description.split(/(?<=\.)\s/).slice(1).join(" ");
+---
+<Base title={`/${skill.name}`}>
+  <article class="wrap section" style="padding-top:3rem;max-width:50rem;">
+    <p class="kicker"><a href="/skills">← all skills</a></p>
+    <h1 style="font-family:var(--mono);font-size:clamp(1.6rem,4vw,2.4rem);margin:0;">/{skill.name}</h1>
+    <span class="pill" style="margin-top:1rem;">stage: {skill.stage}</span>
+    <p class="lede">{skill.description}</p>
+    {body && <p class="lede">{body}</p>}
+    <div class="card" style="margin-top:2.5rem;">
+      <h3>Install just this skill</h3>
+      <div class="copy" style="margin-top:1rem;">
+        <code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code>
+      </div>
+      <p style="font-size:.85rem;">Or install everything at once with <code>npx aisdlc init</code>. Source: <a href={`https://github.com/AnshRoshan/aisdlc/blob/main/skills/${skill.name}/SKILL.md`}>skills/{skill.name}/SKILL.md</a></p>
+    </div>
+  </article>
+</Base>

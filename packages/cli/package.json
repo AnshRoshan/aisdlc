@@ -1,0 +1,18 @@
+{
+  "name": "aisdlc",
+  "version": "0.1.0",
+  "description": "Agents write code, aisdlc runs the process. Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
+  "type": "module",
+  "bin": { "aisdlc": "bin/aisdlc.js" },
+  "files": ["bin", "src", "skills", "README.md"],
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "sync-skills": "node scripts/sync-skills.mjs",
+    "prepack": "node scripts/sync-skills.mjs"
+  },
+  "keywords": ["agent-skills", "claude-code", "codex", "cursor", "gemini-cli", "copilot", "sdlc", "ears", "spec-driven", "gates", "evidence"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/AnshRoshan/aisdlc", "directory": "packages/cli" },
+  "homepage": "https://github.com/AnshRoshan/aisdlc#readme"
+}

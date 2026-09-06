@@ -1,0 +1,29 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    strategy: { matrix: { node: [18, 20, 22] } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ matrix.node }}" }
+      - run: npm test
+        working-directory: packages/cli
+      - name: smoke the CLI end to end
+        run: |
+          mkdir /tmp/demo && cd /tmp/demo && git init -q && git config user.name ci && git config user.email ci@example.com
+          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js init --harness all
+          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js new "Demo" --kind backend
+          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js next --json
+          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js doctor
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: site/package-lock.json }
+      - run: npm ci
+        working-directory: site
+      - run: npm run build
+        working-directory: site

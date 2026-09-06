@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import { getSkills, skillSlug } from "../lib/skills";
+
+const skills = getSkills();
+const stages = [...new Set(skills.map((s) => s.stage))];
+---
+<Base title="Skills">
+  <section class="wrap section" style="padding-top:3rem;">
+    <p class="kicker">{skills.length} skills</p>
+    <h1 style="font-size:clamp(2rem,5vw,3rem);margin:0;">Every stage, one skill.</h1>
+    <p class="lede">
+      Each skill is a single SKILL.md in the open Agent Skills format. They work in any harness that reads them; the CLI
+      (<code>npx aisdlc</code>) is the referee that derives state and enforces gates.
+    </p>
+    {stages.map((stage) => (
+      <div style="margin-top:3rem;">
+        <p class="kicker">{stage === "any" ? "cross-cutting" : `stage: ${stage}`}</p>
+        <table class="skill">
+          <thead><tr><th>skill</th><th>what it does</th></tr></thead>
+          <tbody>
+            {skills.filter((s) => s.stage === stage).map((s) => (
+              <tr>
+                <td><a href={`/skills/${skillSlug(s.name)}`}>/{s.name}</a></td>
+                <td style="color:var(--fog);">{s.description.split(/(?<=\.)\s/).slice(0, 2).join(" ")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ))}
+  </section>
+</Base>

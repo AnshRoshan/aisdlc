@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.log
+.env
+.DS_Store
+next-env.d.ts
+*.tsbuildinfo
+
+# aisdlc cli: skills are synced from /skills at pack time
+packages/cli/skills/
+packages/cli/node_modules/

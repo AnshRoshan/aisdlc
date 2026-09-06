@@ -8,7 +8,7 @@
     {
       "name": "aisdlc",
       "source": "./",
-      "description": "Agents write code, aisdlc runs the process. 18 skills + evidence gates G1-G6, hash-bound approvals, EARS spec validation.",
+      "description": "Agents write code, aisdlc runs the process. 20 skills + evidence gates G1-G6, hash-bound approvals, EARS spec validation.",
       "version": "0.1.0",
       "category": "engineering-process",
       "keywords": ["sdlc", "spec-driven-development", "ears", "verification", "agent-skills"]

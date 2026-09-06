@@ -78,7 +78,7 @@ Skipped gates show as `skipped` in `aisdlc next`; they are not failures.
 | `SPECIFY` | spec missing, invalid EARS, has `[NEEDS CLARIFICATION]`, or unsigned | `aisdlc-spec` (uses `aisdlc-grill` for open questions) |
 | `PLAN` | spec ok, plan missing or G1 unapproved | `aisdlc-plan` then ask a human for `aisdlc approve G1` |
 | `TASKS` | plan approved, tasks missing or untraced (G2) | `aisdlc-tasks` |
-| `BUILD` | open tasks remain | `aisdlc-implement` (with `aisdlc-ponytail`; `aisdlc-debug` for fix tasks) |
+| `BUILD` | open tasks remain | `aisdlc-implement` (with `aisdlc-ponytail` + `aisdlc-craft`; `aisdlc-debug` for fix tasks) |
 | `VERIFY` | tasks done, G3 not green (no run evidence or secrets found) | `aisdlc-verify` |
 | `ACCEPT` | G3 green, acceptance table incomplete or unsigned (G4) | `aisdlc-review` + human sign-off |
 | `RELEASE` | G4 passed, rollout unapproved (G5) | `aisdlc-release` |
@@ -87,12 +87,14 @@ Skipped gates show as `skipped` in `aisdlc next`; they are not failures.
 
 ## Companions (optional, recommended)
 
-aisdlc bridges to two maintained third-party skills and degrades gracefully without them:
+aisdlc bridges to four maintained third-party skills and degrades gracefully without them:
 
 - **ponytail** (DietrichGebert/ponytail): minimal-code discipline. `aisdlc-ponytail` uses the official one when installed.
 - **grilling** (mattpocock/skills): the interview primitive. `aisdlc-grill` uses the official one when installed.
+- **code-craft** (AnshRoshan/ansh-other-skills): line-level clean-code craft. `aisdlc-craft` uses the official one when installed.
+- **code-quality-tools** (AnshRoshan/ansh-other-skills): lint/dead-code/complexity/security CLI runner. `aisdlc-quality` uses the official one when installed.
 
-`npx aisdlc-cli doctor` reports which are present; `npx aisdlc-cli addon ponytail|grilling|all` installs them. Never install without asking.
+`npx aisdlc-cli doctor` reports which are present; `npx aisdlc-cli addon ponytail|grilling|code-craft|quality-tools|all` installs them. Never install without asking.
 
 ## Output contract for every turn
 

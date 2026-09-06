@@ -33,6 +33,7 @@ With `docs/taste.md` and `docs/glossary.md` beside you:
 - **Taste**: naming from the glossary, error-handling style, comment policy, test philosophy, definition of done.
 - **Smell baseline** (Fowler): duplicated code, long function, large class/module, long parameter list, feature envy, shotgun surgery, speculative generality, dead code, primitive obsession, message chains.
 - **Over-build (ponytail lens)**: abstraction with one implementation, dependency added for <20 lines of value, config for a constant, wrapper around a one-line stdlib call, scaffolding "for later", files that could be deleted. If the official `ponytail-review` skill is installed, run it on the diff and merge its output. Load `aisdlc-ponytail` otherwise.
+- **Mechanical pass (quality lens)**: load `aisdlc-quality` (or the official `code-quality-tools`) and run its fix sequence in detect-only mode over the diff - types, lint, dead code, duplication, complexity, security hotspots. Findings are findings: they become review rows or new tasks, never silent auto-fixes.
 - **Safety**: input validation at trust boundaries, errors that could lose data, secrets in fixtures, migrations without a contract step or rollback, flags defaulting on, logging PII.
 - **Tests**: implementation-coupled (break on refactor), tautological (assert the code against itself), horizontal (all tests written before any behaviour), missing negative cases.
 

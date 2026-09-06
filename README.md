@@ -13,7 +13,7 @@
 [![Node](https://img.shields.io/node/v/aisdlc)](packages/cli/package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![docs](https://img.shields.io/badge/docs-anshroshan.github.io%2Faisdlc-0c100d)](https://anshroshan.github.io/aisdlc/)
-[![skills](https://img.shields.io/badge/agent_skills-18-b1e57c)](#the-18-skills)
+[![skills](https://img.shields.io/badge/agent_skills-20-b1e57c)](#the-20-skills)
 
 A process kit for AI-assisted engineering that installs into any coding agent.
 EARS specs, six evidence gates, hash-bound human approvals, and an evidence log
@@ -48,7 +48,7 @@ Skills + instructions + slash commands, detected for your harness. The npm packa
 /plugin install aisdlc@aisdlc
 ```
 
-18 skills plus the `/aisdlc-next` and `/aisdlc-status` commands, updated through the plugin system.
+20 skills plus the `/aisdlc-next` and `/aisdlc-status` commands, updated through the plugin system.
 
 </td>
 <td valign="top">
@@ -118,7 +118,7 @@ The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does
 
 </details>
 
-## The 18 skills
+## The 20 skills
 
 <table>
 <tr>
@@ -143,8 +143,10 @@ The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does
 - [`aisdlc-tasks`](skills/aisdlc-tasks/SKILL.md)
 - [`aisdlc-implement`](skills/aisdlc-implement/SKILL.md)
 - [`aisdlc-debug`](skills/aisdlc-debug/SKILL.md)
+- [`aisdlc-craft`](skills/aisdlc-craft/SKILL.md)
 - [`aisdlc-verify`](skills/aisdlc-verify/SKILL.md)
 - [`aisdlc-review`](skills/aisdlc-review/SKILL.md)
+- [`aisdlc-quality`](skills/aisdlc-quality/SKILL.md)
 
 </td>
 <td valign="top">
@@ -160,13 +162,13 @@ The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does
 </tr>
 </table>
 
-Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to the official [ponytail](https://github.com/DietrichGebert/ponytail) and [grilling](https://github.com/mattpocock/skills) skills when they are installed; works without them.
+Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx aisdlc-cli addon all` installs them; works without them.
 
 ## Repo layout
 
 | path | what |
 |---|---|
-| [`skills/`](skills/) | the 18 canonical skills (source of truth) |
+| [`skills/`](skills/) | the 20 canonical skills (source of truth) |
 | [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18), installed as `npx aisdlc-cli` |
 | [`commands/`](commands/) | Claude Code plugin slash commands (`/aisdlc-next`, `/aisdlc-status`) |
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |

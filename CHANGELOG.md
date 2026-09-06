@@ -5,6 +5,7 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 ## [Unreleased]
 
 ### Added
+- Two new companion bridges from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills): `aisdlc-craft` (line-level clean-code craft during BUILD, bridged to code-craft) and `aisdlc-quality` (lint/dead-code/complexity/security CLI runner feeding VERIFY and review, bridged to code-quality-tools). Both use the official skills when installed and embedded distillations otherwise. Skill count: 18 to 20; `aisdlc addon code-craft|quality-tools|all` installs them.
 - Claude Code plugin support: `/plugin marketplace add AnshRoshan/aisdlc` then `/plugin install aisdlc@aisdlc` installs the 18 skills plus `/aisdlc-next` and `/aisdlc-status` commands (`.claude-plugin/`, `commands/`).
 - `publish cli` workflow: tag `vX.Y.Z` (or run manually) to publish the CLI to npm as `aisdlc-cli`; requires the `NPM_TOKEN` repository secret.
 

@@ -241,7 +241,7 @@ const commands = {
     if (which === "list") {
       const present = detectCompanions(root);
       for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(`${present.includes(id) ? ok(id.padEnd(10)) : c.dim(`  ${id.padEnd(10)}`)} ${c.dim(cpn.about)}\n             ${c.cyan(cpn.install)}  ${c.dim(`bridged by ${cpn.bridge}`)}`);
-      console.log(c.dim("\naisdlc addon <ponytail|grilling|all> [--print]   (--print only shows the commands)"));
+      console.log(c.dim("\naisdlc addon <ponytail|grilling|code-craft|quality-tools|all> [--print]   (--print only shows the commands)"));
       return;
     }
     const ids = which === "all" ? Object.keys(COMPANIONS) : which.split(",").map((x) => x.trim());
@@ -437,7 +437,7 @@ ${c.bold("Install")}
   aisdlc init [--harness auto|all|claude-code,codex,cursor,gemini-cli,copilot,windsurf,opencode] [--link]
   aisdlc doctor                          show what is installed where
   aisdlc skills                          list bundled skills
-  aisdlc addon [ponytail|grilling|all]   install the companion skills aisdlc bridges to (optional)
+  aisdlc addon [ponytail|grilling|code-craft|quality-tools|all]   install the companion skills aisdlc bridges to (optional)
 
 ${c.bold("Features")}
   aisdlc new "<title>" --kind <${KINDS.join("|")}> [--lane ${LANES.join("|")}]

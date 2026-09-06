@@ -27,15 +27,16 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
    `npx aisdlc-cli evidence <slug> --task T<n> --label red -- <test command>`
    (a non-zero exit is expected and is recorded honestly). Read the failure message; it must be the assertion you meant, not a syntax error.
 2. **Ladder:** load `aisdlc-ponytail` (or the official `ponytail`). Does the repo already have it? stdlib? platform? installed dependency? one line? Pick the highest rung that turns the test green while respecting the never-lazy list (trust boundaries, data loss, security, a11y, anything the spec says).
-3. **Green:** write the minimum code to pass. Run:
+3. **Craft pass:** load `aisdlc-craft` (or the official `code-craft`) and run the smell→fix table over the touched lines only - honest types, no dead code, no swallowed errors. Out-of-scope mess gets flagged for review, not fixed in passing.
+4. **Green:** write the minimum code to pass. Run:
    `npx aisdlc-cli evidence <slug> --task T<n> --label green -- <test command>`
-4. **Refactor:** only with the suite green, only inside the files this task touched, only to remove duplication or clarify names from the glossary; re-run evidence if you touched behaviour. Broader refactors are review findings or new tasks.
-5. **Check off:** change `- [ ] T<n>` to `- [x] T<n>` in `tasks.md`. Do not reorder or delete tasks.
-6. **Secrets:** `npx aisdlc-cli scan` before you finish. Any finding blocks the task.
-7. **Verify before you claim** (the gate function):
+5. **Refactor:** only with the suite green, only inside the files this task touched, only to remove duplication or clarify names from the glossary; re-run evidence if you touched behaviour. Broader refactors are review findings or new tasks.
+6. **Check off:** change `- [ ] T<n>` to `- [x] T<n>` in `tasks.md`. Do not reorder or delete tasks.
+7. **Secrets:** `npx aisdlc-cli scan` before you finish. Any finding blocks the task.
+8. **Verify before you claim** (the gate function):
    - IDENTIFY the command that proves the claim → RUN it fresh, in full → READ the whole output and the exit code → only THEN state the claim, with the evidence file name.
    - Any of "should pass", "probably works", "looks good" in your draft = go back to RUN.
-8. Report: task id, SHALL line, files changed, evidence file names, what was skipped and when to add it (`ponytail:` notes), and the exact command a human can re-run.
+9. Report: task id, SHALL line, files changed, evidence file names, what was skipped and when to add it (`ponytail:` notes), and the exact command a human can re-run.
 
 ## Hard rules
 

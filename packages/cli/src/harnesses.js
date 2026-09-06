@@ -115,6 +115,26 @@ export const COMPANIONS = {
     ],
     dirs: ["grilling", "grill-me"],
   },
+  "code-craft": {
+    about: "line-level clean-code craft: the ladder before writing, smell-fix on touched lines, dead-code deletion with dynamic-reference checks (AnshRoshan/ansh-other-skills)",
+    bridge: "aisdlc-craft",
+    install: "npx skills@latest add AnshRoshan/ansh-other-skills --skill code-craft",
+    alternatives: [
+      "Claude Code:  /plugin marketplace add AnshRoshan/ansh-other-skills   then   /plugin install ansh-other-skills@ansh-other-skills",
+      "Any agent:    npx skills@latest add AnshRoshan/ansh-other-skills   then pick code-craft (and code-quality-tools)",
+    ],
+    dirs: ["code-craft"],
+  },
+  "quality-tools": {
+    about: "the lint/dead-code/complexity/security CLI runner: which tool, safe order, what mutates vs detects (AnshRoshan/ansh-other-skills)",
+    bridge: "aisdlc-quality",
+    install: "npx skills@latest add AnshRoshan/ansh-other-skills --skill code-quality-tools",
+    alternatives: [
+      "Claude Code:  /plugin marketplace add AnshRoshan/ansh-other-skills   then   /plugin install ansh-other-skills@ansh-other-skills",
+      "Any agent:    npx skills@latest add AnshRoshan/ansh-other-skills   then pick code-quality-tools",
+    ],
+    dirs: ["code-quality-tools"],
+  },
 };
 
 const SKILL_ROOTS = [".agents/skills", ".claude/skills", ".cursor/skills", ".gemini/skills", ".github/skills", ".windsurf/skills", ".opencode/skills", ".codex/skills"];

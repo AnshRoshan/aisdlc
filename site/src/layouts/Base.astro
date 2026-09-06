@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { base } from "../lib/base.js";
 const { title, description = "Agents write code. aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals — local-first, any harness." } = Astro.props;
 const REPO = "https://github.com/AnshRoshan/aisdlc";
 ---
@@ -11,16 +12,16 @@ const REPO = "https://github.com/AnshRoshan/aisdlc";
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title ? `${title} · aisdlc` : "aisdlc — agents write code, aisdlc runs the process"}</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
     <header class="site-header">
       <nav class="nav">
-        <a href="/" class="brand">aisdlc</a>
+        <a href={`${base}/`} class="brand">aisdlc</a>
         <div class="nav-links">
-          <a href="/skills">Skills</a>
-          <a href="/docs">Docs</a>
-          <a href="/#faq">FAQ</a>
+          <a href={`${base}/skills`}>Skills</a>
+          <a href={`${base}/docs`}>Docs</a>
+          <a href={`${base}/#faq`}>FAQ</a>
           <a href={REPO} class="nav-cta">star on github ↗</a>
         </div>
       </nav>

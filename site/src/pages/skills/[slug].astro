@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import { base } from "../../lib/base.js";
 import { getSkills, skillSlug } from "../../lib/skills";
 
 export function getStaticPaths() {
@@ -11,7 +12,7 @@ const rest = skill.description.split(/(?<=\.)\s/).slice(1).join(" ");
 ---
 <Base title={`/${skill.name}`} description={skill.description.slice(0, 150)}>
   <article class="wrap" style="padding-top:3.5rem;max-width:50rem;">
-    <p class="hashline"><a href="/skills">← all skills</a></p>
+    <p class="hashline"><a href={`${base}/skills`}>← all skills</a></p>
     <h1 style="font-family:var(--mono);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:500;margin-top:1rem;">{skill.name}</h1>
     <p class="hashline" style="margin-top:0.5rem;">stage: <b>{skill.stage}</b> · source: <b>skills/{skill.name}/SKILL.md</b></p>
     <p class="lede" style="margin-top:1.8rem;font-size:1.05rem;">{skill.description}</p>

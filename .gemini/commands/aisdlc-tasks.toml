@@ -1,0 +1,4 @@
+description = "Generate or repair tasks"
+prompt = """
+Load and follow the aisdlc-tasks skill in this repository (.gemini/skills/aisdlc-tasks/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

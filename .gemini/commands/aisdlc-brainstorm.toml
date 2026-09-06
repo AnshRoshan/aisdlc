@@ -1,0 +1,4 @@
+description = "The front door for any new request"
+prompt = """
+Load and follow the aisdlc-brainstorm skill in this repository (.gemini/skills/aisdlc-brainstorm/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

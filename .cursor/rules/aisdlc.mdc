@@ -1,0 +1,23 @@
+---
+description: aisdlc process rules (spec → gates → evidence)
+alwaysApply: true
+---
+<!-- aisdlc:start -->
+# aisdlc: agents write code, aisdlc runs the process
+
+This repository uses the aisdlc process. Before starting any engineering task:
+
+1. Run `npx aisdlc next <feature>` (or `npx aisdlc status`) and trust its output over chat history. If the CLI is unavailable, `aisdlc-flow` explains how to derive the state from the files by hand.
+2. Load the skill it names (`aisdlc-brainstorm`, `aisdlc-brownfield`, `aisdlc-debug`, `aisdlc-delta`, `aisdlc-discover`, `aisdlc-flow`, `aisdlc-grill`, `aisdlc-handoff`, `aisdlc-implement`, `aisdlc-plan`, `aisdlc-ponytail`, `aisdlc-release`, `aisdlc-retro`, `aisdlc-review`, `aisdlc-spec`, `aisdlc-tasks`, `aisdlc-taste`, `aisdlc-verify`). Start with `aisdlc-flow` when unsure, `aisdlc-brainstorm` for a new idea, `aisdlc-debug` for a bug.
+2b. Match process to stakes with lanes: spike (answer a question) · quick (bounded change, G2-G4) · standard (all gates) · regulated (two approvers). Lanes only ratchet up.
+3. Obey the eight invariants:
+   spec is truth · gates are transitions · approver ≠ author · humans sign the acceptance bar ·
+   done = recorded evidence · disk is state · no secrets in files · fail loud, never fake green.
+4. Never write a name into an `Approved-by:` line and never run `aisdlc approve`. Those are human actions.
+5. Record every test run with `npx aisdlc evidence <feature> -- <command>`. A claim without an evidence file is not a claim.
+6. Any change of intent after the spec is signed goes through `aisdlc-delta`.
+7. Write the least code that passes the spec (`aisdlc-ponytail`; uses the official `ponytail` skill if installed). Ask decisions with recommended answers, find facts yourself (`aisdlc-grill`; uses the official `grilling` skill if installed).
+8. Before a session ends mid-feature, write `handoff.md` (`aisdlc-handoff`). After DONE, run `aisdlc-retro`.
+
+Artifacts live in `docs/features/<slug>/`; project taste lives in `docs/taste.md`; shared vocabulary in `docs/glossary.md`; the constitution in `docs/constitution.md`.
+<!-- aisdlc:end -->

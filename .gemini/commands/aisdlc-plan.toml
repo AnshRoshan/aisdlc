@@ -1,0 +1,4 @@
+description = "Produce plan"
+prompt = """
+Load and follow the aisdlc-plan skill in this repository (.gemini/skills/aisdlc-plan/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

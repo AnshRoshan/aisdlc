@@ -25,3 +25,11 @@ Thanks for looking under the hood. The project is small and opinionated; here is
 ## Reporting bugs
 
 Open an issue with: the harness you used, `npx aisdlc doctor` output, and the smallest repo state that reproduces (the `aisdlc/` and `docs/features/` files are enough — no need for your code).
+
+## Releasing the CLI
+
+1. Bump `version` in `packages/cli/package.json` and add a CHANGELOG.md entry.
+2. `cd packages/cli && npm test` — the publish workflow runs the tests again before publishing.
+3. `git tag vX.Y.Z && git push --tags`. The `publish cli` workflow publishes to npm and opens a GitHub release.
+   - One-time setup: add an npm **automation** token as the repository secret `NPM_TOKEN` (npmjs.com → Access Tokens → Generate Token → Automation).
+   - Local alternative: `npm login`, then `cd packages/cli && npm publish --access public` (`prepack` syncs `skills/` into the tarball automatically).

@@ -1,0 +1,4 @@
+description = "Bridge to Ponytail, the \"lazy senior developer\" discipline that forces the simplest, shortest solution that actually works (YAGNI, stdlib before custom code, native platform before dependencies, one line before fifty)"
+prompt = """
+Load and follow the aisdlc-ponytail skill in this repository (.gemini/skills/aisdlc-ponytail/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

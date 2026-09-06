@@ -1,0 +1,4 @@
+description = "Disciplined, evidence-backed debugging loop for bugs, flaky tests, performance regressions and \"it works on my machine\""
+prompt = """
+Load and follow the aisdlc-debug skill in this repository (.gemini/skills/aisdlc-debug/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

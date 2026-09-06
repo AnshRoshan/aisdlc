@@ -1,0 +1,9 @@
+budgets:
+  latency_p95_ms: 800
+  error_rate_pct: 1.0
+  monthly_cost: 5000
+kill_switch: <FLAG_NAME>
+alerts:
+  - on: error_rate_pct > budget for 5m
+    do: page owner, flip kill_switch
+review_after_days: 14

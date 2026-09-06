@@ -4,7 +4,13 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+### Added
+- Claude Code plugin support: `/plugin marketplace add AnshRoshan/aisdlc` then `/plugin install aisdlc@aisdlc` installs the 18 skills plus `/aisdlc-next` and `/aisdlc-status` commands (`.claude-plugin/`, `commands/`).
+- `publish cli` workflow: tag `vX.Y.Z` (or run manually) to publish the CLI to npm; requires the `NPM_TOKEN` repository secret.
+
 ### Changed
+- Rewrote the README as a proper front page: install matrix (npx, Claude Code plugin, skills.sh, manual), mermaid gate flow, lanes, gates, invariants, skill index.
+- Repository homepage now points at the live GitHub Pages site.
 - Rebuilt the repository from scratch with clean history.
 - Replaced the Next.js website (and the dead SaaS application left inside it) with a static Astro site deployed to GitHub Pages.
 

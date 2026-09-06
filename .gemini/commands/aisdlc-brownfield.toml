@@ -1,0 +1,4 @@
+description = "Safe entry into an existing codebase"
+prompt = """
+Load and follow the aisdlc-brownfield skill in this repository (.gemini/skills/aisdlc-brownfield/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

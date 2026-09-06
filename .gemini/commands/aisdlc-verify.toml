@@ -1,0 +1,4 @@
+description = "Run the merge-safety gate G3 honestly - full test run recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals)"
+prompt = """
+Load and follow the aisdlc-verify skill in this repository (.gemini/skills/aisdlc-verify/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

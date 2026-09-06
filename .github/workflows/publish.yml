@@ -1,0 +1,33 @@
+name: publish cli
+
+# Publishes the aisdlc CLI to npm. Requires one secret:
+#   NPM_TOKEN - an npm automation token (npmjs.com -> Access Tokens -> Generate)
+# Trigger: push a tag (git tag v0.1.1 && git push --tags) or run manually.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm test
+        working-directory: packages/cli
+      - run: npm publish --access public
+        working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/create-release@v1
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: See CHANGELOG.md

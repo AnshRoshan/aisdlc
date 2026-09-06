@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "project": "aisdlc",
+  "docsDir": "docs",
+  "featuresDir": "docs/features",
+  "harnesses": [
+    "claude-code",
+    "codex",
+    "cursor",
+    "gemini-cli",
+    "copilot",
+    "windsurf",
+    "opencode",
+    "universal"
+  ],
+  "policy": {
+    "minApprovals": {
+      "G1": 1,
+      "G5": 1
+    }
+  }
+}

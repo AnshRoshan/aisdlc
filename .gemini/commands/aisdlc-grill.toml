@@ -1,0 +1,4 @@
+description = "Relentless, structured interview that turns a vague plan, idea, spec, or design into shared understanding before anything is built"
+prompt = """
+Load and follow the aisdlc-grill skill in this repository (.gemini/skills/aisdlc-grill/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

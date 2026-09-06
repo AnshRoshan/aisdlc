@@ -1,0 +1,4 @@
+description = "Prepare and gate a release - rollout"
+prompt = """
+Load and follow the aisdlc-release skill in this repository (.gemini/skills/aisdlc-release/SKILL.md). Start by running `npx aisdlc next {{args}}` and obey its output.
+"""

@@ -90,8 +90,10 @@ code { font-family: var(--mono); font-size: 0.92em; }
 .split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 2.5rem; align-items: start; }
 @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
 
+.invariant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); column-gap: 3rem; margin-top: 2rem; }
 .invariant { display: flex; gap: 1.4rem; padding: 1.35rem 0.2rem; border-top: 1px solid var(--line); }
-.invariant:first-child { border-top: 0; }
+.invariant:first-child, .invariant-grid .invariant:nth-child(2) { border-top: 0; }
+@media (max-width: 700px) { .invariant-grid { grid-template-columns: 1fr; } .invariant:nth-child(2) { border-top: 1px solid var(--line); } .invariant:first-child { border-top: 0; } }
 .invariant .n { font-family: var(--mono); font-size: 0.8rem; color: var(--faint); padding-top: 0.3rem; }
 .invariant p { margin: 0.3rem 0 0; color: var(--fog); font-size: 0.95rem; }
 

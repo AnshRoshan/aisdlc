@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { base } from "../lib/base.js";
-const { title, description = "Agents write code. aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals — local-first, any harness." } = Astro.props;
+const { title, description = "Agents write code. aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
 const REPO = "https://github.com/AnshRoshan/aisdlc";
 ---
 <!doctype html>
@@ -11,7 +11,7 @@ const REPO = "https://github.com/AnshRoshan/aisdlc";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
-    <title>{title ? `${title} · aisdlc` : "aisdlc — agents write code, aisdlc runs the process"}</title>
+    <title>{title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process"}</title>
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
@@ -30,7 +30,7 @@ const REPO = "https://github.com/AnshRoshan/aisdlc";
       <slot />
     </main>
     <footer class="site-footer">
-      <p>MIT licensed · <a href={REPO}>AnshRoshan/aisdlc</a> · every claim on this page is a file check, not a vibe</p>
+      <p>MIT licensed. <a href={REPO}>AnshRoshan/aisdlc</a>. Every claim on this page is a file check, not a vibe.</p>
     </footer>
   </body>
 </html>

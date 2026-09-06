@@ -27,8 +27,9 @@ export function getSkills() {
       const raw = readFileSync(path.join(SKILLS_DIR, dir, "SKILL.md"), "utf8");
       const fm = raw.slice(raw.indexOf("---") + 3, raw.indexOf("---", 3));
       const name = dir;
-      const description = (fm.match(/^description:\s*(.+)$/m)?.[1] ?? "").trim();
-      const stage = fm.match(/^stage:\s*(.+)$/m)?.[1]?.trim() ?? "any";
+      const description = clean((fm.match(/^description:\s*(.+)$/m)?.[1] ?? "").trim());
+      // stage is nested under metadata:, so it is indented in the frontmatter
+      const stage = fm.match(/^\s+stage:\s*(.+)$/m)?.[1]?.trim() ?? "any";
       return { name, description, stage };
     });
 }
@@ -37,6 +38,16 @@ export function getSkills() {
 export function shortDesc(description) {
   const s = description.split(/(?<=\.)\s/)[0] ?? description;
   return s.length > 180 ? s.slice(0, 177) + "…" : s;
+}
+
+// Descriptions come from SKILL.md frontmatter and may contain em-dashes or
+// middle-dot chains, which the design system bans on the page.
+export function clean(text) {
+  return text
+    .replace(/\s*[—–]\s*/g, ", ")
+    .replace(/(?:\s*·\s*){2,}/g, ", ")
+    .replace(/\s*·\s*/g, ", ")
+    .replace(/,\s*,/g, ",");
 }
 
 export const skillSlug = (name) => name.replace(/^aisdlc-/, "");

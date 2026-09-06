@@ -36,22 +36,20 @@ const FAQ = [
   ["Is it free?", "MIT licensed. Fork it, vendor it, ship it inside your company. If you find it useful, star the repo and file issues."],
 ];
 
-const stageGroups = ["any", "discover", "specify", "plan", "build", "verify", "release"];
+const stageGroups = ["any", "discover", "specify", "plan", "tasks", "build", "verify", "accept", "release"];
 const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
 ---
 <Base>
   <section class="hero wrap">
-    <p class="hashline">docs/features/payment-retries/ · state: <b id="hero-state">BUILD</b> · <span class="tick">●</span> next: aisdlc-implement</p>
+    <p class="hashline">docs/features/payment-retries/ · state: <b id="hero-state">BUILD</b>, next: aisdlc-implement</p>
     <h1>Agents write code. aisdlc runs the process.</h1>
     <p class="sub">
-      A process kit for AI-assisted engineering that installs into any coding agent. <strong>EARS specs, six evidence
-      gates, hash-bound human approvals</strong> — and an evidence log the agent cannot fake with prose. Your laptop is
-      the sandbox; there is no server to sign up for.
+      EARS specs, six evidence gates, and an evidence log your agent cannot fake.
+      Local-first, any harness. <strong>Your laptop is the sandbox.</strong>
     </p>
     <div class="cta-block">
       <div>
         <div class="cmdline"><code>npx aisdlc init</code><button data-copy="cmd-main">copy</button></div>
-        <p class="note">skills + instructions + slash commands, into the repo you are already in</p>
       </div>
       <div class="cta-row">
         <a href={`${base}/docs`} class="btn btn-primary">Read the ten-minute tour</a>
@@ -77,14 +75,15 @@ const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
       <h2 class="h2">“All tests pass” is a sentence. A run is a file.</h2>
       <p class="lede">
         The agent wrote the sentence it predicted you wanted. Nothing ran. aisdlc only counts a run it recorded itself:
-        command, exit code, output hash, timestamp — appended to an evidence log in your repo, reviewable in a PR.
+        command, exit code, output hash, timestamp, appended to an evidence log in your repo, reviewable in a PR.
       </p>
       <p class="lede">
         And when a requirement quietly drifts to match the code at 2 a.m., aisdlc turns the edit into a delta, invalidates
         the stale approvals, and moves the state backwards on purpose. The agent tried to approve its own plan? Refused.
       </p>
     </div>
-    <pre class="term" aria-label="Example terminal transcript">$ <span class="p">npx aisdlc verify</span> payment-retries -- npm test
+    <pre class="term" aria-label="Example terminal session"><span class="c"># example session: the author tried to approve their own plan; the tool said no</span>
+$ <span class="p">npx aisdlc verify</span> payment-retries -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
 <span class="p">evidence/20260906T154412-full.json</span> recorded
 sha256:e3f1…9b7c · label: full
@@ -102,7 +101,7 @@ next skill: aisdlc-verify · owner: agent</pre>
     <h2 class="h2">Six gates between an idea and production. Each one is a file check.</h2>
     <p class="lede">
       The agent runs <code>npx aisdlc next</code>, gets the state and the skill to load, does the work, and runs it again.
-      Humans are asked for exactly two things: signatures and approvals. Skipped lanes show as <code>skipped</code> — they
+      Humans are asked for exactly two things: signatures and approvals. Skipped lanes show as <code>skipped</code>, and they
       are not failures.
     </p>
     <div class="panel" style="margin-top:2.5rem;">
@@ -115,16 +114,13 @@ next skill: aisdlc-verify · owner: agent</pre>
     </div>
   </section>
 
-  <section class="section wrap split">
-    <div>
-      <h2 class="h2">Eight invariants, written to every project the CLI touches.</h2>
-      <p class="lede">
-        They land in <code>docs/constitution.md</code> and in your agent's instructions file. You add your own below the
-        line; the tool enforces these eight so you never have to remember them.
-      </p>
-      <a href={`${base}/docs`} class="btn btn-ghost" style="margin-top:1.8rem;">See them in the tour</a>
-    </div>
-    <div>
+  <section class="section wrap">
+    <h2 class="h2">Eight invariants, written to every project the CLI touches.</h2>
+    <p class="lede">
+      They land in <code>docs/constitution.md</code> and in your agent's instructions file. You add your own below the
+      line; the tool enforces these eight so you never have to remember them.
+    </p>
+    <div class="invariant-grid">
       {INVARIANTS.map(([h, p], i) => (
         <div class="invariant">
           <span class="n">{String(i + 1).padStart(2, "0")}</span>
@@ -137,7 +133,7 @@ next skill: aisdlc-verify · owner: agent</pre>
   <section class="section wrap">
     <h2 class="h2">{skills.length} skills. One entry point per scenario.</h2>
     <p class="lede">
-      Plain Markdown in the open Agent Skills format — read identically by Claude Code, Codex, Cursor, Gemini, Copilot,
+      Plain Markdown in the open Agent Skills format, read identically by Claude Code, Codex, Cursor, Gemini, Copilot,
       Windsurf and OpenCode. <a href={`${base}/skills`}>Browse the full index →</a>
     </p>
     <div class="skillet panel" style="padding:0.4rem 1.4rem 1rem;">
@@ -151,7 +147,7 @@ next skill: aisdlc-verify · owner: agent</pre>
               <tbody>
                 {rows.map((s) => (
                   <tr>
-                    <td><a href={`/skills/${skillSlug(s.name)}`}>{s.name}</a></td>
+                    <td><a href={`${base}/skills/${skillSlug(s.name)}`}>{s.name}</a></td>
                     <td>{s.description.split(/(?<=\.)\s/)[0]}</td>
                   </tr>
                 ))}

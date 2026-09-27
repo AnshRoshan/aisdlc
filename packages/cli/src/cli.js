@@ -6,7 +6,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, basename } from "node:path";
 import { spawnSync } from "node:child_process";
-import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, sha256, short } from "./engine.js";
+import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, sha256, short } from "./engine.js";
 import { HARNESSES, resolveHarnessList, detectHarnesses, COMPANIONS, detectCompanions } from "./harnesses.js";
 import * as T from "./templates.js";
 import { skillsSourceDir, listSkills, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot } from "./fsx.js";
@@ -296,16 +296,35 @@ const commands = {
 
   async check(args, root) {
     const what = args._[0];
-    if (what !== "spec") fail("Usage: aisdlc check spec <path|feature>");
+    if (what !== "spec" && what !== "delta") fail("Usage: aisdlc check spec|delta <path|feature>");
     let p = args._[1];
     const cfg = loadConfig(root);
-    if (!p || !existsSync(p)) p = join(featureDir(root, cfg, resolveSlug(root, cfg, p)), "spec.md");
-    const v = validateSpec(read(p));
+    if (what === "spec") {
+      if (!p || !existsSync(p)) p = join(featureDir(root, cfg, resolveSlug(root, cfg, p)), "spec.md");
+      const v = validateSpec(read(p));
+      console.log(c.bold(relative(root, p) || p));
+      for (const r of v.requirements) console.log(`  ${r.hasShall && r.scenarios ? ok(r.name) : bad(r.name)} ${c.dim(`${r.scenarios} scenario(s)`)}`);
+      v.errors.forEach((e) => console.log(bad(e)));
+      v.warnings.forEach((w) => console.log(warn(w)));
+      console.log(v.errors.length ? c.red(`\n${v.errors.length} error(s)`) : c.green(`\nspec valid: ${v.requirements.length} requirement(s)${v.signedBy ? `, signed by ${v.signedBy}` : ""}`));
+      if (v.errors.length) process.exit(2);
+      return;
+    }
+    if (!p || !existsSync(p)) {
+      const dir = join(featureDir(root, cfg, resolveSlug(root, cfg, p)), "deltas");
+      const files = existsSync(dir)
+        ? readdirSync(dir).filter((f) => /^D\d+.*\.md$/i.test(f)).sort((a, b) => (Number(a.match(/^D(\d+)/i)?.[1]) || 0) - (Number(b.match(/^D(\d+)/i)?.[1]) || 0))
+        : [];
+      if (!files.length) fail(`No delta file found in ${relative(root, dir) || dir}`);
+      p = join(dir, files[files.length - 1]);
+    }
+    const v = validateDelta(read(p));
     console.log(c.bold(relative(root, p) || p));
-    for (const r of v.requirements) console.log(`  ${r.hasShall && r.scenarios ? ok(r.name) : bad(r.name)} ${c.dim(`${r.scenarios} scenario(s)`)}`);
+    const byType = v.rows.reduce((acc, r) => ((acc[r.type] = (acc[r.type] || 0) + 1), acc), {});
+    if (v.rows.length) console.log(`  ${v.rows.length} row(s): ${Object.entries(byType).map(([k, n]) => `${n} ${k}`).join(", ")}`);
     v.errors.forEach((e) => console.log(bad(e)));
     v.warnings.forEach((w) => console.log(warn(w)));
-    console.log(v.errors.length ? c.red(`\n${v.errors.length} error(s)`) : c.green(`\nspec valid: ${v.requirements.length} requirement(s)${v.signedBy ? `, signed by ${v.signedBy}` : ""}`));
+    console.log(v.errors.length ? c.red(`\n${v.errors.length} error(s)`) : c.green(`\ndelta valid: ${v.rows.length} row(s)`));
     if (v.errors.length) process.exit(2);
   },
 
@@ -353,7 +372,7 @@ const commands = {
     const cfg = loadConfig(root);
     const slug = resolveSlug(root, cfg, args._[0]);
     const cmd = args.passthrough;
-    if (!cmd.length) fail('Usage: aisdlc evidence <feature> [--label full|green|red|blocked|deploy] [--task T3] -- <command>');
+    if (!cmd.length) fail('Usage: aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>');
     const label = args.flags.label || "full";
     const started = new Date();
     const r = spawnSync(cmd[0], cmd.slice(1), { cwd: root, shell: process.platform === "win32", encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
@@ -447,12 +466,13 @@ ${c.bold("Features")}
 
 ${c.bold("Checks (deterministic, from disk)")}
   aisdlc check spec <path|feature>       EARS validator
+  aisdlc check delta <path|feature>       delta Change-table validator (types, Reason/Migration, FROM/TO)
   aisdlc trace [feature]                 requirement → task matrix
   aisdlc gate <G1..G6> [feature]         one gate       ·  aisdlc gates [feature]  all six
   aisdlc scan                            secrets scan over tracked files
 
 ${c.bold("Evidence & approvals")}
-  aisdlc evidence <feature> [--label full|green|red|blocked|deploy] [--task T3] -- <command>
+  aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>
   aisdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]     (humans only; SoD enforced)
   aisdlc audit [feature]                 approval chain + evidence log
 

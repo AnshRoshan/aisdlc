@@ -60,9 +60,9 @@ aisdlc doctor · aisdlc skills · aisdlc addon [ponytail|grilling|all] [--print]
 aisdlc new "<title>" --kind <frontend|backend|mobile|data|ml|infra|docs|lib|other> [--lane spike|quick|standard|regulated]
 aisdlc lane <feature> [lane]
 aisdlc status [--json] · aisdlc next [feature] [--json]
-aisdlc check spec <path|feature> · aisdlc trace [feature]
+aisdlc check spec <path|feature> · aisdlc check delta <path|feature> · aisdlc trace [feature]
 aisdlc gate <G1..G6> [feature] · aisdlc gates [feature] · aisdlc scan
-aisdlc evidence <feature> [--label full|green|red|blocked|deploy] [--task T3] -- <command>
+aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>
 aisdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]
 aisdlc audit [feature]
 ```

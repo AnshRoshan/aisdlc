@@ -109,6 +109,64 @@ export function validateSpec(text) {
   return { errors, warnings, requirements: reqs, signedBy };
 }
 
+/* ───────────── Deltas ───────────── */
+/**
+ * A delta file: `# Delta D<n>: <title>` with `## Trigger`, a `## Change` table
+ * (Requirement | Before | After | Type, Type ∈ modify|add|remove|rename),
+ * `## Impact` and `## Decision`. Removals carry Reason + Migration; renames carry FROM/TO + Reason.
+ */
+export function validateDelta(text) {
+  const errors = [];
+  const warnings = [];
+  text = text || "";
+  if (!/^#\s+Delta\s+D\d+\s*:/m.test(text)) errors.push("Missing `# Delta D<n>: <title>` heading.");
+  for (const s of ["Trigger", "Change", "Impact", "Decision"]) {
+    if (!new RegExp(`^##\\s+${s}\\b.*$`, "m").test(text)) errors.push(`Missing \`## ${s}\` section.`);
+  }
+  const rows = [];
+  const change = text.split(/^##\s+Change\b.*$/m)[1];
+  if (change) {
+    const body = change.split(/^##\s+/m)[0];
+    const lines = body.split("\n").map((l) => l.trim()).filter((l) => l.startsWith("|"));
+    for (const line of lines) {
+      if (/^\|[\s:|-]+\|$/.test(line) || /\|\s*Requirement\s*\|/i.test(line)) continue;
+      const cells = line.split("|").slice(1, -1).map((c) => c.trim());
+      if (cells.length < 4) {
+        errors.push(`Malformed row (need Requirement | Before | After | Type): ${line}`);
+        continue;
+      }
+      const [req, before, after, rawType] = cells;
+      const type = (rawType || "").toLowerCase();
+      if (!/^(modify|add|remove|rename)$/.test(type)) {
+        errors.push(`Unknown Type "${rawType}" for "${req || "?"}" (modify | add | remove | rename).`);
+        continue;
+      }
+      if (!req) errors.push("A row has no Requirement name.");
+      if (type === "modify" && (!after || after === before)) {
+        errors.push(`modify row "${req}" needs an After cell with the full new requirement text, different from Before.`);
+      }
+      if (type === "add" && !after) errors.push(`add row "${req}" has no After text.`);
+      if (type === "remove" && !before) errors.push(`remove row "${req}" has no Before text - state what is being removed.`);
+      rows.push({ requirement: req, type });
+    }
+  }
+  if (change && !rows.length) errors.push("Change table has zero rows - a delta that changes nothing is noise.");
+  const types = new Set(rows.map((r) => r.type));
+  if (types.has("remove")) {
+    if (!/^-?\s*Reason:/mi.test(text)) errors.push("remove row(s) present but no `Reason:` line.");
+    if (!/^-?\s*Migration:/mi.test(text)) errors.push("remove row(s) present but no `Migration:` line (or `none - no callers (evidence: <file>)`).");
+  }
+  if (types.has("rename")) {
+    if (!/FROM:/i.test(text)) errors.push("rename row(s) present but no `FROM:` line.");
+    if (!/TO:/i.test(text)) errors.push("rename row(s) present but no `TO:` line.");
+    if (!/^-?\s*Reason:/mi.test(text)) errors.push("rename row(s) present but no `Reason:` line.");
+  }
+  if (/^##\s+Decision\b.*$/m.test(text) && !/Approved-by:/i.test(text)) {
+    warnings.push("No `Approved-by:` in ## Decision - the delta will be applied before anyone agreed to it.");
+  }
+  return { errors, warnings, rows };
+}
+
 /* ───────────── Tasks ───────────── */
 /** `- [ ] T3 [R:Name, R:Other] title {est: 2h}` */
 export function parseTasks(text) {

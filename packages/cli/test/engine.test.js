@@ -157,3 +157,65 @@ test("lanes: regulated requires two SoD approvals on G1", () => {
   const two = deriveFlow({ ...base, lane: "regulated", spec: signedSpec, plan, tasks: "- [ ] T1 [R:Export CSV] x", approvals: [{ gate: "G1", by: "Priya", hash }, { gate: "G1", by: "Ravi", hash }] });
   assert.notEqual(two.state, "PLAN");
 });
+
+/* ---------------- deltas ---------------- */
+import { validateDelta } from "../src/engine.js";
+
+const DELTA = `# Delta D1: rename export, drop the legacy path
+
+## Trigger
+Human asked for the rename; the legacy path has no callers.
+
+## Change
+| Requirement | Before | After | Type |
+|---|---|---|---|
+| Export CSV | WHEN clicked THE SYSTEM SHALL download a CSV | WHEN clicked THE SYSTEM SHALL stream a CSV | modify |
+| Old Export | WHEN clicked THE SYSTEM SHALL download | - | remove |
+| New Name | - | WHEN clicked THE SYSTEM SHALL export | rename |
+
+## Removed requirements
+- Reason: superseded by Export CSV
+- Migration: none - no callers (evidence: src/old.js)
+
+## Renames
+- FROM: Old Name  ->  TO: New Name
+- Reason: clearer
+
+## Impact
+Tasks affected: T2 - Approvals invalidated: G1, G4 - Risk: low
+
+## Decision
+Requested-by: human   Approved-by: Priya  Date: 2026-09-27
+`;
+
+test("validateDelta accepts a well-formed delta", () => {
+  const v = validateDelta(DELTA);
+  assert.deepEqual(v.errors, []);
+  assert.deepEqual(v.warnings, []);
+  assert.equal(v.rows.length, 3);
+  assert.deepEqual(v.rows.map((r) => r.type), ["modify", "remove", "rename"]);
+});
+
+test("validateDelta rejects: unknown type, missing migration, empty change, missing sections, fragment modify", () => {
+  const badType = validateDelta(DELTA.replace("| remove |", "| delete |"));
+  assert.ok(badType.errors.some((e) => /Unknown Type/.test(e)), "unknown type must fail");
+
+  const noMig = validateDelta(DELTA.replace(/^- Migration:.*$/m, ""));
+  assert.ok(noMig.errors.some((e) => /Migration/.test(e)), "remove without Migration must fail");
+
+  const noReason = validateDelta(DELTA.replace(/^- Reason:.*$/m, "").replace(/^- Reason:.*$/m, ""));
+  assert.ok(noReason.errors.some((e) => /Reason/.test(e)), "remove/rename without Reason must fail");
+
+  const dataRows = /^-? ?\| (Export CSV|Old Export|New Name) /;
+  const empty = validateDelta(DELTA.split("\n").filter((l) => !dataRows.test(l)).join("\n"));
+  assert.ok(empty.errors.some((e) => /zero rows/.test(e)), "empty change table must fail");
+
+  const fragment = validateDelta(DELTA.replace("WHEN clicked THE SYSTEM SHALL stream a CSV", "WHEN clicked THE SYSTEM SHALL download a CSV"));
+  assert.ok(fragment.errors.some((e) => /full new requirement text/.test(e)), "After === Before must fail");
+
+  const stub = validateDelta("# Delta D2: x\n");
+  assert.ok(stub.errors.length >= 4, "stub delta reports every missing section");
+
+  const unsigned = validateDelta(DELTA.replace("Approved-by: Priya  Date: 2026-09-27", ""));
+  assert.ok(unsigned.warnings.some((w) => /Approved-by/.test(w)), "applied-without-agreement is a warning");
+});

@@ -1,6 +1,6 @@
 {
   "name": "aisdlc-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agents write code, aisdlc runs the process. Command: aisdlc (npx aisdlc-cli). Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
   "type": "module",
   "bin": {

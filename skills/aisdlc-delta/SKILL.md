@@ -61,7 +61,7 @@ Specs change. Silent changes are the problem, not change itself. A delta makes t
 
 2. Apply the change to `spec.md` exactly as the table says. For `modify`, the After cell must contain the **full new requirement text** — a fragment loses the parts of the old wording you meant to keep, and the next reader cannot tell what survived. For `rename`, update every `[R:<name>]` in `tasks.md` and every traceability row to the new name; a rename that orphans references fails G2. Update `plan.md` traceability and `tasks.md` (reopen affected tasks by unchecking them; add new ones).
 3. **Re-read the change against the table, both directions** — every `Change` row has a corresponding edit, and every edit you made has a row. A row with no edit is a promise you did not keep; an edit with no row is an untraced change the reviewer will call fiction. Deltas have no validator of their own, so this read is the validator.
-4. Run `npx aisdlc-cli check spec` and `npx aisdlc-cli trace <slug>`. Both clean.
+4. Run `npx aisdlc-cli check delta D<n>-<short-slug>.md`, `npx aisdlc-cli check spec` and `npx aisdlc-cli trace <slug>`. All three clean. `check delta` is the mechanical half of step 3 — it parses the Change table and fails on an unknown Type, a `remove` without Reason/Migration, a `rename` without FROM/TO/Reason, a fragment `modify`, an empty change, or a missing section; step 3's read is what it cannot see (an edit with no row).
 5. Tell the human, explicitly: "D<n> changes the plan/spec hash; G1 and G4 approvals are now stale and must be re-signed." Then run `npx aisdlc-cli next <slug>`; the state will move backwards. That is correct behaviour, not a bug.
 
 ## Bug-driven deltas

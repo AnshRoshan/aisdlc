@@ -48,3 +48,12 @@ Write them into `plan.md` under `## Seams`, each with the toggle or flag that co
 
 - Discovery continues in `aisdlc-discover` with the baseline attached.
 - Every change from here on is a **delta** against the baseline (`aisdlc-delta`). If you find yourself editing an untested legacy path, stop and add a characterization test first.
+
+## Smells to refuse
+
+- **"It's easier to rewrite."** Until the baseline exists and the golden masters run, that sentence is an opinion with no evidence behind it. It is also the single most expensive sentence in software.
+- **A baseline assembled from the README.** Stack, entrypoints and test commands come from *running them* and recording exit codes. A baseline that was never executed is fiction with a file extension.
+- **Characterization tests that judge.** They pin what the system *does*, including the parts that look wrong. If you "fix" the behaviour while writing the test, you have written a spec test, not a golden master, and it will not detect anything.
+- **A seam opened before its characterization test is green.** Order is baseline → characterize → seam → change. Skipping a step means the seam's regression signal is missing exactly when you need it.
+- **A must-never-change list with no test attached.** An item on the list with no golden master is a wish. Attach one or move it to `Unknowns`.
+- **Guessing at `Unknowns`.** An unexamined legacy behaviour written down as a fact will be quoted back to you for the rest of the feature. Leave the marker.

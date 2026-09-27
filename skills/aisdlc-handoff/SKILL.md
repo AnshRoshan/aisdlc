@@ -1,6 +1,6 @@
 ---
 name: aisdlc-handoff
-description: Compact the current session into a handoff document so a fresh session, a different agent, or a human can continue without loss. Use when the user says "handoff", "hand off", "save progress", "I need to stop", "context is getting long", "continue this tomorrow", "pass this to", before /compact or /clear, when the context window is over ~70% full, or at the end of any stage that took more than one session. Writes docs/features/<slug>/handoff.md; aisdlc-flow reads it on the next start. Disk is state, chat is not.
+description: Compact the current session into a handoff document so a fresh session, a different agent, or a human can continue without loss. Use when the user says "handoff", "hand off", "save progress", "I need to stop", "context is getting long", "continue this tomorrow", "pass this to", before /compact or /clear, when the context window is over ~70% full, or at the end of any stage that took more than one session. Writes handoff.md into the feature folder; aisdlc-flow reads it on the next start. Disk is state, chat is not.
 license: MIT
 metadata:
   author: aisdlc
@@ -39,7 +39,9 @@ Written: <ISO timestamp> · by: <agent/model or human> · lane: <lane> · state 
 ## Where we are
 - Next task: T<n> <title> [R:<Requirement>]
 - Gates: G1 ● G2 ● G3 ○ G4 ○ G5 ○ G6 ○
+- Readiness (from `aisdlc-tasks`): PASS | CONCERNS | FAIL — <the concerns, verbatim, or "none">
 - Blocking: <copied from `aisdlc next`, or "none">
+- Blocked on: <who/what, exactly what unblocks it, or "nothing">
 
 ## Decisions made this session (and why)
 - D1 <decision> because <reason> (also recorded in plan.md §Decisions / delta D2 / ADR path)

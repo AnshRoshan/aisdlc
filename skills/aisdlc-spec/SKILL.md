@@ -1,6 +1,6 @@
 ---
 name: aisdlc-spec
-description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc-cli check spec`. Use when `aisdlc next` reports SPECIFY, when the user says "write the spec", "spec it", "requirements", "to-spec", or when a spec has [NEEDS CLARIFICATION] markers, requirements without SHALL, or requirements without scenarios. Covers happy, failure and edge scenarios, non-functional requirements, test seams and the project's glossary terms; uses aisdlc-grill to close open questions; has a compact mode for the quick lane. The spec is the source of truth for everything downstream.
+description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc-cli check spec`. Use when `aisdlc next` reports SPECIFY, when the user says "write the spec", "spec it", "requirements", "to-spec", or when a spec has [NEEDS CLARIFICATION] markers, requirements without SHALL, or requirements without scenarios. Covers happy, failure and edge scenarios, non-functional requirements, test seams, an interaction contract for frontend/mobile kinds, and the project's glossary terms; runs a two-pass adversarial review (within each requirement and across requirement pairs) to catch conflicts and ambiguous quantifiers; uses aisdlc-grill to close open questions; has a compact mode for the quick lane. The spec is the source of truth for everything downstream.
 license: MIT
 metadata:
   author: aisdlc
@@ -65,6 +65,12 @@ Approved-by: ______  Date: ______
 
 ## 7. Seams (where tests attach)
 - <seam>: <public interface: HTTP route / CLI / exported function / UI flow> · exists today: yes/no
+
+## 8. UX & interaction (kinds frontend / mobile; non-UI kinds get `n/a: <kind>`)
+Primary journey: <one line: who does what, in order>
+States: default · loading · empty (<what the user sees with no data>) · error (<what it says and what they can do>) · offline (if applicable)
+A11y bar: <keyboard path, focus order, contrast/label rule — from docs/taste.md §UI, not invented here>
+Touch targets / density: <only if it differs from the taste profile>
 ```
 
 Hard rules the validator checks:
@@ -79,19 +85,25 @@ Rules the validator cannot check but the reviewer will:
 - Every THEN is observable from outside the system (response, file, row, pixel, log line), with a value a test can assert.
 - Section 4 has, at minimum, one line each for auth (who may not), data (what is stored/retained/PII), and a performance or size budget with a number, or explicitly `n/a: <why>`.
 - Section 7 names the seams; prefer existing seams, the highest level that still isolates the behaviour, and as few as possible. Tests will live there and nowhere else.
+- For kinds `frontend` and `mobile`, §8 exists and is filled from `docs/taste.md` §UI — a spec with no states section will be built with invented loading and empty states.
+- **No two requirements contradict.** Two `SHALL`s that no single implementation can satisfy (retry forever vs. fail fast; log everything vs. never log PII; always sync vs. offline-first) is the most expensive class of spec bug, and it survives every per-requirement check because each requirement is individually valid. Read the requirement pairs against each other, not just each against its scenarios.
+- **No ambiguous quantifier survives without a number.** "quickly", "many", "large", "as needed", "frequently", "appropriate" — every one of them becomes two different implementations. Replace with a value or mark `[NEEDS CLARIFICATION: what number?]`.
+- **No requirement describes implementation** that the plan does not yet own ("use Redis", "call the Stripe API"). Behaviour here; technology in `plan.md` Decisions.
 
 ## Procedure
 
 1. Read `docs/brief.md`, `docs/taste.md`, `docs/glossary.md`, `baseline.md` (brownfield) and any `deltas/`. Skim the code the seams will touch; facts you find are not questions you ask.
 2. Draft requirements from the brief's must-haves: one requirement per must-have, one scenario per observable path (happy, failure, edge). Add ubiquitous requirements for the non-functional needs.
 3. For each unknown write `[NEEDS CLARIFICATION: <question>]` inline and add a §6 row. Then load `aisdlc-grill` in "grill the spec" mode: work the open questions as a frontier, one round at a time, each with a recommended answer. Resolve the markers with the answers; leave nothing implicit.
-4. **Adversarial pass** (do this yourself before asking a human): for each requirement ask "what input breaks this?", "what if it happens twice?", "what if it happens while <other state>?", "who must not be able to do this?". Add scenarios or mark clarifications.
+4. **Two adversarial passes** (do this yourself before asking a human):
+   - **Within each requirement:** "what input breaks this?", "what if it happens twice?", "what if it happens while \<other state\>?", "who must not be able to do this?". Add scenarios or mark clarifications.
+   - **Between requirements:** read every pair that could interact and ask "can both of these hold at once?" Contradictions, overlapping ownership ("who is responsible for X?" answered twice differently), and one requirement quietly superseding another all hide here. Also sweep for unnumbered quantifiers. Fix by merging, narrowing, or a `[NEEDS CLARIFICATION]` — never by picking a winner yourself.
 5. Run `npx aisdlc-cli check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
 6. Ask the human to sign §5 (name + date) or run `npx aisdlc-cli approve`-equivalent in their tool. Do not proceed to `aisdlc-plan` until `aisdlc next` moves to PLAN (or to TASKS/BUILD in the quick lane).
 
 ## Compact mode (lane `quick`)
 
-1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx aisdlc-cli lane <slug> standard`.
+1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. §8 becomes one line for frontend/mobile kinds (journey + the two states you are most likely to get wrong: empty and error). Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx aisdlc-cli lane <slug> standard`.
 
 ## Spike mode (lane `spike`)
 
@@ -104,4 +116,5 @@ One requirement: `THE SYSTEM SHALL answer: <question>` with one scenario whose T
 - A requirement whose only scenario is the happy path.
 - "Etc.", "and so on", "as appropriate", "handle errors gracefully".
 - Two requirements that can both be satisfied by the same trivial implementation (merge them) or that contradict (resolve now, not in code).
+- A frontend/mobile spec with no §8 — the loading, empty and error states will be invented during implementation if you leave them out.
 - Filling in §5 yourself, ever.

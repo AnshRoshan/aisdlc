@@ -9,6 +9,7 @@ export const INSTRUCTIONS_BLOCK = (skillNames) => `${MARK_START}
 This repository uses the aisdlc process. Before starting any engineering task:
 
 1. Run \`npx aisdlc-cli next <feature>\` (or \`npx aisdlc-cli status\`) and trust its output over chat history. If the CLI is unavailable, \`aisdlc-flow\` explains how to derive the state from the files by hand.
+1b. Before writing any code, read \`docs/taste.md\`, \`docs/glossary.md\` and \`docs/constitution.md\`. They are always-on steering: how to build here, what the words mean, what is non-negotiable. They are short by design - read them in full.
 2. Load the skill it names (\`${skillNames.join("`, `")}\`). Start with \`aisdlc-flow\` when unsure, \`aisdlc-brainstorm\` for a new idea, \`aisdlc-debug\` for a bug.
 2b. Match process to stakes with lanes: spike (answer a question) · quick (bounded change, G2-G4) · standard (all gates) · regulated (two approvers). Lanes only ratchet up.
 3. Obey the eight invariants:
@@ -24,6 +25,9 @@ Artifacts live in \`docs/features/<slug>/\`; project taste lives in \`docs/taste
 ${MARK_END}`;
 
 export const CONSTITUTION = (project) => `# ${project}: Constitution
+
+Version: 1.0
+Amended: ${new Date().toISOString().slice(0, 10)}
 
 Non-negotiables every agent and human in this project obeys. Add project-specific rules below the line.
 
@@ -48,7 +52,9 @@ Non-negotiables every agent and human in this project obeys. Add project-specifi
 export const FEATURE_JSON = (title, slug, kind, author, lane = "standard") =>
   JSON.stringify({ title, slug, kind, lane, author, created: new Date().toISOString(), aisdlc: 2 }, null, 2) + "\n";
 
-export const SPEC = (title, kind, lane = "standard") => `# Spec: ${title}
+export const SPEC = (title, kind, lane = "standard") => {
+  const ui = kind === "frontend" || kind === "mobile";
+  return `# Spec: ${title}
 
 ## 1. Context
 Kind: **${kind}**. Lane: **${lane}** (${LANE_HINTS[lane] || LANE_HINTS.standard}). Verify model: ${KIND_HINTS[kind] || KIND_HINTS.other}.
@@ -83,19 +89,50 @@ Approved-by: ______  Date: ______
 
 ## 7. Seams (where tests attach)
 - [NEEDS CLARIFICATION: the public interface the tests will use: route / CLI / exported function / UI flow]
+
+## 8. UX & interaction${ui ? " (kinds frontend / mobile)" : ` (n/a: ${kind})`}
+${ui ? `- Primary journey: [NEEDS CLARIFICATION: the first thing a user does, step by step]
+- States: loading [NEEDS CLARIFICATION: copy] · empty [NEEDS CLARIFICATION: copy] · error [NEEDS CLARIFICATION: copy]
+- A11y: [NEEDS CLARIFICATION: the bar - keyboard reachable, focus visible, screen-reader labels, WCAG level]` : `- n/a: ${kind} is not a UI kind.`}
 `;
+};
 
 export const PLAN = (title) => `# Plan: ${title}
 
 ## Architecture
-<components and one dependency diagram>
+<3 to 10 sentences. Name components with glossary terms. One ASCII diagram of dependencies (A -> B).
+For backend / data / infra / ml kinds also draw the sequence or data flow: who calls what, in order,
+and where the data lands.>
+
+## Constitution check
+| Principle (from docs/constitution.md) | Verdict | Evidence / justification |
+|---|---|---|
+| The spec is the source of truth | comply | no spec edits in this plan |
 
 ## Decisions
-| # | Decision | Alternatives considered | Why |
+| # | Decision | Alternatives considered | Why | Ladder rung |
+|---|---|---|---|---|
+
+## Research & unknowns
+| # | Unknown | Decision | Rationale | Alternatives considered |
+|---|---|---|---|---|
+
+## Data model
+<n/a: no new or changed data | entities, key fields, relationships, state transitions, retention>
+
+## Interface contracts
+<n/a: internal only | every route, command, exported function, event, file format and UI affordance
+this feature exposes, with the shape of each>
+
+## Seams (tests attach here; brownfield: toggles too)
+- <seam>: <interface> · existing/new · toggled by <flag> (brownfield)
+
+## Threat model (regulated lane; optional otherwise)
+| Asset | Threat | Mitigation | Requirement |
 |---|---|---|---|
 
-## Work breakdown
-- T1 [R:Primary Flow] Implement the primary flow behind a failing test
+## Work breakdown (tracer bullets)
+- T1 [R:Primary Flow] <thin end-to-end slice through the seam, behind a failing test>
 
 ## Traceability
 | Requirement | Tasks |
@@ -103,7 +140,11 @@ export const PLAN = (title) => `# Plan: ${title}
 | Primary Flow | T1 |
 
 ## Verification strategy
-<kind-specific>
+Kind-specific: <from KIND hints: e.g. component tests + visual diff + a11y audit>. Full-suite command: \`<cmd>\`.
+
+## Smoke path
+<the shortest end-to-end proof a stranger can run: exact commands, in order, and what they should
+observe. This is what a reviewer runs before reading the diff.>
 
 ## Risks
 | Risk | Likelihood | Impact | Mitigation |
@@ -111,7 +152,7 @@ export const PLAN = (title) => `# Plan: ${title}
 | Scope creep without a delta | medium | high | aisdlc-delta |
 
 ## Rollback thinking
-<what is reversible>
+<what is reversible, what is not; migrations are expand/contract; flags default off>
 `;
 
 export const TASKS = (title) => `# Tasks: ${title}
@@ -126,7 +167,10 @@ export const ACCEPTANCE = (title) => `# Acceptance: ${title}
 | A1 | Primary Flow | Happy path | <evidence file> | pending |
 
 ## Findings
-- (none yet)
+- F1 (<blocking|advisory> · <spec|safety|standards|over-built>): <finding> · triage: <fix now | defer → task/issue | decision needed → <who>>
+
+## Reviewer notes
+Reviewed by: <agent/model, session id> · axes run separately: yes/no · diff base: <sha>
 
 Approved-by: ______  Date: ______
 `;
@@ -151,11 +195,12 @@ Changelog · status page
 Approved-by: ______  Date: ______
 `;
 
-export const GUARDRAILS = `budgets:
+export const GUARDRAILS = `# Every number below must come from a measured baseline or a stated SLO - never from this template.
+budgets:
   latency_p95_ms: 800
   error_rate_pct: 1.0
   monthly_cost: 5000
-kill_switch: <FLAG_NAME>
+kill_switch: <FLAG_NAME>   # must exist in the deployed config; name who can flip it
 alerts:
   - on: error_rate_pct > budget for 5m
     do: page owner, flip kill_switch

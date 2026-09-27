@@ -1,6 +1,6 @@
 ---
 name: aisdlc-implement
-description: Implement one task at a time, test-first at the agreed seam, with the ponytail ladder applied, recorded evidence, and zero scope creep. Use when `aisdlc next` reports BUILD, when the user says "implement", "build T3", "write the code", "continue", or "tdd". Never edits the spec silently; intent changes go through aisdlc-delta. Never claims tests pass without an evidence record. Routes fix tasks to aisdlc-debug.
+description: Implement one task at a time, test-first at the agreed seam, with the ponytail ladder applied, recorded evidence, and zero scope creep. Use when `aisdlc next` reports BUILD, when the user says "implement", "build T3", "write the code", "continue", or "tdd". Never edits the spec silently; intent changes go through aisdlc-delta. Never claims tests pass without an evidence record. Routes fix tasks to aisdlc-debug, and defines how work is delegated to subagents and run in waves.
 license: MIT
 metadata:
   author: aisdlc
@@ -15,11 +15,13 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 ## Before touching code
 
 1. `npx aisdlc-cli next <slug> --json` → confirm state is BUILD and read `nextTask`. If a `handoff.md` is newer than the last evidence, read it for gotchas.
-2. Read `docs/taste.md` (laziness level, style, DoD), `docs/glossary.md`, and the requirement(s) referenced by the task. **Quote the SHALL line and the scenario you are implementing.**
-3. Identify the seam from the task's `{seam:}` or the plan. The test attaches there and only there.
-4. **Trace the flow end to end** through the code the change touches (callers, callees, tests, migrations). Understanding is never lazy.
-5. If the task, as written, needs behaviour the spec does not describe: **stop**, load `aisdlc-delta`. Do not invent requirements.
-6. Task title starts with `fix:`? Load `aisdlc-debug` for the loop; come back here for the check-off.
+2. **Isolated workspace.** Start the feature on its own branch — `git switch -c feat/<slug>`, or a worktree when the harness supports it (`git worktree add ../<slug> -b feat/<slug>`). One feature, one branch, and never the tree where something else was half-finished; the diff a reviewer reads must contain only this feature.
+3. **First task of the feature only — prove the baseline and record where you started.** Run the full suite on the current tree and record the commit with it: `npx aisdlc-cli evidence <slug> --label baseline -- git rev-parse --short HEAD && <full test command>`. The evidence file then names the exact commit the tree was green on — every later failure has something to diff against. Green baseline: proceed. Red baseline: **stop and report it as a pre-existing defect** — it is not your regression and it is not yours to fix inside this task. Ask whether to file it as its own `quick` feature first. Building on a red baseline makes every later failure ambiguous.
+4. Read `docs/taste.md` (laziness level, style, DoD), `docs/glossary.md`, and the requirement(s) referenced by the task. **Quote the SHALL line and the scenario you are implementing.**
+5. Identify the seam from the task's `{seam:}` or the plan. The test attaches there and only there.
+6. **Trace the flow end to end** through the code the change touches (callers, callees, tests, migrations). Understanding is never lazy.
+7. If the task, as written, needs behaviour the spec does not describe: **stop**, load `aisdlc-delta`. Do not invent requirements.
+8. Task title starts with `fix:`? Load `aisdlc-debug` for the loop; come back here for the check-off.
 
 ## The loop (per task, one vertical slice)
 
@@ -50,11 +52,45 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 - Commit messages reference the task: `T3: <summary> [R:<Requirement>]`. One task per commit where practical.
 - Migrations: expand step in this task, contract step in its own later task, always reversible.
 
-## Working in parallel or across sessions
+## Parallel execution: waves, subagents, checkpoints
 
-- One task per agent/worktree; tasks that share a seam are sequential.
+`aisdlc-tasks` published the wave plan from the `after:` edges. Use it.
+
+- **One task per agent or worktree.** Tasks that share a seam, file, or migration are sequential regardless of what the edges say.
+- **Delegation is context construction, not session inheritance.** When the harness supports subagents, dispatch one per task and hand it *only* what is on disk:
+  - the task line verbatim, with its `{seam:}` and `{after:}`
+  - the requirement's SHALL line and every `#### Scenario:` under it
+  - the plan rows it touches: Decisions (with ladder rung), Data model, Interface contracts, Seams
+  - the relevant `docs/taste.md` lines and `docs/glossary.md` terms
+  - the exact evidence command and what counts as green
+  
+  Never pass your session history. A subagent that inherits the conversation inherits your guesses.
+- **Two-stage review before the box is ticked.** Order is not negotiable:
+  1. **Spec compliance first** — does the diff deliver every scenario of the task, and nothing the spec does not describe? (This is `aisdlc-review` Axis 1 at task scale.)
+  2. **Code quality second** — only after compliance passes: taste, smells, ponytail over-build, safety. (Axis 2.)
+  
+  Running quality review on code that does not yet match the spec wastes the pass and hides the real defect. Findings go back to the implementer; re-review after each fix.
+- **Subagent evidence is its own evidence.** A delegate finishes when its diff is on disk *and* its `evidence/*.json` files exist. "The subagent said it's done" is not a status; if it claims a run you did not record, treat the claim as unmade.
+- **Human checkpoints.** Where `docs/taste.md` sets a checkpoint cadence (default: every 3 tasks, or before any wave that touches a migration, auth, or money path), stop, print `lane · state → next action → owner`, and wait. Long autonomous runs are a taste setting, not a right.
+- **Two failures and you stop.** If a task has burned two red→green cycles without a root cause, stop widening the diff: record the evidence, load `aisdlc-handoff` (or `aisdlc-debug` if it is a bug), and surface it. Grinding silently is how a one-task day becomes a rewrite.
 - Before ending a session with open tasks, load `aisdlc-handoff`.
 - On resume, trust `tasks.md` and `evidence/` over your memory of what was done.
+
+## Worked example (one task, start to finish)
+
+```
+next → BUILD, nextTask "T3 [R:Export CSV] stream rows without buffering the whole set" {seam: GET /export}
+
+baseline (first task of feature)  evidence/...-baseline.json      exit 0
+quote: "WHEN /export is called with >10k rows THE SYSTEM SHALL stream ..." + Scenario: large export
+red    npx aisdlc-cli evidence demo --task T3 --label red -- npm test -- export   exit 1 (asserted row cap)
+ladder rung 2: the repo already has a rowIterator util → reuse it, no new dependency
+craft: touched lines only — one generator, honest types, no swallowed errors
+green  npx aisdlc-cli evidence demo --task T3 --label green -- npm test -- export  exit 0
+refactor → re-run evidence → - [x] T3 in tasks.md → npx aisdlc-cli scan → clean
+report: T3 done · SHALL quoted · files: src/export.ts, test/export.test.ts ·
+        evidence: ...-red.json, ...-green.json · re-run: npm test -- export
+```
 
 ## When all tasks are checked
 

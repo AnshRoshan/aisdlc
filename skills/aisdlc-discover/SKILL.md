@@ -1,6 +1,6 @@
 ---
 name: aisdlc-discover
-description: Double-Diamond discovery intake for a new idea or feature in the standard or regulated lane. Use when the user has a vague idea, says "I want to build", "new feature", "help me figure out what to build", or when `aisdlc next` reports DISCOVER and aisdlc-brainstorm has classified the work. Runs JTBD, workaround mining, 5 Whys, problem statement, How-Might-We, MoSCoW, riskiest assumption and rejection criteria using the aisdlc-grill interview discipline, seeds docs/glossary.md, then writes docs/brief.md and seed EARS requirements.
+description: Double-Diamond discovery intake for a new idea or feature in the standard or regulated lane. Use when the user has a vague idea, says "I want to build", "new feature", "help me figure out what to build", or when `aisdlc next` reports DISCOVER and aisdlc-brainstorm has classified the work. Runs JTBD, workaround mining, 5 Whys, problem statement, How-Might-We, MoSCoW, riskiest assumption and rejection criteria using the aisdlc-grill interview discipline, seeds docs/glossary.md, then writes docs/brief.md and seed EARS requirements. Ends in an explicit verdict — build, spike first, defer, or do not build — so a bad idea can die cheaply instead of becoming a spec.
 license: MIT
 metadata:
   author: aisdlc
@@ -47,12 +47,32 @@ Read `docs/constitution.md`, `docs/taste.md`, `docs/glossary.md`, existing brief
 11. **Constraints:** Deadlines, budgets, compliance, must-never-change systems, languages the team already knows.
 12. **Rejection criteria:** "What would make you send this back?" Ask it last; it is the most revealing question.
 
+Optional, only when it can change the verdict:
+- **Alternatives (ask only if the answer is not obvious from the workaround question):** what else was considered — buying it, integrating it, doing it by hand, doing nothing? "Do nothing" is a real competitor and often the honest one.
+- **PR-FAQ (user-facing `standard`/`regulated` work, one page max):** a fake press release for the finished thing plus six FAQs a stranger would ask. Working Backwards: if the release paragraph is boring, the feature is boring. Park it in the brief; it is not an artifact any gate reads.
+
 If the work touches an **existing repository**, load `aisdlc-brownfield` after question 12 before writing the brief.
+
+## The verdict
+
+Discovery ends in one of four outcomes, and you must say which one you are returning. Producing a brief for an idea that should not be built is the most expensive failure this skill has.
+
+| verdict | when | what you do next |
+|---|---|---|
+| **build** | the problem is real, the riskiest assumption is cheap to test or already tested | write the brief, seed requirements, hand to `aisdlc-spec` |
+| **spike first** | the riskiest assumption is *not* tested and a probe would settle it | open a `spike` lane feature for the probe (`npx aisdlc-cli new ... --lane spike`); the main feature waits for the answer |
+| **defer** | real, but blocked by a date, a dependency, or something more important | write the brief anyway, mark it `status: deferred` in the brief, stop |
+| **do not build** | the workaround is fine, the rejection criteria are already met today, the assumption fails, or nobody will use it | write one short paragraph — what was believed, what was learned, what evidence killed it — into `docs/brief.md` under `## Verdict`, and stop. No feature folder. |
+
+Ask for a yes on the verdict before you route. "Do not build" needs the human's agreement too; your job is the evidence, theirs is the call.
 
 ## Output: `docs/brief.md`
 
 ```markdown
 # Brief: <title>
+
+## Verdict
+build | spike first | defer | do not build — <one sentence, evidence-linked>
 
 ## Job story
 When <situation>, <user> wants to <motivation>, so they can <outcome>.
@@ -75,6 +95,9 @@ Should: ...
 Could: ...
 Won't (this release): ...
 
+## Alternatives considered
+<including "do nothing" — one line each>
+
 ## Riskiest assumption
 <assumption> · cheapest test: <test> · spike first? <yes/no>
 
@@ -90,6 +113,9 @@ auth: ... · privacy: ... · performance: <number> · scale: <number> · durabil
 ## Rejection criteria
 - <what would make the user send it back>
 
+## PR-FAQ (optional, user-facing work)
+<one-paragraph press release; six FAQs>
+
 ## Facts established (not asked)
 - <fact> (source: file/command)
 
@@ -103,7 +129,7 @@ auth: ... · privacy: ... · performance: <number> · scale: <number> · durabil
 
 Then:
 1. Append new terms to `docs/glossary.md` (create it if missing: `# Glossary` then `- **term**: meaning`).
-2. Run `npx aisdlc-cli new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet.
-3. Paste the seed requirements into `spec.md` §3 and the non-functional needs into §4 Constraints.
-4. Load `aisdlc-taste` once per project if `docs/taste.md` is missing (six questions max).
-5. Hand off to `aisdlc-spec`.
+2. For the **build** verdict only: run `npx aisdlc-cli new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet, paste the seed requirements into `spec.md` §3 and the non-functional needs into §4 Constraints, then hand off to `aisdlc-spec`.
+3. For **spike first**: open the spike feature and hand off to `aisdlc-brainstorm`'s spike path (or `aisdlc-spec` in spike mode). The main feature does not start until the probe reports.
+4. For **defer** / **do not build**: stop after the brief. Nothing downstream runs.
+5. Load `aisdlc-taste` once per project if `docs/taste.md` is missing (six questions max) — only on the `build` path.

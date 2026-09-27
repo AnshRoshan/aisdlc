@@ -91,3 +91,13 @@ The smallest rollout that is still reversible wins: one flag, one canary step, o
 - Record the deploy as evidence: `npx aisdlc-cli evidence <slug> --label deploy -- <deploy or smoke command>`.
 - Schedule the guardrails review (`review_after_days`). Budget breaches are new deltas, not silent tuning.
 - Run `npx aisdlc-cli next <slug>`; when it says DONE, load `aisdlc-retro`.
+
+## Smells to refuse
+
+- **A rollback section that has not been rehearsed.** Steps that have never been executed are a wish list. Regulated lane records the drill as evidence (`--label rollback-drill`); every other lane should still walk the steps once and say what it found.
+- **A five-stage canary for a copy change, or no flag for a schema change.** Both are the same mistake: the rollout does not match the blast radius.
+- **Guardrail numbers invented to satisfy the gate.** `error_rate_pct: 1.0` is worthless if the service normally sits at 0.9 or at 3. Derive every budget from a baseline measurement or a stated SLO, and say which.
+- **A kill switch nobody can reach.** Name the flag, say who can flip it, and confirm it exists in the deployed config — a `kill_switch:` key pointing at a flag that was never created is a false sense of safety.
+- **A runbook written from memory.** Symptoms come from the alerts and the failure modes you actually observed; "contact the team" is not an escalation path without a name or rotation.
+- **Deploying without recording it.** The deploy command run through `aisdlc-cli evidence` is the last piece of proof the whole feature has; skip it and the chain breaks at the finish line.
+- **Calling the feature DONE before `aisdlc next` says so.** G4 green is not shipped.

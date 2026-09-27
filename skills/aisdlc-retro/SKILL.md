@@ -70,6 +70,24 @@ Lane: <lane> · duration: <first evidence → last approval> · tasks: <n> · de
 - **Skills** (only if this repository owns its skills) get the concrete step that would have prevented the miss. Keep skill edits surgical; they are read by every session.
 - Anything requiring code is a new feature or delta, not a retro side effect.
 
+### Amending the constitution (do this every time, not sometimes)
+
+`docs/constitution.md` is a governed document, not a scratchpad. When a retro (or anything else) changes it:
+
+1. **Bump the header.** Immediately under the title sit two lines: `Version: X.Y` and `Amended: YYYY-MM-DD`. `aisdlc init` / `aisdlc new` seed them at `Version: 1.0` with today's date, so every amendment after that bumps them: **MINOR** for a new principle, **MAJOR** for a principle removed, redefined or made stricter in a way that invalidates existing artifacts, **PATCH** for wording. A constitution whose header says `1.0` but has been edited since has lost its audit trail — bump it first, then edit.
+2. **One numbered line per principle**, plus a one-line rationale that names the incident that caused it ("G5 caught an irreversible migration" — not "be careful with migrations").
+3. **Record the amendment** in `retro.md`'s Proposed changes table: file, change, why. The table *is* the amendment record.
+4. **Say what it invalidates.** A stricter principle can make an approved plan non-compliant. Check the open features' `## Constitution check` rows against the new text and flag the ones that now need re-justification — a principle that nothing re-reads is decoration.
+5. Never edit a numbered non-negotiable to make a failure disappear. If one of them was wrong, that is an `MAJOR` bump and a conversation, not a quiet rewrite.
+
+### Editing a skill (only in a repo that owns its skills)
+
+- Change the **smallest** section that would have prevented the miss. A skill is read in full by every session; a paragraph added casually is a paragraph forever.
+- If the miss is about *discovery* rather than *execution*, the fix belongs in the `description` frontmatter (what the user says / when it triggers), not the body — the body does not exist until the skill has already been chosen.
+- Keep the body under ~500 lines; if an edit pushes toward it, move the detail into a file the skill points at, with a clear "read this when".
+- In this repository: edit `skills/<name>/SKILL.md`, then run `node packages/cli/scripts/sync-skills.mjs` so `packages/cli/skills/` matches. A skill edited only in `packages/cli/` is lost on the next sync.
+- Re-read the neighbouring skills you touched. If a rule moves or a section is renamed, every skill that points at it has to be updated in the same turn.
+
 Apply the doc changes in the same turn when the human says yes; list them as files changed. Never edit approvals, evidence, or signed sections.
 
 ## Incident variant (post-mortem)

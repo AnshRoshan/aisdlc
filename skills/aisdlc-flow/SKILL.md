@@ -31,6 +31,8 @@ Your first job is always to find out **where the feature actually is**, from dis
    - a bug, stack trace, "broken", "slow", "flaky" → `aisdlc-debug` (it files the task, then returns here).
    - "actually…", "can we also…", "that's not what I meant" on a signed spec → `aisdlc-delta`.
    - "grill me", "poke holes" → `aisdlc-grill`. "handoff", "I need to stop" → `aisdlc-handoff`. "retro" → `aisdlc-retro`.
+   - "analyze", "is this consistent", "does the plan match the spec" → `aisdlc-tasks` (read-only consistency pass; it never edits).
+   - "the plan is wrong, not the spec", "we're going about it backwards", "this approach won't work" → `aisdlc-plan` in re-plan mode (see its Re-plan section; G1 goes stale on purpose, no delta unless behaviour changes).
    - anything else about an existing feature → continue below.
 2. Run `npx aisdlc-cli status`. If the user named a feature (or only one exists), run `npx aisdlc-cli next <feature> --json`.
 3. Read the JSON: `state`, `lane`, `blocking[]`, `skill`, `owner`, `nextTask`, `gates`. Trust it over any prior conversation.
@@ -38,8 +40,9 @@ Your first job is always to find out **where the feature actually is**, from dis
 5. Read `docs/taste.md` (calibration: verbosity, laziness level, review strictness) and `docs/glossary.md` (vocabulary) if present. Quote them when they drive a choice.
 6. Announce, in one short paragraph: lane, state, blocking items, and the **single** next action with its owner. Then load the skill named in `skill`.
 7. Never skip a stage. If `owner` is `human` (approval, signature, decision), stop and ask the human for exactly that; do not simulate it, do not "prepare it so it's ready", do not keep building.
-8. When a stage's work is complete, re-run `npx aisdlc-cli next <feature>` to confirm the transition happened on disk. Paste its output.
-9. If context is getting long or the session is ending mid-stage, load `aisdlc-handoff` before you stop.
+8. **Discovery may return "do not build".** `aisdlc-discover` closes with a verdict — build / spike first / defer / do not build. Only `build` creates a feature folder. If the brief's `## Verdict` says otherwise, report it and stop; do not route to SPECIFY to be helpful.
+9. When a stage's work is complete, re-run `npx aisdlc-cli next <feature>` to confirm the transition happened on disk. Paste its output.
+10. If context is getting long or the session is ending mid-stage, load `aisdlc-handoff` before you stop.
 
 ## If `npx aisdlc-cli` is unavailable (no network, no Node, restricted sandbox)
 
@@ -99,6 +102,7 @@ aisdlc bridges to four maintained third-party skills and degrades gracefully wit
 ## Output contract for every turn
 
 - One line: `lane · state → next action → who owns it (agent / human)`.
+- If blocked, name the blocker and exactly what unblocks it: who, what artifact or credential (name, never the value), and what you will do the moment it arrives. "Waiting" without that is not a status.
 - If you changed files, list them and re-run `npx aisdlc-cli next`.
 - Never write the words "approved", "signed", or "PASS" about work that has no artifact behind it.
 - Never say "should work", "probably passes", or "looks good" in place of a recorded run.

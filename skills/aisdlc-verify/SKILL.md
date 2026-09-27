@@ -1,6 +1,6 @@
 ---
 name: aisdlc-verify
-description: Run the merge-safety gate G3 honestly - full test run recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals). Use when `aisdlc next` reports VERIFY, when the user says "verify", "is it done", "run the gates", "does it work", or before opening a PR or claiming completion. Enforces the iron law: no completion claim without fresh verification evidence. Distinguishes PASS from IMPLEMENTED-NOT-VERIFIED and never fakes green.
+description: Run the merge-safety gate G3 honestly - full test run recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals). Use when `aisdlc next` reports VERIFY, when the user says "verify", "is it done", "run the gates", "does it work", or before opening a PR or claiming completion. Enforces the iron law - no completion claim without fresh verification evidence. Distinguishes PASS from IMPLEMENTED-NOT-VERIFIED and never fakes green.
 license: MIT
 metadata:
   author: aisdlc
@@ -48,7 +48,8 @@ If you have not run the command in this session and recorded it, you cannot say 
 
 1. Run the **whole** suite, not just the tests you wrote:
    `npx aisdlc-cli evidence <slug> --label full -- <full test command from plan.md Verification strategy>`
-2. Run kind-specific verification and record each as evidence with a descriptive label:
+2. Run the plan's **smoke path** end to end — the exact commands a stranger would run — and record it as `--label smoke`. Unit tests green with a broken entrypoint is the classic fake-green, and the smoke path is what catches it.
+3. Run kind-specific verification and record each as evidence with a descriptive label:
 
    | kind | required extra evidence |
    |---|---|
@@ -61,11 +62,26 @@ If you have not run the command in this session and recorded it, you cannot say 
    | docs | lint, link check, code samples executed |
    | lib | API contract tests, semver check, back-compat test against the previous version |
 
-3. Static checks the repo already has (typecheck, lint, build): run and record them too; a green suite on code that does not compile is not green.
-4. `npx aisdlc-cli scan`. Findings block; fix and re-run.
-5. `npx aisdlc-cli gate G3 <slug>`. Paste the output verbatim.
-6. Scenario sweep: for every `#### Scenario:` in the spec, name the evidence file that exercises it. Missing one? That is a missing test: go back to BUILD via a new task, do not proceed.
-7. Write `acceptance.md` rows for each spec scenario, linking the evidence file names (see `aisdlc-review`).
+4. Static checks the repo already has (typecheck, lint, build): run and record them too; a green suite on code that does not compile is not green.
+5. `npx aisdlc-cli scan`. Findings block; fix and re-run.
+6. `npx aisdlc-cli gate G3 <slug>`. Paste the output verbatim.
+7. Scenario sweep: for every `#### Scenario:` in the spec, name the evidence file that exercises it. Missing one? That is a missing test: go back to BUILD via a new task, do not proceed.
+8. Write `acceptance.md` rows for each spec scenario, linking the evidence file names (see `aisdlc-review`).
+
+## Worked example (what a real claim looks like)
+
+```
+claim:  "the export flow works"
+wrong:  "I ran the tests earlier and they were green."
+right:  IDENTIFY → npm test -- export
+        RUN      → npx aisdlc-cli evidence demo --label full -- npm test -- export
+        READ     → exit 0, 84 passed, 0 failed, 0 skipped
+        CLAIM    → "Full suite green: 84 passed (evidence/2026-09-27T10-12-03-full.json).
+                    Smoke path ran: curl -s localhost:3000/export returns 200 CSV
+                    (evidence/...-smoke.json). Re-run: npm test -- export."
+```
+
+The difference is not politeness; the second message can be checked by a stranger and the first cannot.
 
 ## Honesty protocol
 

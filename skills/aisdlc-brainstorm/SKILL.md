@@ -76,6 +76,7 @@ On yes:
 - `quick` → `npx aisdlc-cli new "<title>" --kind <kind> --lane quick`; load `aisdlc-spec` (compact mode).
 - `standard` / `regulated` → if `docs/brief.md` for this idea is missing load `aisdlc-discover`, else `npx aisdlc-cli new ... --lane <lane>` then `aisdlc-spec`. Brownfield repo? Load `aisdlc-brownfield` first.
 - Existing repo without `docs/taste.md`? Run `aisdlc-taste` once (≤6 questions) before the spec.
+- **Discovery may come back with a verdict you did not expect** — `spike first`, `defer`, or `do not build`. All four are legitimate exits. Report it, and do not open a feature folder to avoid an uncomfortable answer; the cheapest outcome of discovery is the one that stops the work.
 
 ## Red flags (stop and re-read the gate)
 

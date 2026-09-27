@@ -67,3 +67,12 @@ The project's shared language. Agents use these words in code, tests, specs and 
 - `laziness` sets the intensity for `aisdlc-ponytail` (and the official `ponytail` if installed). `interview` sets the pacing for `aisdlc-grill`.
 - For UI work, pair this with a dedicated design skill (for example `frontend-design` or `impeccable`) and treat `docs/taste.md` §UI as the brief those skills infer from.
 - The Definition of done list is what `aisdlc-implement` checks before ticking a task and what `aisdlc-review` audits.
+
+## Smells to refuse
+
+- **Asking what the repo already answers.** Formatter config, test runner, naming, commit style and PR template are all readable. Present them as the recommended answer; spend the six questions on what nothing can infer.
+- **A profile that only describes taste in adjectives.** "Clean code", "modern", "high quality" are not settings. Every line must be checkable: a command, a threshold, a list, or a named example to copy.
+- **Recording a preference nobody enforces.** If `review blocks on: correctness + security` is written but nothing in review reads it, delete the line or wire it up. Dead settings teach agents to skim the file.
+- **Inventing a UI language instead of capturing one.** Reference products and anti-patterns come from the human ("looks like Stripe's dashboard", "never a centered modal"); your job is to write down what they said, not to have taste on their behalf.
+- **Letting the profile rot.** The user correcting you mid-session is a change to `docs/taste.md` in that same turn — not a note you remember for the rest of the conversation.
+- **Putting project facts here.** Stack and architecture belong in the plan and the code; taste is the part a reader cannot recover by looking.

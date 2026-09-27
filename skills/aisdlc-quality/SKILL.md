@@ -34,3 +34,13 @@ The mechanical complement to `aisdlc-craft` (judgment) and `aisdlc-ponytail` (sc
 3. **Deletion needs confirmation, then evidence.** knip/vulture candidates are candidates until a human-checked dynamic-reference pass says otherwise; the deletion still has to survive the full evidence run.
 4. **Secrets are the CLI's job.** G3's secrets scan runs inside `aisdlc verify`; bandit/semgrep findings complement it and route as findings.
 5. **New tool commands the project should always run?** Put them in the project's own gate command (the one `aisdlc verify` wraps), not in a side script - the gate is the contract.
+
+## Smells to refuse
+
+- Pasting a linter's output in chat and calling it evidence. Wrap the run: `npx aisdlc-cli evidence <slug> --label quality -- <command>`.
+- Claiming a detect-only tool autofixed something, or a mutating tool "just reformatted one line" repo-wide inside a task.
+- Running a repo-wide `--fix` during a BUILD task. The blast radius is the task's requirement, nothing more; everything else is scope creep with a commit attached.
+- Auto-applying a finding without routing it. Detect-only output becomes a task, a delta, or a review finding — never a silent edit.
+- Deleting code because a tool listed it. Dynamic references (reflection, routes, DI, templates, string-built imports) are invisible to every dead-code tool here; confirm by hand first.
+- Adding a new tool to the process without putting it in the gate command. A check nobody's gate runs is a check that does not exist.
+- Letting a green linter stand in for a green suite. Types and style are not behaviour.

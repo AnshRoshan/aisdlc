@@ -40,10 +40,10 @@ import Base from "../layouts/Base.astro";
 
     <section style="margin-top:3rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Verify, don't trust</h2>
-      <pre class="term"><span class="p">npx aisdlc-cli verify</span> payment-retries -- npm test
+      <pre class="term"><span class="p">npx aisdlc-cli evidence payment-retries --label full</span> -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
 <span class="p">evidence/20260906T154412-full.json</span> recorded</pre>
-      <p class="lede"><code>aisdlc verify</code> runs the command itself and records a hash-chained evidence file. "Tests pass" without a recorded run is not a state the process accepts.</p>
+      <p class="lede"><code>aisdlc evidence</code> runs the command itself and records a hash-chained evidence file. "Tests pass" without a recorded run is not a state the process accepts.</p>
     </section>
 
     <section style="margin-top:3.5rem;">
@@ -55,7 +55,8 @@ import Base from "../layouts/Base.astro";
             <tr><td>aisdlc new</td><td>open a feature with a lane</td></tr>
             <tr><td>aisdlc next</td><td>derive state; print blocking items and the next skill</td></tr>
             <tr><td>aisdlc status</td><td>list every feature and its state</td></tr>
-            <tr><td>aisdlc verify</td><td>run a command and record evidence</td></tr>
+            <tr><td>aisdlc evidence</td><td>run a command and record evidence</td></tr>
+            <tr><td>aisdlc gate / check</td><td>run one of G1-G6; validate spec and delta files</td></tr>
             <tr><td>aisdlc approve</td><td>human gate approval (G1, G5, acceptance)</td></tr>
             <tr><td>aisdlc lane</td><td>raise a feature's lane (never lowers)</td></tr>
             <tr><td>aisdlc doctor</td><td>check installation health</td></tr>

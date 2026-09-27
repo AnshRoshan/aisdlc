@@ -12,8 +12,9 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 ### Changed
 - Seeds now match the skill contracts: constitution carries `Version`/`Amended`, spec carries §8, plan carries the full contract, acceptance carries finding triage and reviewer notes, and the `init` instruction block tells every session to read taste + glossary + constitution before writing code.
 - Version aligned to 0.2.0 everywhere (`package.json` was 0.1.0, `cli.js` was 0.2.0, Claude plugin manifests were 0.1.0).
+- Doc consistency sweep: root README CLI reference now lists `aisdlc evidence` and `aisdlc gate` (there is no `aisdlc verify` command), the npm README says twenty skills and lists Craft and Quality, `aisdlc-quality` points at `aisdlc gate G3`/`aisdlc evidence`, and `COMPETITORS.md` marks its gap lists as research-time snapshots resolved by RESEARCH §9.
 - Two new companion bridges from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills): `aisdlc-craft` (line-level clean-code craft during BUILD, bridged to code-craft) and `aisdlc-quality` (lint/dead-code/complexity/security CLI runner feeding VERIFY and review, bridged to code-quality-tools). Both use the official skills when installed and embedded distillations otherwise. Skill count: 18 to 20; `aisdlc addon code-craft|quality-tools|all` installs them.
-- Claude Code plugin support: `/plugin marketplace add AnshRoshan/aisdlc` then `/plugin install aisdlc@aisdlc` installs the 18 skills plus `/aisdlc-next` and `/aisdlc-status` commands (`.claude-plugin/`, `commands/`).
+- Claude Code plugin support: `/plugin marketplace add AnshRoshan/aisdlc` then `/plugin install aisdlc@aisdlc` installs the 20 skills plus `/aisdlc-next` and `/aisdlc-status` commands (`.claude-plugin/`, `commands/`).
 - `publish cli` workflow: tag `vX.Y.Z` (or run manually) to publish the CLI to npm as `aisdlc-cli`; requires the `NPM_TOKEN` repository secret.
 
 ### Changed

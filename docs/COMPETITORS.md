@@ -1,7 +1,8 @@
 # COMPETITORS.md — what the other process kits actually do
 
 Raw research notes, kept so the next gap analysis does not have to re-derive them.
-Read alongside [`RESEARCH.md`](RESEARCH.md) §7 (v2) and §8 (v3, the analysis that used this file).
+Read alongside [`RESEARCH.md`](RESEARCH.md) §7 (v2), §8 (v3, the analysis that used this file) and §9 (v4, the final head-to-head).
+**Status:** every "Things aisdlc does not have" list below is a snapshot from research time — §9 says which have since been closed and which were deliberately not copied.
 All of it is read-only research on public repos/docs; nothing here is vendored.
 
 Sources are cited inline. Checked: Sept 2026.

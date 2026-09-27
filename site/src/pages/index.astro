@@ -83,7 +83,7 @@ const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
       </p>
     </div>
     <pre class="term" aria-label="Example terminal session"><span class="c"># example session: the author tried to approve their own plan; the tool said no</span>
-$ <span class="p">npx aisdlc-cli verify</span> payment-retries -- npm test
+$ <span class="p">npx aisdlc-cli evidence payment-retries --label full</span> -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
 <span class="p">evidence/20260906T154412-full.json</span> recorded
 sha256:e3f1…9b7c · label: full

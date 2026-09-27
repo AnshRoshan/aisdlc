@@ -32,8 +32,8 @@ The mechanical complement to `aisdlc-craft` (judgment) and `aisdlc-ponytail` (sc
 1. **Evidence comes from `aisdlc-cli evidence`, nothing else.** A lint or typecheck run only counts for G3 when wrapped: `npx aisdlc-cli evidence <slug> --label quality -- <command>`. A green linter output pasted in chat is not evidence.
 2. **Findings route, they don't auto-apply.** A detect-only finding becomes (a) a fix task in `tasks.md`, (b) an `aisdlc-delta` if it reveals the spec was wrong, or (c) a review finding in `acceptance.md`. A mutating tool may only run on the task's blast radius - a repo-wide `--fix` inside a BUILD task is scope creep with a commit attached.
 3. **Deletion needs confirmation, then evidence.** knip/vulture candidates are candidates until a human-checked dynamic-reference pass says otherwise; the deletion still has to survive the full evidence run.
-4. **Secrets are the CLI's job.** G3's secrets scan runs inside `aisdlc verify`; bandit/semgrep findings complement it and route as findings.
-5. **New tool commands the project should always run?** Put them in the project's own gate command (the one `aisdlc verify` wraps), not in a side script - the gate is the contract.
+4. **Secrets are the CLI's job.** G3's secrets scan runs inside `aisdlc gate G3`; bandit/semgrep findings complement it and route as findings.
+5. **New tool commands the project should always run?** Put them in the project's own verification command (the one you record with `aisdlc evidence`), not in a side script - the gate is the contract.
 
 ## Smells to refuse
 

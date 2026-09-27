@@ -2,7 +2,7 @@
 
 **Agents write code. aisdlc runs the process.**
 
-A harness-agnostic process kit for AI-assisted engineering: eighteen [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, Windsurf, OpenCode and any agent that reads `AGENTS.md`. Bring your own model and your own subscription; nothing leaves your machine.
+A harness-agnostic process kit for AI-assisted engineering: twenty [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, Windsurf, OpenCode and any agent that reads `AGENTS.md`. Bring your own model and your own subscription; nothing leaves your machine.
 
 ```bash
 npx aisdlc-cli init            # installs skills + instructions into every harness it detects
@@ -18,7 +18,7 @@ npx skills add AnshRoshan/aisdlc
 
 | | |
 |---|---|
-| `skills/aisdlc-*` | Flow (router) · Brainstorm (lane + approaches) · Discover · Brownfield · Taste · Spec (EARS) · Plan · Tasks · Implement · Debug · Verify · Review · Release · Retro, plus Grill, Ponytail, Delta and Handoff |
+| `skills/aisdlc-*` | Flow (router) · Brainstorm (lane + approaches) · Discover · Brownfield · Taste · Spec (EARS) · Plan · Tasks · Implement · Debug · Craft · Verify · Review · Quality · Release · Retro, plus Grill, Ponytail, Delta and Handoff |
 | `aisdlc-grill` / `aisdlc-ponytail` | bridges to the official [grilling](https://github.com/mattpocock/skills) and [ponytail](https://github.com/DietrichGebert/ponytail) skills when installed (`aisdlc addon all`); embedded fallbacks otherwise |
 | `aisdlc new --lane` / `aisdlc lane` | spike [G3] · quick [G2 G3 G4] · standard [G1-G6] · regulated [G1-G6, two approvers]; lanes only ratchet up |
 | `aisdlc next` | derives the feature's state from files and tells the agent which skill to load |

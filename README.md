@@ -174,6 +174,7 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |
 | [`site/`](site/) | Astro static site, deployed to GitHub Pages |
 | [`docs/RESEARCH.md`](docs/RESEARCH.md) | design decisions and their sources (Spec Kit, BMAD, superpowers, ponytail, grilling) |
+| [`docs/COMPETITORS.md`](docs/COMPETITORS.md) | raw research notes on the six competing process kits (read-only; cited by RESEARCH §7-§9) |
 
 <details>
 <summary><strong>CLI reference</strong></summary>
@@ -184,7 +185,8 @@ aisdlc init      install skills + process scaffolding into a repo
 aisdlc new       open a feature with a lane
 aisdlc next      derive state; print blocking items and the next skill
 aisdlc status    list every feature and its state
-aisdlc verify    run a command and record evidence
+aisdlc evidence  run a command and record evidence
+aisdlc gate      run one of G1-G6; aisdlc check validates spec and delta files
 aisdlc approve   human gate approval (G1, G5, acceptance)
 aisdlc lane      raise a feature's lane (never lowers)
 aisdlc doctor    check installation health

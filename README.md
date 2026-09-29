@@ -221,6 +221,12 @@ Yes, <code>aisdlc-brownfield</code>: baseline, characterization tests and named 
 </details>
 
 <details>
+<summary><strong>Does it combine with an AGENTS.md / context/ state system?</strong></summary>
+<br>
+Yes — they are different layers. aisdlc runs the <em>per-change</em> pipeline (EARS spec → plan → gates → evidence → approval); the <a href="https://github.com/AnshRoshan/project-context-system">project-context-system</a> skill maintains the <em>per-project</em> state (AGENTS.md, <code>context/</code> with architecture, build plan, decisions log, progress tracker, memory.md handoff). aisdlc reads the project's AGENTS.md and context files as constraints. When both are installed, one rule holds: spec artifacts stay owned by the aisdlc gates, decisions land in <code>context/decisions.md</code>, and no parallel spec tree is created.
+</details>
+
+<details>
 <summary><strong>Is it free?</strong></summary>
 <br>
 MIT. Fork it, vendor it, ship it inside your company. If you find it useful, star the repo and file issues.

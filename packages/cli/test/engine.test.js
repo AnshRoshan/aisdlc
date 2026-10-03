@@ -20,6 +20,11 @@ Approved-by: Priya  Date: 2026-01-01
 | # | Question | Owner | Status |
 |---|---|---|---|
 | 1 | q | me | done |
+## 9. Value sourcing
+| Value | Source | How obtained |
+|---|---|---|
+| session id | Login | returned by the auth call |
+| lockout flag | Lockout | counter in the session store |
 `;
 
 test("approvedBy ignores underscores and Date:", () => {
@@ -53,7 +58,7 @@ test("parseTasks + traceMatrix", () => {
 test("scanSecrets catches real keys, ignores placeholders", () => {
   assert.equal(scanSecrets("AWS_KEY=AKIA" + "ABCDEFGHIJKLMNOP").length, 1);
   assert.equal(scanSecrets("key = <your-aws-key> AKIA" + "ABCDEFGHIJKLMNOP").length, 0);
-  assert.equal(scanSecrets('password: "correct-horse-battery"').length, 1);
+  assert.equal(scanSecrets('password: "correct-horse-battery"').length, 1); // aisdlc:allow-secret
   assert.equal(scanSecrets('password: "${DB_PASSWORD}"').length, 0);
 });
 
@@ -77,11 +82,11 @@ test("flow walks forward with evidence", () => {
   const ctx = { spec: SPEC, plan: "# Plan\n\n## Architecture\nA -> B and more words here to exceed stub\n\n## Traceability\nx\n", tasks: "- [x] T1 [R:Login] a\n- [x] T2 [R:Lockout] b\n", author: "Ansh", approvals: [], evidence: [], secretFindings: [] };
   ctx.approvals.push({ gate: "G1", by: "Priya", hash: artifactHashFor("G1", ctx) });
   assert.equal(deriveFlow(ctx).state, "VERIFY");
-  ctx.evidence.push({ label: "full", exitCode: 1, command: "npm test" });
+  ctx.evidence.push({ file: "2026-01-02-full.json", label: "full", exitCode: 1, command: "npm test" });
   assert.equal(deriveFlow(ctx).state, "VERIFY");
-  ctx.evidence.push({ label: "full", exitCode: 0, command: "npm test" });
+  ctx.evidence.push({ file: "2026-01-02-full.json", label: "full", exitCode: 0, command: "npm test" });
   assert.equal(deriveFlow(ctx).state, "ACCEPT");
-  ctx.acceptance = "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/x.json | pass |\n\nApproved-by: Priya  Date: 2026-01-02\n";
+  ctx.acceptance = "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/2026-01-02-full.json | pass |\n\nAuthor model: gpt-5.2 · Reviewer model: claude-opus-4.1 · Cross-model: independent\n\nApproved-by: Priya  Date: 2026-01-02\n";
   assert.equal(deriveFlow(ctx).state, "RELEASE");
   ctx.rollout = "# Rollout\n\n## Strategy\nflag\n\n## Rollback\n1. flip flag\n2. revert\n";
   ctx.approvals.push({ gate: "G5", by: "Priya", hash: artifactHashFor("G5", ctx) });
@@ -111,6 +116,10 @@ WHEN the user clicks export THE SYSTEM SHALL download a CSV.
 - THEN a file is downloaded
 ## 5
 Approved-by: Priya  Date: 2026-01-01
+## 9. Value sourcing
+| Value | Source | How obtained |
+|---|---|---|
+| csv bytes | Export CSV | streamed from the query |
 `;
 const unsignedSpec = signedSpec.replace("Approved-by: Priya  Date: 2026-01-01", "Approved-by: ______  Date: ______");
 const base = { hasBrief: true, author: "agent-a", approvals: [], evidence: [], secretFindings: [], policy: { minApprovals: {} }, plan: "", tasks: "", acceptance: "", rollout: "", guardrails: "", runbook: "" };
@@ -142,11 +151,62 @@ test("lanes: quick skips G1 and goes straight to TASKS/BUILD after a signed spec
 });
 
 test("lanes: quick is DONE after G4, never asks for rollout/runbook", () => {
-  const acceptance = "| ID | Requirement | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Export CSV | happy | evidence/x-green.json | pass |\n\nApproved-by: Priya  Date: 2026-01-02";
-  const f = deriveFlow({ ...base, lane: "quick", spec: signedSpec, plan: "# Plan\n## Traceability\n| Export CSV | T1 |", tasks: "- [x] T1 [R:Export CSV] stream rows", evidence: [{ label: "full", exitCode: 0, command: "npm test" }], acceptance });
+  const acceptance = "| ID | Requirement | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Export CSV | happy | evidence/x-green.json | pass |\n\nAuthor model: claude-opus-4.1 · Reviewer model: gpt-5.2 · Cross-model: independent\n\nApproved-by: Priya  Date: 2026-01-02";
+  const f = deriveFlow({ ...base, lane: "quick", spec: signedSpec, plan: "# Plan\n## Traceability\n| Export CSV | T1 |", tasks: "- [x] T1 [R:Export CSV] stream rows", evidence: [{ file: "x-green.json", label: "full", exitCode: 0, command: "npm test" }], acceptance });
   assert.equal(f.state, "DONE");
   assert.equal(f.gates.G5.skipped, true);
   assert.equal(f.gates.G6.skipped, true);
+});
+
+/* ---------------- value sourcing + cross-model review ---------------- */
+
+test("G2: an untraced value with no named source blocks the gate", () => {
+  const noTable = SPEC.replace(/## 9\. Value sourcing[\s\S]*$/, "");
+  const g = runGate("G2", { spec: noTable, plan: "# Plan\n## Traceability\nx", tasks: "- [ ] T1 [R:Login] a", lane: "quick" });
+  assert.equal(g.passed, false);
+  assert.ok(g.checks.some((c) => c.name.includes("named source") && !c.ok && /no `## 9/.test(c.detail)));
+
+  const blank = SPEC.replace("| lockout flag | Lockout | counter in the session store |", "| lockout flag |  |  |");
+  const g2 = runGate("G2", { spec: blank, plan: "# Plan\n## Traceability\nx", tasks: "- [ ] T1 [R:Login] a", lane: "quick" });
+  assert.ok(g2.checks.some((c) => /no source for: lockout flag/.test(c.detail)));
+
+  const waived = SPEC.replace(/## 9\. Value sourcing[\s\S]*$/, "## 9. Value sourcing\nn/a: internal refactor, nothing new reaches a user\n");
+  const g3 = runGate("G2", { spec: waived, plan: "# Plan\n## Traceability\nx", tasks: "- [ ] T1 [R:Login] a", lane: "quick" });
+  assert.ok(g3.checks.some((c) => c.name.includes("named source") && c.ok && /waived/.test(c.detail)), "an honest n/a with a reason passes");
+});
+
+test("G3: test.gate none-by-design waives the suite, never the recorded run", () => {
+  const g = (testPolicy, evidence) => runGate("G3", { lane: "quick", testPolicy, evidence, secretFindings: [], tasks: "- [x] T1 [R:Login] a" });
+  const runs = [{ file: "s.json", label: "smoke", exitCode: 0, command: "node smoke.js" }];
+  assert.equal(g("none-by-design", runs).passed, true, "a repo that ships no runner can still close G3 on a recorded run");
+  assert.ok(g("none-by-design", runs).checks.some((c) => /waived by test.gate/.test(c.detail)), "the waiver is printed, not silent");
+  assert.equal(g("none-yet", runs).passed, false, "never set up is not an escape hatch");
+  assert.equal(g("none-by-design", []).passed, false, "no run at all is IMPLEMENTED-NOT-VERIFIED by design or not");
+  assert.equal(g("configured", runs).passed, false, "a repo with a runner still owes the full suite");
+});
+
+test("G4: the reviewing model must differ from the authoring model", () => {
+  const rows = "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | e.json | pass |\n";
+  const ev = [{ file: "e.json", label: "full", exitCode: 0, command: "npm test" }];
+  const ctx = (notes) => ({ lane: "quick", acceptance: rows + notes, evidence: ev, author: "Ansh" });
+
+  assert.ok(runGate("G4", ctx("\n\nApproved-by: Priya")).checks.some((c) => /different model/.test(c.name) && !c.ok), "no models recorded is not a pass");
+  const same = runGate("G4", ctx("\n\nAuthor model: claude-opus-4.1 · Reviewer model: gpt-5.2 · Cross-model: independent\n\nApproved-by: Priya"));
+  assert.ok(same.checks.find((c) => /different model/.test(c.name)).ok, "gpt reviewing claude is independent");
+  const twin = runGate("G4", ctx("\n\nAuthor model: claude-opus-4.1 · Reviewer model: claude-opus-4.5 · Cross-model: independent\n\nApproved-by: Priya"));
+  assert.equal(twin.passed, false, "same family fails");
+  assert.ok(twin.checks.some((c) => /shares its blind spots|both on/.test(c.detail)), twin.checks.find((c) => /different model/.test(c.name)).detail);
+  const degraded = runGate("G4", ctx("\n\nAuthor model: claude-opus-4.1 · Reviewer model: claude-opus-4.1 · Cross-model: degraded (only one family available here)\n\nApproved-by: Priya"));
+  assert.ok(degraded.checks.find((c) => /different model/.test(c.name)).ok, "a declared degradation is honest, not a lie");
+  assert.ok(/not the cross-model guarantee/.test(degraded.checks.find((c) => /different model/.test(c.name)).detail));
+  const filledBelowSeed = runGate("G4", ctx("\n\nAuthor model: <the model that wrote this code> · Reviewer model: <a different family>\n\nAuthor model: claude-sonnet-5 · Reviewer model: deepseek-v4\n\nApproved-by: Priya"));
+  assert.ok(filledBelowSeed.checks.find((c) => /different model/.test(c.name)).ok, "a filled line under an untouched template line still counts");
+});
+
+test("G4: evidence a row cites must exist in the log", () => {
+  const g = runGate("G4", { lane: "quick", author: "Ansh", evidence: [{ file: "real.json", label: "full", exitCode: 0, command: "npm test" }], acceptance: "| ID | R | S | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/ghost.json | pass |\n\nApproved-by: Priya" });
+  assert.equal(g.passed, false);
+  assert.ok(g.checks.some((c) => /not recorded: ghost\.json|ghost\.json/.test(c.detail)));
 });
 
 test("lanes: regulated requires two SoD approvals on G1", () => {

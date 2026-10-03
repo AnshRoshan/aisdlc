@@ -94,6 +94,15 @@ Approved-by: ______  Date: ______
 ${ui ? `- Primary journey: [NEEDS CLARIFICATION: the first thing a user does, step by step]
 - States: loading [NEEDS CLARIFICATION: copy] · empty [NEEDS CLARIFICATION: copy] · error [NEEDS CLARIFICATION: copy]
 - A11y: [NEEDS CLARIFICATION: the bar - keyboard reachable, focus visible, screen-reader labels, WCAG level]` : `- n/a: ${kind} is not a UI kind.`}
+
+## 9. Value sourcing
+Every value this feature produces, computes or displays, and where it comes from. A value with
+no named source is an owed decision, not wiring - name the source or raise it before the plan.
+| Value | Source | How obtained |
+|---|---|---|
+| <each user-visible field, computed number, state and message> | <spec requirement / API response / stored record / derived from X> | <the requirement name or the call that yields it> |
+
+n/a: <only when the feature produces no values a user ever sees, with the reason>
 `;
 };
 
@@ -170,7 +179,9 @@ export const ACCEPTANCE = (title) => `# Acceptance: ${title}
 - F1 (<blocking|advisory> · <spec|safety|standards|over-built>): <finding> · triage: <fix now | defer → task/issue | decision needed → <who>>
 
 ## Reviewer notes
-Reviewed by: <agent/model, session id> · axes run separately: yes/no · diff base: <sha>
+Reviewed by: <agent, session id> · axes run separately: yes/no · diff base: <sha>
+Author model: <the model that wrote this code> · Reviewer model: <a different family> · Cross-model: independent
+_If no second family was available, replace "independent" with "degraded" and say why - a degraded review is honest, not the guarantee._
 
 Approved-by: ______  Date: ______
 `;

@@ -3,9 +3,11 @@ import { cpSync, existsSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
-const src = join(here, "..", "..", "..", "skills");
-const dest = join(here, "..", "skills");
-if (!existsSync(src)) { console.log("no monorepo skills dir; nothing to sync"); process.exit(0); }
-rmSync(dest, { recursive: true, force: true });
-cpSync(src, dest, { recursive: true });
-console.log(`synced skills → ${dest}`);
+const repo = join(here, "..", "..", "..");
+for (const [name, dest] of [["skills", join(here, "..", "skills")], ["agents", join(here, "..", "agents")]]) {
+  const src = join(repo, name);
+  if (!existsSync(src)) { console.log(`no ${name} dir in the checkout; nothing to sync`); continue; }
+  rmSync(dest, { recursive: true, force: true });
+  cpSync(src, dest, { recursive: true });
+  console.log(`synced ${name} → ${dest}`);
+}

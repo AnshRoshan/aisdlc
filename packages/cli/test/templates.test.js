@@ -1,7 +1,23 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CONSTITUTION, SPEC, PLAN, ACCEPTANCE, ROLLOUT, GUARDRAILS, RUNBOOK, TASTE, INSTRUCTIONS_BLOCK } from "../src/templates.js";
-import { validateSpec, runGate } from "../src/engine.js";
+import { validateSpec, runGate, valueSourcing } from "../src/engine.js";
+
+test("spec seed carries the value-sourcing table G2 requires", () => {
+  const fe = SPEC("Demo", "backend", "standard");
+  assert.match(fe, /^## 9\. Value sourcing$/m);
+  const filled = fe.replace(/\[NEEDS CLARIFICATION:[^\]]*\]/g, "x");
+  assert.ok(valueSourcing(filled).present, "the seeded section is the one the engine reads");
+});
+
+test("acceptance seed cannot pass G4 by leaving placeholders in", () => {
+  const g = runGate("G4", { lane: "quick", author: "Ansh", evidence: [], acceptance: ACCEPTANCE("Demo") });
+  assert.equal(g.passed, false);
+  const cross = g.checks.find((c) => /different model/.test(c.name));
+  assert.equal(cross.ok, false, "`Author model: <the model that wrote this code>` is a template, not a record");
+  assert.ok(/record `Author model:`/.test(cross.detail), cross.detail);
+  assert.ok(g.checks.some((c) => /no row names a recorded evidence file/.test(c.detail)));
+});
 
 test("constitution seed is a governed document", () => {
   const c = CONSTITUTION("demo");

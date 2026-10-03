@@ -9,7 +9,7 @@ import { spawnSync } from "node:child_process";
 import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, sha256, short } from "./engine.js";
 import { HARNESSES, resolveHarnessList, detectHarnesses, COMPANIONS, detectCompanions } from "./harnesses.js";
 import * as T from "./templates.js";
-import { skillsSourceDir, listSkills, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot } from "./fsx.js";
+import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot } from "./fsx.js";
 
 const VERSION = "0.2.0";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -24,6 +24,8 @@ const c = {
 const ok = (s) => `${c.green("✓")} ${s}`;
 const bad = (s) => `${c.red("✗")} ${s}`;
 const warn = (s) => `${c.yellow("!")} ${s}`;
+// Printed paths are forward-slashed on every OS; docs and skills quote them that way.
+const relp = (from, p) => relative(from, p).replace(/\\/g, "/");
 
 /* ───────────── args ───────────── */
 function parseArgs(argv) {
@@ -104,6 +106,7 @@ function loadCtx(root, cfg, slug, { scan = true } = {}) {
     evidence: loadEvidence(dir),
     secretFindings: scan ? scanRepo(root).slice(0, 50) : [],
     policy: cfg.policy,
+    testPolicy: (cfg.test && cfg.test.gate) || cfg.testGate || "configured",
   };
   return ctx;
 }
@@ -117,7 +120,7 @@ function scanRepo(root) {
     if (/\/docs\/features\/[^/]+\/evidence\//.test(f)) continue;
     let txt;
     try { txt = readFileSync(f, "utf8"); } catch { continue; }
-    for (const x of scanSecrets(txt, relative(root, f))) out.push(x);
+    for (const x of scanSecrets(txt, relp(root, f))) out.push(x);
     if (out.length > 200) break;
   }
   scanCache = out;
@@ -144,7 +147,7 @@ const commands = {
     const src = skillsSourceDir();
     const skills = listSkills(src);
     const project = args.flags.name || basename(root);
-    console.log(c.bold(`aisdlc ${VERSION}: installing into ${relative(process.cwd(), root) || "."}`));
+    console.log(c.bold(`aisdlc ${VERSION}: installing into ${relp(process.cwd(), root) || "."}`));
     console.log(c.dim(`harnesses: ${harnesses.join(", ")}  ·  skills: ${skills.length}  ·  mode: ${link ? "symlink" : "copy"}`));
 
     const done = new Set();
@@ -166,6 +169,11 @@ const commands = {
           write(join(root, h.commandsDir, `${s.name}${h.commandExt}`), body);
         }
         console.log(`  ${c.dim(`${h.commandsDir}/ ${skills.length} slash commands`)}`);
+      }
+      if (h.agentsDir) {
+        const agents = listAgents();
+        for (const a of agents) write(join(root, h.agentsDir, a.file), read(a.path));
+        if (agents.length) console.log(`  ${c.dim(`${h.agentsDir}/ ${agents.length} read-only subagents (${agents.map((a) => a.file.replace(".md", "")).join(", ")})`)}`);
       }
     }
 
@@ -195,7 +203,7 @@ const commands = {
     const cfg = loadConfig(root);
     const slug = args.flags.slug || slugify(title);
     const dir = featureDir(root, cfg, slug);
-    if (existsSync(dir)) fail(`Feature "${slug}" already exists at ${relative(root, dir)}`);
+    if (existsSync(dir)) fail(`Feature "${slug}" already exists at ${relp(root, dir)}`);
     const author = args.flags.author || gitUser(root) || "unknown";
     write(join(dir, "feature.json"), T.FEATURE_JSON(title, slug, kind, author, lane));
     write(join(dir, "spec.md"), T.SPEC(title, kind, lane));
@@ -209,10 +217,17 @@ const commands = {
     ensureDir(join(dir, "evidence"));
     ensureDir(join(dir, "deltas"));
     writeIfMissing(join(root, cfg.docsDir, "constitution.md"), T.CONSTITUTION(cfg.project || basename(root)));
-    console.log(ok(`created ${relative(root, dir)}/  kind=${kind}  lane=${lane}  author=${author}`));
+    console.log(ok(`created ${relp(root, dir)}/  kind=${kind}  lane=${lane}  author=${author}`));
     console.log(c.dim(`verify model for ${kind}: ${KIND_HINTS[kind]}`));
     console.log(c.dim(`lane ${lane}: ${LANE_HINTS[lane]} → gates ${LANE_GATES[lane].join(" ")}`));
     console.log(`\nNext: ${c.cyan(`aisdlc next ${slug}`)}`);
+  },
+
+  async kinds() {
+    console.log(`${c.bold("Kinds")} ${c.dim("(--kind <k>) - each kind carries its own verify model, so G3 knows what to run")}`);
+    for (const k of KINDS) console.log(`  ${k.padEnd(10)} ${KIND_HINTS[k]}`);
+    console.log(`${c.bold("\nLanes")} ${c.dim("(--lane <l>) - how much process a feature carries; they only ratchet up")}`);
+    for (const l of LANES) console.log(`  ${l.padEnd(10)} ${LANE_HINTS[l]} ${c.dim(`→ gates ${LANE_GATES[l].join(" ")}`)}`);
   },
 
   async lane(args, root) {
@@ -302,7 +317,7 @@ const commands = {
     if (what === "spec") {
       if (!p || !existsSync(p)) p = join(featureDir(root, cfg, resolveSlug(root, cfg, p)), "spec.md");
       const v = validateSpec(read(p));
-      console.log(c.bold(relative(root, p) || p));
+      console.log(c.bold(relp(root, p) || p));
       for (const r of v.requirements) console.log(`  ${r.hasShall && r.scenarios ? ok(r.name) : bad(r.name)} ${c.dim(`${r.scenarios} scenario(s)`)}`);
       v.errors.forEach((e) => console.log(bad(e)));
       v.warnings.forEach((w) => console.log(warn(w)));
@@ -315,11 +330,11 @@ const commands = {
       const files = existsSync(dir)
         ? readdirSync(dir).filter((f) => /^D\d+.*\.md$/i.test(f)).sort((a, b) => (Number(a.match(/^D(\d+)/i)?.[1]) || 0) - (Number(b.match(/^D(\d+)/i)?.[1]) || 0))
         : [];
-      if (!files.length) fail(`No delta file found in ${relative(root, dir) || dir}`);
+      if (!files.length) fail(`No delta file found in ${relp(root, dir) || dir}`);
       p = join(dir, files[files.length - 1]);
     }
     const v = validateDelta(read(p));
-    console.log(c.bold(relative(root, p) || p));
+    console.log(c.bold(relp(root, p) || p));
     const byType = v.rows.reduce((acc, r) => ((acc[r.type] = (acc[r.type] || 0) + 1), acc), {});
     if (v.rows.length) console.log(`  ${v.rows.length} row(s): ${Object.entries(byType).map(([k, n]) => `${n} ${k}`).join(", ")}`);
     v.errors.forEach((e) => console.log(bad(e)));
@@ -387,7 +402,7 @@ const commands = {
     const file = `${stamp}-${label}${args.flags.task ? `-${args.flags.task}` : ""}.json`;
     const rec = { label, task: args.flags.task || null, command: cmd.join(" "), cwd: ".", exitCode, startedAt: started.toISOString(), durationMs: Date.now() - started.getTime(), outputSha256: outHash, outputTail: (stdout + stderr).split("\n").slice(-25).join("\n"), recordedBy: gitUser(root) || process.env.USER || "unknown", node: process.version };
     write(join(dir, file), JSON.stringify(rec, null, 2) + "\n");
-    console.log(`\n${exitCode === 0 ? ok("recorded") : warn(`recorded (exit ${exitCode})`)} ${c.dim(relative(root, join(dir, file)))}`);
+    console.log(`\n${exitCode === 0 ? ok("recorded") : warn(`recorded (exit ${exitCode})`)} ${c.dim(relp(root, join(dir, file)))}`);
     process.exit(exitCode === 0 ? 0 : 3);
   },
 
@@ -436,13 +451,18 @@ const commands = {
       const dir = join(root, h.skillsDir);
       const present = skills.filter((s) => existsSync(join(dir, s.dir, "SKILL.md"))).length;
       const instr = read(join(root, h.instructions)).includes(T.MARK_START);
-      const line = `${h.label.padEnd(36)} skills ${present}/${skills.length}  instructions ${instr ? "yes" : "no"}`;
-      console.log(present === skills.length && instr ? ok(line) : present || instr ? warn(line) : c.dim(`  ${line}`));
+      const want = listAgents();
+      const have = h.agentsDir ? want.filter((a) => existsSync(join(root, h.agentsDir, a.file))).length : 0;
+      const line = `${h.label.padEnd(36)} skills ${present}/${skills.length}  instructions ${instr ? "yes" : "no"}${h.agentsDir ? `  agents ${have}/${want.length}` : ""}`;
+      const agentsOk = !h.agentsDir || have === want.length;
+      console.log(present === skills.length && instr && agentsOk ? ok(line) : present || instr || !agentsOk ? warn(line) : c.dim(`  ${line}`));
     }
     console.log(existsSync(join(root, "aisdlc.json")) ? ok("aisdlc.json") : warn("aisdlc.json missing (run aisdlc init)"));
     console.log(existsSync(join(root, "docs", "constitution.md")) ? ok("docs/constitution.md") : warn("docs/constitution.md missing"));
     console.log(existsSync(join(root, "docs", "taste.md")) ? ok("docs/taste.md") : warn("docs/taste.md missing (run the aisdlc-taste skill)"));
     console.log(existsSync(join(root, "docs", "glossary.md")) ? ok("docs/glossary.md") : c.dim("  docs/glossary.md missing (aisdlc-discover / aisdlc-taste seed it)"));
+    const pol = loadConfig(root).test?.gate || "configured";
+    console.log(`${pol === "configured" ? ok : warn}test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (aisdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`);
     const comp = detectCompanions(root);
     for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(comp.includes(id) ? ok(`companion ${id.padEnd(10)} installed (${cpn.bridge} uses it)`) : c.dim(`  companion ${id.padEnd(10)} not installed (${cpn.bridge} uses its embedded fallback; aisdlc addon ${id})`));
   },
@@ -456,6 +476,7 @@ ${c.bold("Install")}
   aisdlc init [--harness auto|all|claude-code,codex,cursor,gemini-cli,copilot,windsurf,opencode] [--link]
   aisdlc doctor                          show what is installed where
   aisdlc skills                          list bundled skills
+  aisdlc kinds                           kind verify models and lane gate sets
   aisdlc addon [ponytail|grilling|code-craft|quality-tools|all]   install the companion skills aisdlc bridges to (optional)
 
 ${c.bold("Features")}
@@ -466,7 +487,7 @@ ${c.bold("Features")}
 
 ${c.bold("Checks (deterministic, from disk)")}
   aisdlc check spec <path|feature>       EARS validator
-  aisdlc check delta <path|feature>       delta Change-table validator (types, Reason/Migration, FROM/TO)
+  aisdlc check delta <path|feature>      delta Change-table validator (types, Reason/Migration, FROM/TO)
   aisdlc trace [feature]                 requirement → task matrix
   aisdlc gate <G1..G6> [feature]         one gate       ·  aisdlc gates [feature]  all six
   aisdlc scan                            secrets scan over tracked files

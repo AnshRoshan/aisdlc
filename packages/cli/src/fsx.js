@@ -13,8 +13,19 @@ export function skillsSourceDir() {
   throw new Error("aisdlc skills directory not found; reinstall the package.");
 }
 
-export function listSkills(dir = skillsSourceDir()) {
-  return readdirSync(dir)
+/** Read-only subagent definitions, same two locations as the skills. Only harnesses with an
+ *  agentsDir consume them; others keep the capability-first prose in the skills. */
+export function agentsSourceDir() {
+  const candidates = [join(here, "..", "agents"), join(here, "..", "..", "..", "agents")];
+  for (const c of candidates) if (existsSync(c) && readdirSync(c).some((f) => f.endsWith(".md"))) return c;
+  return null;
+}
+
+export function listAgents(dir = agentsSourceDir()) {
+  return dir ? readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => ({ file: f, path: join(dir, f) })) : [];
+}
+
+export function listSkills(dir = skillsSourceDir()) {  return readdirSync(dir)
     .filter((d) => existsSync(join(dir, d, "SKILL.md")))
     .map((d) => {
       const text = readFileSync(join(dir, d, "SKILL.md"), "utf8");

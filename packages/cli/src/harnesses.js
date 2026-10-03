@@ -14,6 +14,7 @@ export const HARNESSES = {
     instructions: "CLAUDE.md",
     commandsDir: ".claude/commands",
     commandExt: ".md",
+    agentsDir: ".claude/agents",
     detect: [".claude", "CLAUDE.md"],
   },
   codex: {

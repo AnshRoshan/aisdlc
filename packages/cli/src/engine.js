@@ -245,6 +245,60 @@ export function parseAcceptance(text) {
   return rows;
 }
 
+/* ───────────── Cross-model review independence ─────────────
+ * Segregation of duties says a human, not the author, approves. Segregation of *models*
+ * is the orthogonal failure: the model that wrote the code shares its blind spots with
+ * itself. The field is recorded in acceptance.md so the check reads disk, not chat.
+ */
+const MODEL_FAMILIES = ["opus", "sonnet", "haiku", "fable", "grok", "gemini", "llama", "deepseek", "qwen", "mistral", "gpt", "o4", "o3", "o1", "claude"];
+export function modelFamily(value) {
+  const v = String(value || "").toLowerCase();
+  if (!v.trim()) return null;
+  const hit = MODEL_FAMILIES.find((f) => new RegExp(`\\b${f}\\b`).test(v));
+  return hit || v.replace(/[^a-z0-9.]+/g, "-").slice(0, 24);
+}
+
+export function reviewerNotes(text) {
+  const t = text || "";
+  const blank = (v) => !v || /^<[^>]*>?$|^\(.*\)$|^_+$|^\s*$|^(tbd|todo|unknown|none)$/i.test(v.trim());
+  const field = (label) => {
+    // Take the first *filled* occurrence: a seeded placeholder line above a real one must not
+    // hide the answer, and a real answer above a placeholder must not be ignored either.
+    for (const m of t.matchAll(new RegExp(`${label}:\\s*([^·\\n|]+)`, "gi"))) {
+      const v = m[1].trim();
+      if (!blank(v)) return v;
+    }
+    return "";
+  };
+  const note = field("Cross-model");
+  return {
+    author: field("Author model"),
+    reviewer: field("Reviewer model"),
+    degraded: /degraded/i.test(note),
+    independent: /independent/i.test(note),
+    note,
+  };
+}
+
+/* ───────────── Value sourcing ─────────────
+ * "Do I feel like I'm inventing something?" is not a test; the model rationalises a real
+ * decision as wiring. Enumerating every value the build must produce, compute or display,
+ * and demanding a named source for each, is mechanical and harder to talk yourself out of.
+ */
+export function valueSourcing(text) {
+  const sec = (text || "").split(/^##\s+9\.\s*Value sourcing/im)[1];
+  if (!sec) return { present: false, rows: [], unnamed: [], waived: false };
+  const body = sec.split(/^##\s+/m)[0];
+  const waived = /^[\s>]*n\/a:?\s+\S/im.test(body);
+  const rows = body
+    .split("\n")
+    .filter((l) => /^\|/.test(l) && !/^\|[\s:|-]+$/.test(l))
+    .slice(1)
+    .map((l) => l.split("|").slice(1, -1).map((c) => c.trim()));
+  const unnamed = rows.filter((r) => !r[1] || /^(n\/?a|tbd|unknown|<.*>|\s*)$/i.test(r[1]) || /needs clarification/i.test(r[1])).map((r) => r[0] || "(blank row)");
+  return { present: true, rows, unnamed, waived };
+}
+
 /* ───────────── Gates ─────────────
  * ctx = {
  *   spec, plan, tasks(text), acceptance, rollout, guardrails, runbook, evals, kind,
@@ -304,16 +358,37 @@ export function runGate(gate, ctx) {
       const tr = traceMatrix(ctx.spec || "", tasks);
       push("every requirement traced to a task", tr.uncovered.length === 0, tr.uncovered.length ? `uncovered: ${tr.uncovered.join(", ")}` : "full coverage");
       push("no unknown requirement references", tr.unknown.length === 0, tr.unknown.length ? tr.unknown.join(", ") : "");
+      const vs = valueSourcing(ctx.spec || "");
+      push(
+        "every value the build produces has a named source",
+        vs.present ? vs.waived || (vs.rows.length > 0 && vs.unnamed.length === 0) : false,
+        !vs.present
+          ? "spec has no `## 9. Value sourcing` table (or an explicit `n/a: <why>`)"
+          : vs.waived
+            ? "waived with a stated reason"
+            : vs.rows.length === 0
+              ? "table is empty - list every value this feature produces, computes or displays"
+              : vs.unnamed.length
+                ? `no source for: ${vs.unnamed.join(", ")}`
+                : `${vs.rows.length} value(s) sourced`,
+      );
       break;
     }
     case "G3": {
       const f = ctx.secretFindings || [];
       push("secrets scan clean", f.length === 0, f.length ? `${f.length} finding(s): ${[...new Set(f.map((x) => x.family))].join(", ")}` : "0 findings");
-      const runs = (ctx.evidence || []).filter((e) => (lane === "spike" ? /^(green|full|spike)$/i : /^(green|full)$/i).test(e.label || ""));
       const latestFull = [...(ctx.evidence || [])].reverse().find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
-      push("test evidence present", runs.length > 0, runs.length ? `${runs.length} recorded run(s)` : "no run artifact: IMPLEMENTED-NOT-VERIFIED");
-      push("full suite recorded", !!latestFull, latestFull ? `${latestFull.command}` : "run: aisdlc evidence <slug> --label full -- <test cmd>");
-      push("latest full run green", !!latestFull && latestFull.exitCode === 0, latestFull ? `exit ${latestFull.exitCode}` : "");
+      push("test evidence present", (ctx.evidence || []).length > 0, (ctx.evidence || []).length ? `${(ctx.evidence || []).length} recorded run(s)` : "no run artifact: IMPLEMENTED-NOT-VERIFIED");
+      // Three states, from aisdlc.json test.gate: a repo with a runner, one that deliberately has
+      // none, and one that simply never set it up. Only the second relaxes the suite, and it says so.
+      const policy = ctx.testPolicy || "configured";
+      if (policy === "none-by-design") {
+        push("full suite recorded", true, `waived by test.gate: none-by-design - G3 still needs a recorded run, and G4's human sign-off carries the risk`);
+      } else {
+        push("full suite recorded", !!latestFull, latestFull ? `${latestFull.command}` : policy === "none-yet" ? `no runner configured (aisdlc.json test.gate): either set one up or declare none-by-design with a reason` : "run: aisdlc evidence <slug> --label full -- <test cmd>");
+      }
+      const green = policy === "none-by-design" && !latestFull ? [...(ctx.evidence || [])].reverse().find((e) => e.exitCode === 0) : latestFull;
+      push("latest full run green", !!green && green.exitCode === 0, green ? `exit ${green.exitCode} (${green.command})` : policy === "none-by-design" ? "no green run at all, by design or not" : "");
       const tasks = parseTasks(ctx.tasks || "");
       const open = tasks.filter((t) => !t.done);
       push("all tasks checked off", lane === "spike" ? open.length === 0 : tasks.length > 0 && open.length === 0, open.length ? `open: ${open.map((t) => `T${t.num}`).join(", ")}` : `${tasks.length} done`);
@@ -326,6 +401,25 @@ export function runGate(gate, ctx) {
       push("every row passes", rows.length > 0 && bad.length === 0, bad.length ? `not pass: ${bad.map((r) => r.id).join(", ")}` : "");
       const noEv = rows.filter((r) => !r.evidence || /^<|pending|none|tbd|\(none\)/i.test(r.evidence));
       push("every row cites evidence", rows.length > 0 && noEv.length === 0, noEv.length ? `missing: ${noEv.map((r) => r.id).join(", ")}` : "");
+      // A cited evidence file must be one the CLI actually recorded, or prose is standing in for a run.
+      const logged = new Set((ctx.evidence || []).map((e) => e.file).filter(Boolean));
+      const named = rows.map((r) => (r.evidence.match(/[\w.-]+\.(?:json|log)/) || [])[0]).filter(Boolean);
+      const ghost = named.filter((f) => !logged.has(f));
+      push("cited evidence exists in the log", named.length > 0 && ghost.length === 0, named.length === 0 ? "no row names a recorded evidence file" : ghost.length ? `not recorded: ${ghost.join(", ")}` : `${named.length} row(s) cite real runs`);
+      const rn = reviewerNotes(ctx.acceptance || "");
+      const sameFamily = rn.author && rn.reviewer && modelFamily(rn.author) === modelFamily(rn.reviewer);
+      const crossOk = rn.degraded || (!!rn.author && !!rn.reviewer && !sameFamily);
+      push(
+        "review ran on a different model than wrote the code",
+        crossOk,
+        rn.degraded
+          ? `declared ${rn.note} - not the cross-model guarantee`
+          : !rn.author || !rn.reviewer
+            ? "record `Author model:` and `Reviewer model:` in ## Reviewer notes, or `Cross-model: degraded (why)`"
+            : sameFamily
+              ? `both on ${modelFamily(rn.author)}; the author's own model shares its blind spots`
+              : `${rn.author} wrote, ${rn.reviewer} reviewed`,
+      );
       const signer = approvedBy(ctx.acceptance || "");
       const { fresh } = freshSodApprovals(ctx, "G4");
       const signedOk = (!!signer && (!ctx.author || signer.toLowerCase() !== String(ctx.author).toLowerCase())) || fresh.length >= need;

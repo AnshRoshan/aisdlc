@@ -124,3 +124,41 @@ Question asked after v3 shipped: *for each thing in `COMPETITORS.md`, are we now
 | Spec Kit | four-layer template resolution | **accepted, not copied** — see §8. |
 
 Result: no remaining row where a competitor's practice is both better than ours and copyable at skill level. The process spine (gated state machine, hash-chained approvals, evidence files, segregation of duties, lanes, traceability) is still ours alone.
+
+## 10. Skills gap analysis v5 — against `jsmastery-pro/skills` (9 skills, 28 sub-files, no CLI)
+
+Studied 2026-10-07 by reading the repo, not its README: `CLAUDE.md`, `docs/conventions.md`,
+`docs/workflow-guide.md`, both `.claude/agents/*.md`, all nine `SKILL.md` plus their `modes/`,
+`flow/`, `ui/`, `agent-modes/`, `internal/`, `approaches/`, `patterns/` and `templates/` sub-files,
+`scripts/check-portability.mjs` (425 lines, 11 rules), `scripts/analyze-token-usage.mjs`, and
+`.github/workflows/check.yml`.
+
+They are the strongest published example of two things we did not have: **cost discipline as an
+engineered property**, and **a review guarantee about the model, not the person**. They are not
+enforcement: their "no fabricated PASS" apparatus is four imperative sentences in a Markdown file the
+same model can rationalise past, and they say so (`workflow-guide.md`: "a strong gate, not an absolute
+guarantee (no prompt can be)"). We have a verifier. So the steals below went *into* the gates.
+
+| their edge | what we did |
+|---|---|
+| Progressive disclosure: a 52-line router with the rigor in `modes/*.md`, read on the branch ("read exactly one", "read these now, only now, at write time"). | Adopted for the two branches that were genuinely long and genuinely rare: `aisdlc-flow/references/manual-derivation.md`, `aisdlc-review/references/pushback-and-exit.md`. Router cost 9,975 B → 8,986 B. The other 18 skills stay flat: `docs/conventions.md` now records the test (rare **and** long), and `sync-skills.mjs` copies whole folders so sub-files ship. |
+| Byte budgets, and budgets on the **path** (`HOT_PATH_BUDGETS`: required files + the largest `oneOf`), printed as utilisation with `<-- shrink this`. | Adopted, in `check-skills.mjs`. Five named paths, utilisation table on a green run, CI failure on a breach. |
+| `check-portability.mjs` as the product's test, because the corpus *is* the product. | Adopted and extended: theirs lints prose style, ours lints **claims against the code** - every documented command must exist in `cli.js`, every `aisdlc-*` token must name a real skill/slash-command/subagent, every `references/` file must be on disk, every relative link must resolve. The phantom `aisdlc verify` in our own README is the defect that justified it. |
+| Model pinning lives in `.claude/agents/*.md` (`model: haiku`, whitelisted tools, output-size cap), so skill prose stays capability-first. | Adopted: `agents/aisdlc-scout.md`, `agents/aisdlc-researcher.md`, installed by `init` for Claude Code. Their rules 2/3/8 (no harness-specific alias in prose, no naming one client's subagent tool, `Agent` not `Task`) became validator portability checks. |
+| Cross-model review: detect the author model from config (never self-introspection, because `/model` switching makes the answer stale), confirm with one MCQ, contrast table, refuse the author's own family, degrade ladder with plain disclosure. | Adopted **as a gate**. `reviewerNotes` + `modelFamily` in the engine; G4 fails a same-family pair, fails missing or placeholder values, and passes a declared `Cross-model: degraded (why)` while printing that it is not the guarantee. Their version is advice; ours cannot be skipped by skipping a sentence. |
+| Value sourcing / input coverage: "Do NOT judge this by introspection… use a positive input coverage test, which is mechanical and harder to talk yourself out of." | Adopted as spec §9 and a G2 check. Every value the feature produces, computes or displays needs a named source, or an explicit `n/a: <why>`. |
+| Three-state test signal (`configured` / `none-by-design` / `none-yet`) so a deliberate no-runner repo is not nagged and a lazy one is not excused. | Adopted as `aisdlc.json` → `test.gate`, read by G3. `none-by-design` waives the suite and prints the waiver; a recorded run is still required; `none-yet` waives nothing. |
+| `docs/conventions.md`, an authoring constitution that makes a skill edit decidable without an argument. | Adopted, rewritten for this repo, and referenced by the checker output and CONTRIBUTING. |
+| Artifact ownership table (Created by / Read by / Changed by) and the single-writer sentence. | Adopted as README "Who writes what", extended with the two files the CLI owns alone: `evidence/` and `approvals.json`. |
+| Honest-limits copy: "a skipped step is recorded honestly as skipped", "the override is not free". | Adopted as framing in README "What aisdlc will not do" - our policy stays gates, not suggestions. |
+
+Deliberately **not** adopted: the em/en-dash and hyphen prose lints (rules 10-11) - the corpus shows
+the cost, "read only" and "cross cutting" where the compounding was strip-mined for a cosmetic rule,
+with a `PARSED_LITERALS` allowlist to stop the lint fighting the artifact format it teaches; the
+nine-fold duplicated `OUTPUT-STYLE` block (we have an installer, so house voice goes in the generated
+instructions file once); "suggestions, never gates" as policy; and their `docs/`-as-website layout,
+since we already ship a real site.
+
+`analyze-token-usage.mjs` (their cache-read-vs-fresh-cost breakdown over Claude Code transcripts) is
+the best remaining candidate and is still unbuilt: it measures chat cost, which is outside the
+process state machine and does not belong in a gate. Tracked as a possible `aisdlc cost`.

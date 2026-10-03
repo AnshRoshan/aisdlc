@@ -1,6 +1,6 @@
 ---
 name: aisdlc-brainstorm
-description: The front door for any new request. Use BEFORE any creative or engineering work when the user says "I have an idea", "let's build", "brainstorm", "options", "how should we approach", "what would you do", or gives a vague one-line request. Classifies the request into a lane (spike, quick, standard, regulated) so the amount of process matches the stakes, explores 2-3 approaches with trade-offs, applies the ponytail ladder to pick the simplest one that works, and gets explicit human approval before routing to discover, spec, implement, or debug. Never writes code.
+description: Front door for any new request, before creative or engineering work. Use when the user says "I have an idea", "let's build", "brainstorm", "options", "how should we approach", or gives a vague one-line ask. Classifies the work into a lane (spike, quick, standard, regulated) so process matches stakes, compares 2-3 approaches, applies the ponytail ladder, and gets human approval before routing. Never writes code.
 license: MIT
 metadata:
   author: aisdlc

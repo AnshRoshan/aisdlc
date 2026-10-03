@@ -1,6 +1,6 @@
 ---
 name: aisdlc-quality
-description: Bridge to code-quality-tools, the runner guide for lint, autofix, dead-code, complexity and security CLIs on JS/TS and Python (fallow, eslint, biome, knip, tsc, ruff, mypy, vulture, bandit, semgrep - which tool, in what order, what mutates vs detects). Use inside aisdlc during BUILD and VERIFY when you need mechanical quality checks, a pre-G3 structural pass, or a security scan, or when the user says "lint", "clean up", "dead code", "typecheck", "security scan", "complexity". Prefers the official code-quality-tools skill (AnshRoshan/ansh-other-skills) when installed and falls back to an embedded distillation; adds the aisdlc-specific wiring (tools advise, the CLI gates; findings become tasks or deltas; only evidence runs count).
+description: Bridge to code-quality-tools, the runner guide for lint, autofix, dead-code, complexity and security CLIs on JS/TS and Python (fallow, eslint, biome, knip, tsc, ruff, mypy, vulture, bandit, semgrep - which tool, in what order, what mutates vs detects). Use during BUILD and VERIFY for a mechanical pass before G3 or a security scan, or when the user says "lint", "dead code", "typecheck", "complexity". Tools advise, the CLI gates.
 license: MIT
 metadata:
   author: aisdlc

@@ -1,6 +1,6 @@
 ---
 name: aisdlc-implement
-description: Implement one task at a time, test-first at the agreed seam, with the ponytail ladder applied, recorded evidence, and zero scope creep. Use when `aisdlc next` reports BUILD, when the user says "implement", "build T3", "write the code", "continue", or "tdd". Never edits the spec silently; intent changes go through aisdlc-delta. Never claims tests pass without an evidence record. Routes fix tasks to aisdlc-debug, and defines how work is delegated to subagents and run in waves.
+description: Implement one task at a time, test-first at the agreed seam, with the ponytail ladder, recorded evidence and zero scope creep. Use when `aisdlc next` reports BUILD, or the user says "implement", "build T3", "write the code", "continue", "tdd". Never edits the spec silently, intent changes go through aisdlc-delta. Never claims tests pass without an evidence record. Routes fix tasks to aisdlc-debug.
 license: MIT
 metadata:
   author: aisdlc
@@ -25,6 +25,18 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 
 ## The loop (per task, one vertical slice)
 
+0. **Owed-decision check, before you write a line.** Read `spec.md` §9 and list the values this task
+   must produce, compute or display. A value whose source is unnamed, or whose source does not exist in
+   the repo, is an **owed decision**: stop and route it (behaviour gap → `aisdlc-delta`, technology gap →
+   `aisdlc-plan`) instead of picking a value inline. The build model always rationalises a real decision
+   as plumbing, which is why this is a list with named sources and not a feeling about the task.
+0b. **Locate before you read.** Finding the files to touch means opening code, and every file you open
+   stays in your context for the rest of the session. Where the harness supports it, dispatch a
+   read-only scout on a fast, low-cost tier (Claude Code: the `aisdlc-scout` subagent type, installed by
+   `aisdlc init` and pinned to a cheap model in its own definition; Cursor: `Explore`; Codex:
+   `spawn_agent`; else any subagent, or work inline) and take back a compact map: paths, patterns with
+   `file:line`, symbols worth reusing, gotchas. The map is the deliverable; the writing stays on the
+   main thread.
 1. **Red:** write the smallest test that fails for the right reason, at the seam, named after the scenario (`Scenario: ...`). Expected values come from the spec or a worked example, never from re-running the code under test (no tautologies). Run it and record:
    `npx aisdlc-cli evidence <slug> --task T<n> --label red -- <test command>`
    (a non-zero exit is expected and is recorded honestly). Read the failure message; it must be the assertion you meant, not a syntax error.

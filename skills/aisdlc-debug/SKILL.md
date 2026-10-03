@@ -1,6 +1,6 @@
 ---
 name: aisdlc-debug
-description: Disciplined, evidence-backed debugging loop for bugs, flaky tests, performance regressions and "it works on my machine". Use when the user says "bug", "broken", "fix this", "why does", "error", "crash", "regression", "flaky", "slow", pastes a stack trace, or when verification finds a failing scenario. Reproduce first, build a feedback loop that goes red on the exact symptom, minimise, hypothesise, instrument, fix the root cause (never the symptom), add a regression test, and record every run as evidence. Opens a delta when the bug reveals the spec was wrong.
+description: Evidence-backed debugging loop for bugs, flaky tests, regressions and "works on my machine". Use when the user says "bug", "broken", "fix this", "why does", "crash", "flaky", "slow", pastes a stack trace, or verification finds a failing scenario. Reproduce first, build a loop that goes red on the exact symptom, minimise, hypothesise, instrument, fix the root cause not the symptom, add a regression test, record every run.
 license: MIT
 metadata:
   author: aisdlc

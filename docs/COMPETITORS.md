@@ -133,3 +133,53 @@ Relevant to how much the skills ask a session to load every turn:
 - Prefer **pointers over copies** so nothing rots.
 - "Never send an LLM to do a linter's job" — deterministic tools for mechanical rules. *aisdlc already follows this: `aisdlc-quality` is tool-first, and the CLI is law.*
 - Add an instruction when the agent repeats a mistake; delete it when it stops earning its place. *aisdlc's `aisdlc-retro` applies this to constitution/taste/glossary but not systematically to the skills themselves.*
+
+## 7. `jsmastery-pro/skills` - the cost-discipline kit (researched 2026-10-07)
+
+Nine skills, 28 sub-files, two read-only subagents, two zero-dep Node scripts, one CI job, **no CLI and
+no state machine**. 5,447 lines of Markdown; routers are the cheap part (their `check` router is 52
+lines) and the rigor sits in `modes/`, `flow/`, `agent-modes/`, `internal/`, `approaches/`, `patterns/`
+and `templates/`, read only when the branch is taken.
+
+Raw notes, in their own words where it matters:
+
+- "A skill loads in full on its path every run, so every line is a recurring cost" (`CLAUDE.md`), and
+  "prune before you add" (`docs/conventions.md`). Splitting is a cost decision, not an aesthetic one:
+  only when content is **rarely needed and long**, and then with an explicit trigger - "if X, read `Y`
+  before continuing".
+- Budgets are on the **path**, not the file: `HOT_PATH_BUDGETS` sums `required[]` plus the largest
+  `oneOf[]`, warns at 90%, and the header comment records why a ceiling was raised once and insists it
+  is "not a ratchet to dodge a breach". A ceiling that always fires gets bypassed, which is how a budget
+  stops meaning anything.
+- Their CI is the linter (`npm run check`), because the corpus *is* the product. Eleven rules, including
+  three we adopted as portability checks: no harness-specific model alias in spawn prose, never name one
+  client's subagent tool, no POSIX-only shell glue. Two we rejected as self-harm: no em/en dash, no
+  hyphens in prose, enforced by a regex that masks code and needs an allowlist of the very tokens the
+  skills pattern-match on. The corpus shows the damage: "read only", "cross cutting".
+- Model pinning lives in `.claude/agents/*.md` (`model: haiku`, tools whitelisted, "~1 to 2k tokens so it
+  does not bloat the caller's context"), so skill prose can stay capability-first. Offload the *reading*,
+  never the writing: "the main thread does the writing… it never hands `AGENTS.md` writing to a subagent".
+- The review guarantee is about the **model**: detect the author model from env and settings files, never
+  from self-introspection, because the system prompt line "is stale the moment the user switches with
+  `/model`"; confirm with one recommended-answer question; contrast table; refuse the author's own
+  family; degrade ladder that says plainly it shares the blind spots.
+- The completeness gate is mechanical: "Do NOT judge this by introspection ('do I feel like I'm inventing
+  something?'), the build model rationalizes a real decision as 'just wiring'… Any required value with no
+  named source is an owed decision."
+- Three states for the test signal - `configured` / `none-by-design` / `none-yet` - written by `/test` and
+  read by the reviewer, so a repo that deliberately ships no runner is not nagged and one that simply
+  never set tests up is not excused.
+- Honesty as structure, not tone: `specced but missing` vs `specced but not applied`; "a skipped step is
+  recorded honestly as skipped"; "the override is not free"; "a fabricated PASS is the one output this
+  skill must never produce; every later step trusts it."
+
+What they do not have: any enforcement. Their gates are sentences the evaluating model can talk itself
+past, and they admit it - "a strong gate, not an absolute guarantee (no prompt can be)". No state
+machine, no hash-bound approvals, no evidence the tool records itself, no release/retro/handoff stage,
+no plugin or npm distribution, no hosted docs, and no tests of their own scripts. Their hardening skill
+was removed and is "temporarily" gone.
+
+Disposition: cost discipline, portability lint, cross-model review, value sourcing, the three-state test
+policy, the authoring constitution and the ownership table were adopted; the dash lints, the duplicated
+house-voice block, "suggestions, never gates" and docs-folder-as-website were not. Details and the
+engine-side implementation in `docs/RESEARCH.md` §10.

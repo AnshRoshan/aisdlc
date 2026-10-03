@@ -1,6 +1,6 @@
 ---
 name: aisdlc-retro
-description: Close the loop on a finished feature, incident, or sprint so the process gets better instead of just longer. Use when `aisdlc next` reports DONE, when the user says "retro", "retrospective", "post-mortem", "lessons learned", "what went wrong", or after a rollback. Compares what the spec promised with what shipped, which gate caught what, where time went, what the agent over-built, and turns each lesson into a concrete change to docs/constitution.md, docs/taste.md, docs/glossary.md, or a skill. Blameless, evidence-based, short.
+description: Close the loop on a finished feature, incident or sprint so the process gets better instead of just longer. Use when `aisdlc next` reports DONE, the user says "retro", "retrospective", "post-mortem", "lessons learned", "what went wrong", or after a rollback. Compares what the spec promised with what shipped, which gate caught what, where time went, what the agent over-built, and turns each lesson into a concrete edit to the constitution, taste, glossary or a skill.
 license: MIT
 metadata:
   author: aisdlc

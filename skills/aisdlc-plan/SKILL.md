@@ -1,6 +1,6 @@
 ---
 name: aisdlc-plan
-description: Produce plan.md with architecture, a constitution check, explicit decisions (alternatives, ponytail ladder rung), data model, interface contracts, research that resolves every unknown, seams, work breakdown as tracer bullets, a smoke path, risks, and a Traceability table that maps every spec requirement to tasks, then request human G1 approval. Use when `aisdlc next` reports PLAN, when the user says "plan this", "architecture", "how should we build it", or after a spec is signed. Plans are approved by a human who is not the author (SoD); the agent never approves. Regulated lane adds a threat model and two approvers.
+description: Produce plan.md - architecture, constitution check, explicit decisions with alternatives and ladder rung, data model, interface contracts, research that resolves every unknown, seams, tracer-bullet breakdown, smoke path, risks, and a Traceability table mapping every requirement to tasks - then ask a human for G1. Use when `aisdlc next` reports PLAN, the user says "plan this", "architecture", "how should we build it", or a spec just got signed. The agent never approves its own plan.
 license: MIT
 metadata:
   author: aisdlc
@@ -91,6 +91,7 @@ Rules:
 - Respect existing ADRs; superseding one is its own row in Decisions and a new ADR file.
 - **Constitution check is not optional and not decorative.** One row per principle in `docs/constitution.md`. `comply` needs one line of evidence; `n/a` needs a reason. A `violate` row is only allowed with a written justification a human could reject — if you cannot justify it, the plan is wrong, not the principle. Unjustified violations stop the plan: fix the design, or escalate to the human who can amend the constitution (`aisdlc-retro` owns amendments).
 - **Research & unknowns is where guesses go to die.** Every `[NEEDS CLARIFICATION]` the spec left in §6 must already be closed before §5 was signed; this table is for *technical* unknowns discovered while planning (which library, which consistency model, which migration strategy). One row each: decide, say why, list what you rejected. An unknown with no row is an unknown you are carrying into the build silently.
+- **Fetch the facts off the main thread, keep the writing.** Where the harness supports subagents, dispatch a read-only researcher on a fast, low-cost tier (Claude Code: the `aisdlc-researcher` subagent type, installed by `aisdlc init`) to pull current docs, enumerate credible options rather than the first hit, and confirm each link exists and says what it claims. Then *you* write the table and the Decisions rows: a delegated sentence is an unowned one, and a URL nobody checked becomes a spec citation with a typeface.
 - **Data model and contracts exist even when small.** They are what the reviewer checks the diff against. `n/a` is a legitimate entry; a blank section is not.
 - **Smoke path must be runnable as written.** No placeholders for commands, no "run the tests". The point is that a reviewer who has never seen the repo can prove the feature works in under a minute.
 

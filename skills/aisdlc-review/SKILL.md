@@ -1,6 +1,6 @@
 ---
 name: aisdlc-review
-description: Act as an independent reviewer for the acceptance gate G4 - a two-axis review (Spec axis, does the diff faithfully implement every scenario? Standards axis, does it follow the repo's taste, smell baseline and ponytail minimalism?) that audits evidence against each spec scenario, fills acceptance.md, files findings, and prepares the human sign-off. Use when `aisdlc next` reports ACCEPT, when the user says "review", "code review", "audit", "PR review", or "is this acceptable". The reviewer never approves; a human who did not author the work signs.
+description: Independent reviewer for the acceptance gate G4. A two-axis review - Spec axis, does the diff faithfully implement every scenario, and Standards axis, does it follow the repo's taste, smell baseline and ponytail minimalism - that audits evidence against each scenario, fills acceptance.md, files findings and prepares the human sign-off. Use when `aisdlc next` reports ACCEPT, or the user says "review", "code review", "audit", "PR review", "is this acceptable". The reviewer never approves.
 license: MIT
 metadata:
   author: aisdlc
@@ -17,6 +17,32 @@ Assume the author (possibly a previous session of you) was optimistic. Your job 
 - If you implemented any part of this feature in the current session, say so and ask for a fresh session or a different reviewer where possible. If you must continue, be twice as adversarial.
 - You **never** write a name into `Approved-by:`. You prepare; a human signs.
 - Where the harness supports sub-agents, run the two axes below as **separate** agents with separate context so neither pollutes the other; merge their findings.
+
+## Segregation of models
+
+A model reviewing its own output shares its blind spots. This is orthogonal to duties: a human signer
+who is not the author does not help if the *reviewing reasoning* came from the model that wrote the code.
+G4 checks it, so record it honestly or the gate fails.
+
+1. **Detect the author model from disk, never from introspection.** The "you are powered by…" text is
+   written at session start and is stale the moment the user switches models. Read in order:
+   `ANTHROPIC_MODEL` / `OPENAI_MODEL` / `GEMINI_MODEL` env, `.claude/settings.local.json`,
+   `.claude/settings.json`, `~/.claude/settings.json`, then the harness's session metadata.
+   Note which file answered, in `## Reviewer notes`.
+2. **Confirm with one question, recommended answer first.** "Author model reads as `opus`
+   (from `.claude/settings.local.json`) - review on `sonnet`? (recommended)". A wrong guess silently
+   reviews with the author's own model, so this question is not skippable unless the user already named
+   the reviewer model in this session.
+3. **Use a different family.** opus → sonnet, sonnet → opus, haiku → sonnet (never the reverse: the
+   review is high-value reasoning, do not run it on the cheapest tier), gpt → a claude or gemini family,
+   gemini → either of the other two.
+4. **Spawn the reviewer with that model** and no write power over the code: read/search tools plus one
+   findings file. Never `Edit`.
+5. **If you cannot get a second family, write the degradation.** `Cross-model: degraded (why)` in
+   `## Reviewer notes`. G4 accepts a declared degradation and prints that it is not the guarantee; it
+   rejects silence and rejects same-family claims dressed as independent ones.
+6. **"Review it with the model that wrote it" is refused with the alternative named**, not obeyed:
+   "That is the author's model; its blind spots are shared. Reviewing on `<contrast>`, or declare degraded."
 
 ## Axis 1: Spec (faithfulness)
 
@@ -63,12 +89,16 @@ With `docs/taste.md` and `docs/glossary.md` beside you:
 - F4 (advisory · over-built): ...
 
 ## Reviewer notes
-Reviewed by: <agent/model, session id> · axes run separately: yes/no · diff base: <sha>
+Reviewed by: <agent, session id> · axes run separately: yes/no · diff base: <sha>
+Author model: <model that wrote this code> · Reviewer model: <a different family> · Cross-model: independent
+Detected from: <the file or env var that named the author model>
 
 Approved-by: ______  Date: ______
 ```
 
-G4 requires: every row has evidence that is not a placeholder, every row `pass`, and `Approved-by` signed by a human who is not the author. Regulated lane: two approvers.
+G4 requires: every row has evidence that is not a placeholder, the evidence file named in a row must be
+one the CLI actually recorded in `evidence/` (a row that cites a run nobody made is prose wearing a filename),
+every row `pass`, and `Approved-by` signed by a human who is not the author. Regulated lane: two approvers.
 
 Finding classes:
 - **blocking**: correctness, security, data loss, spec violation, untraced change, missing scenario test, secrets. Blocking findings reopen a task (uncheck it, add a note) or create a delta; the state moves back to BUILD on purpose.
@@ -86,16 +116,6 @@ Every advisory finding gets a triage next to it — `fix now` / `defer` (with th
 - Lines added vs. deleted and new dependencies are proportionate to the requirements.
 - Evidence timestamps are after the last code change (`git log -1 --format=%cI` vs. `startedAt`); stale evidence is not evidence.
 
-## When the human pushes back
-
-The human is allowed to disagree with you. You are not allowed to sulk, comply silently, or win by volume.
-
-- **Answer every finding individually**: `fixed` (with the new evidence file), `accepted-as-is` (with the reason), or `disputed` (with the artifact that proves your case — the scenario, the evidence file, the spec line). One line each; no essays.
-- **A requested behaviour change is a delta.** If resolving the pushback changes what a requirement says, stop arguing in review and load `aisdlc-delta`. Approvals go stale on purpose; say so.
-- **A fix re-opens evidence.** Any code change after a green run means the previous evidence is stale: re-run the affected evidence and the full suite before claiming the finding is closed. `git log -1` vs `startedAt` is how the next reviewer catches you.
-- **Push back with artifacts, never with authority.** "I disagree because scenario S3 says X and the evidence file Y shows X" is a response. "I think it's fine" is not — delete it and go read the scenario.
-- **You may not overwrite a human's verdict.** If they accept a blocking finding, it moves to `advisory` with `accepted-as-is · <who>` and the acceptance table keeps the row honest. The signature is theirs.
-
 ## Hand off
 
 1. Run `npx aisdlc-cli gate G4 <slug>`. It will fail on the signature; that is expected.
@@ -103,18 +123,15 @@ The human is allowed to disagree with you. You are not allowed to sulk, comply s
    "A1-A6 pass with evidence; F3, F4 advisory only. To accept, sign `Approved-by` in acceptance.md (name + date) or run `npx aisdlc-cli approve G4 <slug> --by "<name>"`."
 3. If there are blocking findings, say instead: "Not acceptable: F1, F2. Reopened T3; state is BUILD." and run `npx aisdlc-cli next <slug>` to prove it.
 
-## Exit decision (after G4 is green)
+## When the human disagrees, or G4 goes green
 
-Accepted work still has to leave the branch. Present exactly these four options and wait for the choice:
+**Read `references/pushback-and-exit.md` and follow it.** It holds the rules for answering contested
+findings without caving or stonewalling, and the four exit options (merge / PR / keep / discard) with
+the PR body order a reviewer actually reads. Do not read it while the review is still in progress, and
+do not offer an exit option you have not earned: G4 green with evidence, or the run is not yours to close.
 
-1. **Merge** into the base branch locally — run the full suite after the merge, record it, delete the branch/worktree.
-2. **Open a PR** — push, then open it with this body order (a reviewer reads in this order, and it stops them relitigating the approach inside a 300-line diff):
-   - the spec summary: what problem, what changed, lane and gates passed
-   - the acceptance table (rows, results, evidence file names)
-   - findings and their triage
-   - then the diff link
-   Include the feature folder path so the reviewer can read `spec.md` before the code.
-3. **Keep the branch** — nothing merged, worktree intact, state on disk unchanged.
-4. **Discard** — requires the literal word "discard"; delete branch and worktree only after confirming the evidence is committed or the user accepts losing it.
+## Reference files
 
-Verify tests before offering any option. Never describe a PR as "checks passing" — you did not run CI; say what you *did* record.
+| file | read it when |
+|---|---|
+| `references/pushback-and-exit.md` | the human contests a finding, or G4 passed and the work must leave the branch |

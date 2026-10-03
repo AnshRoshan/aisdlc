@@ -1,6 +1,6 @@
 ---
 name: aisdlc-verify
-description: Run the merge-safety gate G3 honestly - full test run recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals). Use when `aisdlc next` reports VERIFY, when the user says "verify", "is it done", "run the gates", "does it work", or before opening a PR or claiming completion. Enforces the iron law - no completion claim without fresh verification evidence. Distinguishes PASS from IMPLEMENTED-NOT-VERIFIED and never fakes green.
+description: Run the merge-safety gate G3 honestly - full test suite recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals). Use when `aisdlc next` reports VERIFY, the user says "verify", "is it done", "run the gates", "does it work", or before opening a PR or claiming completion. Enforces the iron law, no completion claim without fresh evidence, and separates PASS from IMPLEMENTED-NOT-VERIFIED.
 license: MIT
 metadata:
   author: aisdlc
@@ -40,9 +40,25 @@ If you have not run the command in this session and recorded it, you cannot say 
 ## What G3 checks (`npx aisdlc-cli gate G3 <slug>`)
 
 1. **Secrets scan clean** across tracked files (8 pattern families, placeholders ignored).
-2. **Test evidence present**: at least one `evidence/*.json` with `label: green` (or `full`) and a real command.
-3. **Full suite recorded and green**: the latest `full` evidence has `exitCode: 0`.
+2. **A run was recorded**: at least one `evidence/*.json` with a real command and an exit code.
+3. **Full suite recorded and green**: the latest `full` evidence has `exitCode: 0`, unless the repo
+   declares a test policy (below).
 4. **All tasks checked off.**
+
+### Test policy (`aisdlc.json` → `test.gate`)
+
+Three states, because "this repo has no runner" and "nobody set one up" are different facts and only
+one of them is a choice:
+
+| state | G3 requires | when it is true |
+|---|---|---|
+| `configured` (default) | a recorded `full` run, green | the repo has a test command in `plan.md` Verification strategy |
+| `none-by-design` | any recorded green run; the suite is waived and the waiver is printed | docs site, IaC glue, a spike - a repo that deliberately ships no runner, with the reason in `docs/taste.md` |
+| `none-yet` | the recorded `full` run, same as configured | the honest state when tests simply were not written. It is not an escape hatch; write them |
+
+Set it in `aisdlc.json`, check it with `npx aisdlc-cli doctor`. Never reach for `none-by-design` to
+make a gate go green: G4's human sign-off is what carries the risk, so say out loud that you are
+handing the trade-off to a person.
 
 ## Procedure
 

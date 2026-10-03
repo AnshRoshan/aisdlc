@@ -1,6 +1,6 @@
 ---
 name: aisdlc-grill
-description: Relentless, structured interview that turns a vague plan, idea, spec, or design into shared understanding before anything is built. Use whenever the user says "grill me", "interview me", "poke holes", "stress-test this", "what am I missing", or when any aisdlc stage (discover, spec, plan, delta, retro) needs decisions from a human. Works the design tree in rounds, gives a recommended answer with every question, finds facts itself instead of asking, and writes every settled decision to disk. Delegates to the official `grilling` skill (mattpocock/skills) when it is installed.
+description: Relentless structured interview that turns a vague plan, idea or spec into shared understanding before anything is built. Use when the user says "grill me", "interview me", "poke holes", "stress-test this", "what am I missing", or when discover, spec, plan, delta or retro needs a human decision. Works the design tree in rounds, gives a recommended answer with every question, finds facts itself instead of asking, writes settled decisions to disk.
 license: MIT
 metadata:
   author: aisdlc

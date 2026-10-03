@@ -1,6 +1,6 @@
 ---
 name: aisdlc-taste
-description: Capture and apply a project's taste profile (code style, testing philosophy, agent verbosity, laziness level for the ponytail ladder, interview depth, review strictness, definition of done, UI design language) and seed the shared glossary. Use once per project when docs/taste.md is missing, when the user says "this isn't how we do things", "too verbose", "too much ceremony", "be lazier", or before any UI work. Every other aisdlc skill reads docs/taste.md before acting.
+description: Capture and apply a project's taste profile - code style, testing philosophy, agent verbosity, laziness level for the ponytail ladder, interview depth, review strictness, definition of done, UI design language - and seed the shared glossary. Use once per project when docs/taste.md is missing, when the user says "this isn't how we do things", "too verbose", "be lazier", or before any UI work. Every other aisdlc skill reads docs/taste.md before acting.
 license: MIT
 metadata:
   author: aisdlc

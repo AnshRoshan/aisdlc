@@ -1,6 +1,6 @@
 ---
 name: aisdlc-handoff
-description: Compact the current session into a handoff document so a fresh session, a different agent, or a human can continue without loss. Use when the user says "handoff", "hand off", "save progress", "I need to stop", "context is getting long", "continue this tomorrow", "pass this to", before /compact or /clear, when the context window is over ~70% full, or at the end of any stage that took more than one session. Writes handoff.md into the feature folder; aisdlc-flow reads it on the next start. Disk is state, chat is not.
+description: Compact the session into a handoff document so a fresh session, another agent, or a human continues without loss. Use when the user says "handoff", "save progress", "I need to stop", "context is getting long", "continue this tomorrow", before /compact or /clear, when the window is over ~70% full, or at the end of a stage that took more than one session. Writes handoff.md in the feature folder; aisdlc-flow reads it next start.
 license: MIT
 metadata:
   author: aisdlc

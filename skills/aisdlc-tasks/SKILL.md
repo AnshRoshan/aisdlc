@@ -1,6 +1,6 @@
 ---
 name: aisdlc-tasks
-description: Generate or repair tasks.md from the plan's work breakdown so every task is a small tracer bullet, traceable to a requirement, checkable, and ordered by its blocking edges, then run the read-only consistency pass and pass gate G2 (artifact consistency) with a PASS / CONCERNS / FAIL readiness verdict. Use when `aisdlc next` reports TASKS, when the user says "break this down", "tickets", "to-tickets", "analyze", "is this consistent", or when `aisdlc trace` reports uncovered requirements or unknown references.
+description: Generate or repair tasks.md from the plan's work breakdown so every task is a small tracer bullet, traceable to a requirement, checkable, ordered by blocking edges, then run the read-only consistency pass and pass gate G2 with a PASS / CONCERNS / FAIL readiness verdict. Use when `aisdlc next` reports TASKS, the user says "break this down", "tickets", "to-tickets", "analyze", "is this consistent", or `aisdlc trace` reports uncovered requirements or unknown references.
 license: MIT
 metadata:
   author: aisdlc

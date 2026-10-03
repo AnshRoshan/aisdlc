@@ -1,11 +1,11 @@
 ---
 name: aisdlc-flow
-description: The aisdlc router. Use at the start of ANY engineering task in a repo that has an aisdlc.json, aisdlc/ or docs/features/ directory, whenever the user says "next", "where are we", "what should I do", "continue", "status", or before starting brainstorm, spec, plan, build, debug, verify, review or release work. Reads deterministic state from disk via `npx aisdlc-cli next` (or by reading the files directly when the CLI is unavailable), respects the feature's lane, reads any handoff, then hands off to exactly one aisdlc-* skill. Never guesses state from chat history.
+description: The aisdlc router. Use at the start of ANY engineering task in a repo with an aisdlc.json or docs/features/ directory, when the user says "next", "where are we", "what should I do", "continue", "status", or before any stage work. Reads state from disk via `npx aisdlc-cli next` (or from the files by hand when the CLI is unavailable), respects the feature's lane, reads any handoff, then hands off to exactly one aisdlc-* skill. Never guesses state from chat history.
 license: MIT
 metadata:
   author: aisdlc
   version: "2.0"
-  role: router
+  stage: any
 ---
 
 # aisdlc-flow: the router
@@ -46,19 +46,9 @@ Your first job is always to find out **where the feature actually is**, from dis
 
 ## If `npx aisdlc-cli` is unavailable (no network, no Node, restricted sandbox)
 
-Do not stall and do not guess. Derive the state by hand from the files, using this order, and say "derived manually; CLI unavailable":
-
-1. No `docs/brief.md` and empty `spec.md` → `DISCOVER`.
-2. `spec.md` has no `### Requirement:` blocks, a requirement without `SHALL`/`MUST` or without `#### Scenario:`, or any `[NEEDS CLARIFICATION` → `SPECIFY`.
-3. §5 `Approved-by:` is underscores → `SPECIFY` (owner: human), unless lane is `spike`.
-4. Lane `standard`/`regulated`: no `plan.md` content, or no `approvals.json` entry `{gate:"G1", by:<not the author>}` → `PLAN`.
-5. Any `- [ ] T<n>` in `tasks.md` → `BUILD` (next task = first unchecked). Any `T<n>` referencing a requirement name not in the spec, or a requirement with no task → `TASKS`.
-6. No `evidence/*.json` with `label` `full` and `exitCode: 0` newer than the last task check-off → `VERIFY`.
-7. `acceptance.md` rows not all `pass` with real evidence, or unsigned → `ACCEPT`.
-8. Lane `standard`/`regulated`: `rollout.md` without `## Rollback` steps or no G5 approval → `RELEASE`; `guardrails.yaml` without `budgets`/`kill_switch` or `runbook.md` without Symptoms → `OPERATE`.
-9. Otherwise `DONE`.
-
-You may not write approvals, evidence files, or signatures by hand in this mode. Evidence without the CLI means: run the command, save its full output to `evidence/<timestamp>-<label>.log`, and record `{command, exitCode, startedAt, label, note: "recorded manually; CLI unavailable"}` in a sibling `.json`. Say so in your report.
+**Read `references/manual-derivation.md` in full and follow it before you do anything else.** It is
+the by-hand state order, and the list of things you may not simulate in that mode. Do not read it when
+the CLI works; do not improvise the derivation from memory, because the order is the check.
 
 ## Lanes (how much process a feature carries)
 
@@ -106,6 +96,14 @@ aisdlc bridges to four maintained third-party skills and degrades gracefully wit
 - If you changed files, list them and re-run `npx aisdlc-cli next`.
 - Never write the words "approved", "signed", or "PASS" about work that has no artifact behind it.
 - Never say "should work", "probably passes", or "looks good" in place of a recorded run.
+
+## Reference files
+
+Read a file only when its trigger fires. They are paths relative to this skill's folder.
+
+| file | read it when |
+|---|---|
+| `references/manual-derivation.md` | `npx aisdlc-cli` cannot run at all |
 
 ## Where things live
 

@@ -1,6 +1,6 @@
 ---
 name: aisdlc-spec
-description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc-cli check spec`. Use when `aisdlc next` reports SPECIFY, when the user says "write the spec", "spec it", "requirements", "to-spec", or when a spec has [NEEDS CLARIFICATION] markers, requirements without SHALL, or requirements without scenarios. Covers happy, failure and edge scenarios, non-functional requirements, test seams, an interaction contract for frontend/mobile kinds, and the project's glossary terms; runs a two-pass adversarial review (within each requirement and across requirement pairs) to catch conflicts and ambiguous quantifiers; uses aisdlc-grill to close open questions; has a compact mode for the quick lane. The spec is the source of truth for everything downstream.
+description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc-cli check spec`. Use when `aisdlc next` reports SPECIFY, the user says "write the spec", "spec it", "requirements", "to-spec", or a spec still has [NEEDS CLARIFICATION], a requirement without SHALL, or without a Scenario. Covers happy, failure and edge scenarios, non-functionals, test seams, the UI interaction contract and glossary terms, and runs a two-pass adversarial review for conflicts and vague quantifiers.
 license: MIT
 metadata:
   author: aisdlc
@@ -71,6 +71,11 @@ Primary journey: <one line: who does what, in order>
 States: default · loading · empty (<what the user sees with no data>) · error (<what it says and what they can do>) · offline (if applicable)
 A11y bar: <keyboard path, focus order, contrast/label rule — from docs/taste.md §UI, not invented here>
 Touch targets / density: <only if it differs from the taste profile>
+
+## 9. Value sourcing
+| Value | Source | How obtained |
+|---|---|---|
+| <every field, number, message, state and file this feature produces, computes or displays> | <requirement name / API response / stored record / derived from X> | <the call, query or computation that yields it> |
 ```
 
 Hard rules the validator checks:
@@ -79,6 +84,7 @@ Hard rules the validator checks:
 - Zero `[NEEDS CLARIFICATION: ...]` markers remain when you claim the spec is ready. While drafting, **use them liberally**; a marker is honest, a guess is not.
 - §5 `Approved-by:` is left for a human. Never fill it. Underscores mean unsigned. (Lane `spike` does not require a signature.)
 - §6 rows whose Status is not `done`/`resolved`/`closed`/`n/a` are reported as warnings.
+- §9 exists. Every value has a named source, or the section says `n/a: <why>` (G2 fails either way otherwise). A value with no source is not wiring, it is a decision the spec has not made yet.
 
 Rules the validator cannot check but the reviewer will:
 - Every requirement has at least one **unhappy** scenario (IF/THEN) unless it is genuinely impossible to fail; say so if so.
@@ -86,6 +92,7 @@ Rules the validator cannot check but the reviewer will:
 - Section 4 has, at minimum, one line each for auth (who may not), data (what is stored/retained/PII), and a performance or size budget with a number, or explicitly `n/a: <why>`.
 - Section 7 names the seams; prefer existing seams, the highest level that still isolates the behaviour, and as few as possible. Tests will live there and nowhere else.
 - For kinds `frontend` and `mobile`, §8 exists and is filled from `docs/taste.md` §UI — a spec with no states section will be built with invented loading and empty states.
+- **§9 is built by walking the THEN clauses, not by asking yourself how you feel.** For each requirement, list every thing the system must hand over: a field, a computed number, a message, a state, a file, an ID. Name the source of each. "Do I feel like I'm inventing something" is not a test, because the model that has to make the call rationalises a real design decision as plumbing; an enumerated list with a named source per row cannot be rationalised past.
 - **No two requirements contradict.** Two `SHALL`s that no single implementation can satisfy (retry forever vs. fail fast; log everything vs. never log PII; always sync vs. offline-first) is the most expensive class of spec bug, and it survives every per-requirement check because each requirement is individually valid. Read the requirement pairs against each other, not just each against its scenarios.
 - **No ambiguous quantifier survives without a number.** "quickly", "many", "large", "as needed", "frequently", "appropriate" — every one of them becomes two different implementations. Replace with a value or mark `[NEEDS CLARIFICATION: what number?]`.
 - **No requirement describes implementation** that the plan does not yet own ("use Redis", "call the Stripe API"). Behaviour here; technology in `plan.md` Decisions.

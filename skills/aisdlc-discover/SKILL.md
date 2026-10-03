@@ -1,6 +1,6 @@
 ---
 name: aisdlc-discover
-description: Double-Diamond discovery intake for a new idea or feature in the standard or regulated lane. Use when the user has a vague idea, says "I want to build", "new feature", "help me figure out what to build", or when `aisdlc next` reports DISCOVER and aisdlc-brainstorm has classified the work. Runs JTBD, workaround mining, 5 Whys, problem statement, How-Might-We, MoSCoW, riskiest assumption and rejection criteria using the aisdlc-grill interview discipline, seeds docs/glossary.md, then writes docs/brief.md and seed EARS requirements. Ends in an explicit verdict — build, spike first, defer, or do not build — so a bad idea can die cheaply instead of becoming a spec.
+description: Double-Diamond discovery intake for a new idea in the standard or regulated lane. Use when the idea is vague, the user says "I want to build" or "new feature", or `aisdlc next` reports DISCOVER. Runs JTBD, workaround mining, 5 Whys, How-Might-We, MoSCoW and the riskiest assumption with the aisdlc-grill interview discipline, seeds docs/glossary.md, writes docs/brief.md and seed EARS requirements. Ends in a verdict - build, spike first, defer, or do not build - so a bad idea dies cheaply.
 license: MIT
 metadata:
   author: aisdlc

@@ -1,6 +1,6 @@
 ---
 name: aisdlc-ponytail
-description: Bridge to Ponytail, the "lazy senior developer" discipline that forces the simplest, shortest solution that actually works (YAGNI, stdlib before custom code, native platform before dependencies, one line before fifty). Use on every coding task inside aisdlc (plan decisions, implement, review), whenever the user says "ponytail", "be lazy", "simplest", "minimal", "yagni", "do less", or complains about bloat, boilerplate, or over-engineering. Prefers the official ponytail skill (DietrichGebert/ponytail) when installed and falls back to an embedded copy of its ladder and rules; adds the aisdlc-specific list of things you are never allowed to be lazy about (evidence, gates, secrets, spec).
+description: Bridge to Ponytail, the lazy-senior-developer discipline that forces the simplest solution that actually works (YAGNI, stdlib before custom code, native platform before dependencies, one line before fifty). Use on every coding task - plan decisions, implement, review - when the user says "ponytail", "be lazy", "simplest", "minimal", "yagni", "do less", or complains about bloat. Prefers the official ponytail skill when installed, and names what you may never be lazy about.
 license: MIT
 metadata:
   author: aisdlc

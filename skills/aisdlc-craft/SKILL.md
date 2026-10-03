@@ -1,6 +1,6 @@
 ---
 name: aisdlc-craft
-description: Bridge to code-craft, the line-level clean-code discipline (the ladder before writing, smell→fix on touched lines only, dead-code deletion with dynamic-reference checks, honest types, rule of three). Use inside aisdlc during BUILD and review, whenever you are about to write or refactor code and want the least, cleanest, properly-typed result - over-engineering, dead/unused code, deep nesting, fat interfaces, any/casts, swallowed errors, copy-paste duplication, god classes. Prefers the official code-craft skill (AnshRoshan/ansh-other-skills) when installed and falls back to an embedded distillation; adds the aisdlc-specific scope rules (craft serves the spec, blast radius, flag-don't-fix, deletion needs evidence).
+description: Bridge to code-craft, the line-level clean-code discipline. Use during BUILD and review, before writing or refactoring code, over anything: over-engineering, dead code, deep nesting, any/casts, swallowed errors, duplication. Prefers the official code-craft skill (AnshRoshan/ansh-other-skills) when installed, falls back to an embedded distillation, and adds the aisdlc scope rules - craft serves the spec, touched lines only.
 license: MIT
 metadata:
   author: aisdlc

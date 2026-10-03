@@ -1,6 +1,6 @@
 ---
 name: aisdlc-delta
-description: Handle any change of intent after the spec is signed - new requirement, changed behaviour, removed scope, a bug that reveals the spec was wrong. Use when the user says "actually", "change of plan", "can we also", "that's not what I meant", or when implementation discovers behaviour the spec does not cover. Writes a delta file, updates the spec explicitly, and invalidates stale approvals on purpose.
+description: Any change of intent after the spec is signed - new requirement, changed behaviour, removed scope, or a bug that reveals the spec was wrong. Use when the user says "actually", "change of plan", "can we also", "that's not what I meant", or implementation meets behaviour the spec does not cover. Writes a delta file, updates the spec explicitly, and invalidates stale approvals on purpose.
 license: MIT
 metadata:
   author: aisdlc

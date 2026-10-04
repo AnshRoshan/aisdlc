@@ -1,8 +1,11 @@
 ---
 import "../styles/global.css";
 import { base } from "../lib/base.js";
-const { title, description = "Agents write code. aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
+const { title, description = "Agents write code, aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
 const REPO = "https://github.com/AnshRoshan/aisdlc";
+const path = Astro.url.pathname.replace(base, "") || "/";
+const link = (href) => `${base}${href}`;
+const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
 ---
 <!doctype html>
 <html lang="en">
@@ -10,27 +13,63 @@ const REPO = "https://github.com/AnshRoshan/aisdlc";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="generator" content={Astro.generator} />
+    <meta property="og:title" content={title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process"} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
     <title>{title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process"}</title>
-    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="icon" href={link("/favicon.svg")} type="image/svg+xml" />
   </head>
   <body>
+    <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
-      <nav class="nav">
-        <a href={`${base}/`} class="brand">aisdlc</a>
+      <nav class="nav" aria-label="Main">
+        <a href={link("/")} class="brand"><i>▸</i>aisdlc</a>
         <div class="nav-links">
-          <a href={`${base}/skills`}>Skills</a>
-          <a href={`${base}/docs`}>Docs</a>
-          <a href={`${base}/#faq`}>FAQ</a>
-          <a href={REPO} class="nav-cta">star on github ↗</a>
+          <a href={link("/skills")} aria-current={here("/skills") ? "page" : undefined}>Skills</a>
+          <a href={link("/docs")} aria-current={here("/docs") ? "page" : undefined}>Tour</a>
+          <a href={link("/#faq")}>FAQ</a>
+          <a href={REPO} class="nav-cta">star on github</a>
         </div>
       </nav>
     </header>
-    <main>
+    <main id="main">
       <slot />
     </main>
     <footer class="site-footer">
-      <p>MIT licensed. <a href={REPO}>AnshRoshan/aisdlc</a>. Every claim on this page is a file check, not a vibe.</p>
+      <div class="footer-grid">
+        <div>
+          <h4>aisdlc</h4>
+          <p class="footer-note">A process kit for AI-assisted engineering. Local-first: no server, no account, no telemetry. Every claim is a file check.</p>
+        </div>
+        <div>
+          <h4>Use it</h4>
+          <ul>
+            <li><a href={link("/docs")}>Ten-minute tour</a></li>
+            <li><a href={link("/skills")}>All 20 skills</a></li>
+            <li><a href={link("/#how")}>The six gates</a></li>
+            <li><a href={link("/#guard")}>The guard mod</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Repository</h4>
+          <ul>
+            <li><a href={REPO}>Source</a></li>
+            <li><a href={`${REPO}/blob/main/docs/RESEARCH.md`}>Design decisions</a></li>
+            <li><a href={`${REPO}/blob/main/CHANGELOG.md`}>Changelog</a></li>
+            <li><a href={`${REPO}/blob/main/CONTRIBUTING.md`}>Contributing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Install</h4>
+          <ul>
+            <li><a href={`${REPO}/#install`}>Claude Code plugin</a></li>
+            <li><a href="https://github.com/AnshRoshan/aisdlc#install">skills.sh</a></li>
+            <li><a href="https://www.npmjs.com/package/aisdlc">npm (pending)</a></li>
+            <li><a href={`${REPO}/issues`}>Issues</a></li>
+          </ul>
+        </div>
+      </div>
+      <p class="footer-bar">MIT · © Ansh Roshan · agents write code, aisdlc runs the process</p>
     </footer>
   </body>
 </html>

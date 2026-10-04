@@ -1,75 +1,86 @@
 ---
 import Base from "../layouts/Base.astro";
----
-<Base title="Docs">
-  <article class="wrap" style="padding-top:3.5rem;max-width:52rem;">
-    <h1 style="font-size:clamp(2.2rem,5vw,3.2rem);font-weight:700;max-width:22ch;">From idea to production, with receipts.</h1>
-    <p class="lede">The ten-minute tour. Everything below is the real CLI; nothing is mocked.</p>
+import { base } from "../lib/base.js";
+import { getSkills } from "../lib/skills";
 
-    <section style="margin-top:3.5rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Install into the repo you are already in</h2>
-      <pre class="term">cd /path/to/your/repo
+const SKILL_COUNT = getSkills().length;
+
+const STEPS = [
+  ["install", "Install into the repo you are already in", `cd /path/to/your/repo
 <span class="p">npx skills add AnshRoshan/aisdlc</span>        <span class="c"># the skills, into every harness it finds</span>
-<span class="c"># the CLI + process tree, from a clone until aisdlc-cli is on npm:</span>
+<span class="c"># the CLI and the process tree, from a clone until aisdlc-cli is on npm:</span>
 git clone https://github.com/AnshRoshan/aisdlc
-<span class="p">node aisdlc/packages/cli/bin/aisdlc.js init</span></pre>
-      <p class="lede">This writes the skills into your harness's skill directories, a <code>docs/</code> process tree, and an <code>aisdlc.json</code> marker. Claude Code users can instead install the plugin: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then <code>/plugin install aisdlc@aisdlc</code> for the skills plus <code>/aisdlc-next</code> and <code>/aisdlc-status</code> commands. Every <code>aisdlc</code> command below is that same binary, whichever way you got it.</p>
-    </section>
-
-    <section style="margin-top:3rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Open a feature with a lane</h2>
-      <pre class="term"><span class="p">aisdlc new</span> "Payment retries" --kind backend</pre>
-      <p class="lede">Pick a lane: <strong>spike</strong> (a question), <strong>quick</strong> (bounded change), <strong>standard</strong> (new capability), <strong>regulated</strong> (money, PII, auth). The lane decides which gates apply, and only moves up.</p>
-    </section>
-
-    <section style="margin-top:3rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Talk to your agent</h2>
-      <pre class="term">use aisdlc-brainstorm, I want to build payment retries</pre>
-      <p class="lede">The brainstorm skill classifies the work, interviews you with recommended answers, and routes to <code>aisdlc-discover</code> → <code>aisdlc-spec</code>. The spec is EARS-format; you sign §5. No one signs it for you.</p>
-    </section>
-
-    <section style="margin-top:3rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Let the gates referee</h2>
-      <pre class="term"><span class="p">aisdlc next</span> payment-retries --json</pre>
-      <p class="lede">Every stage ends with this. It reads the files, derives the state, names the blocking items and the one skill to load next. The agent obeys the disk, not the chat.</p>
-    </section>
-
-    <section style="margin-top:3rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Approve as a human</h2>
-      <pre class="term"><span class="p">aisdlc approve</span> G1 payment-retries --by "Ansh"
-<span class="e">refused: you authored plan.md</span></pre>
-      <p class="lede">Approvals are bound to the hash of the artifact. Edit the plan afterwards and the approval goes stale, and the CLI sends the state backwards. Agents can never approve; the approver can never be the author.</p>
-    </section>
-
-    <section style="margin-top:3rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">Verify, don't trust</h2>
-      <pre class="term"><span class="p">aisdlc evidence payment-retries --label full</span> -- npm test
+<span class="p">node aisdlc/packages/cli/bin/aisdlc.js init</span>`,
+   "This writes the skills into your harness's skill directories, a `docs/` process tree and an `aisdlc.json` marker. Claude Code can take the plugin instead: `/plugin marketplace add AnshRoshan/aisdlc`, then `/plugin install aisdlc@aisdlc`, which also brings the guard mod. Every `aisdlc` command below is that same binary, whichever way you got it."],
+  ["new", "Open a feature with a lane", `<span class="p">aisdlc new</span> "Payment retries" --kind backend --lane standard`,
+   "Pick a lane: **spike** (a question), **quick** (bounded change), **standard** (new capability), **regulated** (money, PII, auth). The lane decides which gates apply, and it only moves up. `aisdlc kinds` prints what each kind has to verify."],
+  ["brainstorm", "Talk to your agent", `use aisdlc-brainstorm, I want to build payment retries`,
+   "The brainstorm skill classifies the work, interviews you with a recommended answer beside every question, and routes to `aisdlc-discover` then `aisdlc-spec`. The spec is EARS format and you sign §5. Nobody signs it for you."],
+  ["next", "Let the gates referee", `<span class="p">aisdlc next</span> payment-retries --json
+state: BUILD · owner: human · blocking: G1 approval (0/1 on current plan hash)`,
+   "Every stage ends with this. It reads the files, derives the state, names the blocking items and the one skill to load. The agent obeys the disk, not the chat, so a fresh session costs nothing to orient."],
+  ["approve", "Approve as a human", `<span class="p">aisdlc approve</span> G1 payment-retries --by "Ansh"
+<span class="e">✗ segregation of duties: "Ansh" is the author of payment-retries</span>`,
+   "Approvals are bound to the hash of the artifact. Edit the plan afterwards and the approval goes stale and the state moves backwards. Agents cannot approve at all, and the author cannot approve their own work."],
+  ["evidence", "Verify, do not trust", `<span class="p">aisdlc evidence payment-retries --label full</span> -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
-<span class="p">evidence/20260906T154412-full.json</span> recorded</pre>
-      <p class="lede"><code>aisdlc evidence</code> runs the command itself and records a hash-chained evidence file. "Tests pass" without a recorded run is not a state the process accepts.</p>
-    </section>
+<span class="k">evidence/2026-10-04T09-12-03-full.json</span> recorded`,
+   "`aisdlc evidence` runs the command itself and records the exit code and output hash. A test run the agent watched instead of recorded is not evidence, which is exactly what the guard mod holds in Claude Code."],
+  ["review", "Get a second model over the diff", `<span class="p">aisdlc gate</span> G4 payment-retries
+<span class="e">✗ review ran on a different model than wrote the code  both on opus</span>`,
+   "G4 reads `Author model` and `Reviewer model` out of `acceptance.md` and fails a same-family pair. If only one family is configured, the honest line is `Cross-model: degraded (why)`, and the gate prints that it is not the guarantee."],
+];
 
-    <section style="margin-top:3.5rem;">
-      <h2 style="font-size:1.35rem;font-weight:650;">The full command set</h2>
-      <div class="panel" style="padding:0.4rem 1.4rem;margin-top:1rem;">
-        <table class="skill">
-          <tbody>
-            <tr><td>aisdlc init</td><td>install skills, instructions, slash commands and read-only subagents, detected for your harness</td></tr>
-            <tr><td>aisdlc doctor</td><td>what is installed where, which companions, which test gate</td></tr>
-            <tr><td>aisdlc skills / kinds</td><td>list the bundled skills; print each kind's verify model and each lane's gates</td></tr>
-            <tr><td>aisdlc new</td><td>open a feature with a kind and a lane</td></tr>
-            <tr><td>aisdlc next / status</td><td>derive state from disk: blockers, next task, the skill to load; or every feature at once</td></tr>
-            <tr><td>aisdlc check</td><td>validate a spec (EARS) or a delta file</td></tr>
-            <tr><td>aisdlc trace</td><td>requirement → task matrix</td></tr>
-            <tr><td>aisdlc gate / gates</td><td>run one of G1-G6, or all six</td></tr>
-            <tr><td>aisdlc scan</td><td>secrets over tracked files</td></tr>
-            <tr><td>aisdlc evidence</td><td>run a command and record the run as evidence</td></tr>
-            <tr><td>aisdlc approve</td><td>human gate approval (G1, G4, G5); refuses agents and refuses the author</td></tr>
-            <tr><td>aisdlc lane</td><td>show or raise a feature's lane; lowering needs --force with a note</td></tr>
-            <tr><td>aisdlc audit</td><td>approval chain integrity plus the evidence log</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </article>
+const COMMANDS = [
+  ["aisdlc init", "install skills, instructions, slash commands and read-only subagents, detected for your harness"],
+  ["aisdlc doctor", "what is installed where, which companions, which test gate"],
+  ["aisdlc skills / kinds", "list the bundled skills; print each kind's verify model and each lane's gates"],
+  ["aisdlc new", "open a feature with a kind and a lane"],
+  ["aisdlc next / status", "derive state from disk: blockers, next task, the skill to load; or every feature at once"],
+  ["aisdlc check", "validate a spec (EARS) or a delta file"],
+  ["aisdlc trace", "requirement to task matrix"],
+  ["aisdlc gate / gates", "run one of G1-G6, or all six"],
+  ["aisdlc scan", "secrets over tracked files"],
+  ["aisdlc evidence", "run a command and record the run as evidence"],
+  ["aisdlc approve", "human gate approval (G1, G4, G5); refuses agents and refuses the author"],
+  ["aisdlc lane", "show or raise a feature's lane; lowering needs --force with a note"],
+  ["aisdlc audit", "approval chain integrity plus the evidence log"],
+];
+---
+<Base title="Tour" description="The ten-minute tour of aisdlc: install, open a feature, sign a spec, pass six gates.">
+  <div class="wrap doc">
+    <nav class="doc-rail" aria-label="Tour steps">
+      {STEPS.map(([id]) => <a href={`#${id}`}>{id[0].toUpperCase() + id.slice(1)}</a>)}
+      <a href="#commands">Commands</a>
+    </nav>
+
+    <article class="doc-body">
+      <h1>From idea to production, with receipts.</h1>
+      <p class="lede">The ten-minute tour. Every output below is the real CLI; nothing is mocked.</p>
+
+      {STEPS.map(([id, title, term, body], i) => (
+        <section id={id}>
+          <h2><span class="step-n">step {String(i + 1).padStart(2, "0")}</span>{title}</h2>
+          <pre class="term" set:html={term} />
+          <p class="lede" set:html={body.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")} />
+        </section>
+      ))}
+
+      <section id="commands">
+        <h2><span class="step-n">reference</span>The command set</h2>
+        <div class="panel" style="padding:0.4rem 1.25rem;margin-top:1.25rem;">
+          <table class="data">
+            <tbody>
+              {COMMANDS.map(([cmd, what]) => <tr><td>{cmd}</td><td>{what}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+        <p class="lede" style="margin-top:2rem;">
+          Next: <a href={`${base}/skills`}>all {SKILL_COUNT} skills</a>, or read
+          <a href="https://github.com/AnshRoshan/aisdlc"> the README</a>. Every claim on this page is checked in CI
+          against the CLI's own command table, so a command that stops existing fails the build.
+        </p>
+      </section>
+    </article>
+  </div>
 </Base>

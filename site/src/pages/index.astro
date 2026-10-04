@@ -1,19 +1,22 @@
 ---
 import Base from "../layouts/Base.astro";
 import { base } from "../lib/base.js";
-import { getSkills, skillSlug } from "../lib/skills";
+import { getSkills, skillSlug, shortDesc } from "../lib/skills";
 
 const skills = getSkills();
 
-const STAGES = ["DISCOVER", "SPEC", "PLAN", "TASKS", "BUILD", "VERIFY", "ACCEPT", "RELEASE", "OPERATE"];
+const STAGES = [
+  ["DISCOVER", "done"], ["SPEC", "done"], ["PLAN", "done"], ["TASKS", "done"],
+  ["BUILD", "done"], ["VERIFY", "now"], ["ACCEPT", "hold"], ["RELEASE", ""], ["OPERATE", ""],
+];
 
 const GATES = [
-  { id: "G1", name: "Plan approval", checks: ["plan.md is real, not a stub", "approval bound to the plan's hash", "approver ≠ author"] },
-  { id: "G2", name: "Artifact consistency", checks: ["spec passes EARS validation", "§5 signed by a human", "every requirement traced to a task", "every value the build produces names its source (§9)"] },
-  { id: "G3", name: "Merge safety", checks: ["secrets scan clean", "full test run recorded as evidence (or the repo's declared test policy, printed)", "latest run exit code 0"] },
-  { id: "G4", name: "Acceptance proof", checks: ["every scenario has an evidence file", "the file a row cites is one the CLI recorded", "review ran on a different model than wrote the code", "every row passes", "independent human sign-off"] },
-  { id: "G5", name: "Release approval", checks: ["rollout has concrete rollback steps", "release owner approval on rollout hash"] },
-  { id: "G6", name: "Runtime guardrails", checks: ["budgets: latency, errors, cost", "named kill switch", "runbook with symptoms → actions"] },
+  { id: "G1", name: "Plan approval", who: "human, not the author", checks: ["plan.md exists and is not a stub", "approval bound to the plan's hash", "approver ≠ author, agents refused"] },
+  { id: "G2", name: "Artifact consistency", who: "the CLI, from files", checks: ["spec passes EARS validation", "every requirement traced to a task", "every value the build produces names its source"] },
+  { id: "G3", name: "Merge safety", who: "the CLI, from a run it spawned", checks: ["secrets scan clean across tracked files", "full suite recorded, or the declared test policy printed", "latest run exit code 0"] },
+  { id: "G4", name: "Acceptance proof", who: "reviewer plus a human signature", checks: ["every scenario cites a recorded evidence file", "review ran on a different model than wrote the code", "signed by a human who is not the author"] },
+  { id: "G5", name: "Release approval", who: "human, on the rollout hash", checks: ["rollback written as steps, not intent", "approval invalidated the moment rollout.md changes"] },
+  { id: "G6", name: "Runtime guardrails", who: "the CLI, from config", checks: ["budgets named with numbers from a baseline", "kill switch that exists in the deployed config", "runbook maps symptoms to first actions"] },
 ];
 
 const INVARIANTS = [
@@ -21,94 +24,136 @@ const INVARIANTS = [
   ["Gates are transitions, not suggestions", "No evidence, no progress. The CLI refuses to move the state forward."],
   ["Approver is never the author", "Segregation of duties is enforced by the tool, and agents cannot approve at all."],
   ["Humans own the acceptance bar", "Approved-by lines are human-signed. Underscores mean unsigned."],
-  ["Done means a recorded run", "Every test run is captured with command, exit code and output hash. Claims without artifacts do not count."],
-  ["Disk is state, chat is not", "aisdlc next derives the truth from files. Same files, same answer, any machine, any model."],
+  ["Done means a recorded run", "Command, exit code, output hash. Claims without artifacts do not count."],
+  ["Disk is state, chat is not", "aisdlc next derives the truth from files. Same files, same answer, any machine."],
   ["Secrets never land in files", "Eight pattern families, placeholder-aware, blocks G3."],
   ["Fail loud, never fake green", "Infra down means IMPLEMENTED-NOT-VERIFIED, not PASS."],
+];
+
+const HOLDS = [
+  ["a bare npm test while a feature is open", "the run records nothing, so the claim is prose", "invariant 5"],
+  ["any aisdlc approve the agent tries to run", "approvals are human actions, held before the call", "invariants 3 and 4"],
+  ["an edit to a signed spec.md", "intent changes go through a delta, not a quiet rewrite", "invariant 1"],
+  ["a write to evidence/ or approvals.json", "those are the files the gates trust; a hand-made one is a forged one", "invariant 2"],
 ];
 
 const FAQ = [
   ["Is this a SaaS? Do I need an account?", "No. It is a folder of SKILL.md files and a zero-dependency Node CLI. Everything runs on your machine against your own repo. There is no server, no telemetry and nothing to sign up for."],
   ["Which model or subscription do I need?", "Whatever you already have. The skills are plain Markdown in the open Agent Skills format, so Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot, Windsurf, OpenCode and local open-weight models all read them the same way."],
-  ["What is the difference between the skills and the CLI?", "Skills tell the agent how to behave at each stage. The CLI is the referee: it validates EARS specs, derives the state, runs the six gates, records evidence and holds the approval chain. Skills without the CLI still work; the CLI is what makes “done” mean something."],
+  ["What is the difference between the skills and the CLI?", "Skills tell the agent how to behave at each stage. The CLI is the referee: it validates EARS specs, derives the state, runs the six gates, records evidence and holds the approval chain. Skills without the CLI still work; the CLI is what makes done mean something."],
   ["How is this different from Spec Kit or BMAD?", "Those give you excellent templates and advice. aisdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, an evidence log that cannot be faked by prose, and segregation of duties the agent cannot bypass."],
   ["Can I use it on an existing codebase?", "Yes, that is what aisdlc-brownfield is for: baseline, characterization tests and named seams before any delta-only change is allowed."],
-  ["Is it free?", "MIT licensed. Fork it, vendor it, ship it inside your company. If you find it useful, star the repo and file issues."],
+  ["What does this cost my agent in context?", "A skill loads in full on the branch that uses it, so the corpus is budgeted and checked: per-file byte ceilings, per-path budgets for what a real run actually loads, and descriptions kept short because they load into every session. Run the checker to see the numbers."],
+  ["Is it free?", "MIT licensed. Fork it, vendor it, ship it inside your company. If it is useful, star the repo and file issues."],
 ];
 
 const stageGroups = ["any", "discover", "specify", "plan", "tasks", "build", "verify", "accept", "release"];
 const groupLabel = (g) => (g === "any" ? "cross-cutting" : g);
+const link = (href) => `${base}${href}`;
 ---
 <Base>
   <section class="hero wrap">
-    <p class="hashline">docs/features/payment-retries/ · state: <b id="hero-state">BUILD</b>, next: aisdlc-implement</p>
-    <h1>Agents write code. aisdlc runs the process.</h1>
-    <p class="sub">
-      EARS specs, six evidence gates, and an evidence log your agent cannot fake.
-      Local-first, any harness. <strong>Your laptop is the sandbox.</strong>
-    </p>
-    <div class="cta-block">
+    <div class="hero-grid">
       <div>
-        <div class="cmdline"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy="cmd-main">copy</button></div>
-        <p class="install-note">Skills into every harness it finds. Claude Code: <code>/plugin marketplace add AnshRoshan/aisdlc</code>. The CLI ships as <code>aisdlc-cli</code> on npm at the next release; until then it runs from a clone.</p>
+        <h1>Agents write code. <em>aisdlc</em> runs the process.</h1>
+        <p class="lede">
+          EARS specs, six evidence gates, and an evidence log your agent cannot fake.
+          Local-first, any harness. Your laptop is the sandbox.
+        </p>
+        <div class="cmdline"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy>copy</button></div>
+        <p class="install-note">
+          Skills into every harness it finds. Claude Code: <code>/plugin marketplace add AnshRoshan/aisdlc</code>.
+          The CLI ships as <code>aisdlc-cli</code> on npm at the next release; until then it runs from a clone.
+        </p>
+        <div class="cta-row">
+          <a href={link("/docs")} class="btn btn-primary">Take the ten-minute tour</a>
+          <a href="https://github.com/AnshRoshan/aisdlc" class="btn btn-ghost">Star on GitHub</a>
+        </div>
       </div>
-      <div class="cta-row">
-        <a href={`${base}/docs`} class="btn btn-primary">Read the ten-minute tour</a>
-        <a href="https://github.com/AnshRoshan/aisdlc" class="btn btn-ghost">Star on GitHub</a>
+
+      <div class="hero-art">
+        <figure class="ledger" aria-label="A real evidence log, as the CLI writes it">
+          <figcaption class="ledger-head"><span class="dot" aria-hidden="true"></span><b>docs/features/payment-retries/evidence/</b> · 3 runs</figcaption>
+          <div class="ledger-row ok">
+            <span class="cmd">npm test</span>
+            <span class="out">41 passed · 8.2s · sha256 e3f1…9b7c</span>
+            <span class="exit">0</span>
+          </div>
+          <div class="ledger-row ok">
+            <span class="cmd">aisdlc scan</span>
+            <span class="out">0 findings across 214 tracked files</span>
+            <span class="exit">0</span>
+          </div>
+          <div class="ledger-row no blocked">
+            <span class="cmd">aisdlc approve G1 --by Ansh</span>
+            <span class="out">refused: approver is the author</span>
+            <span class="exit">1</span>
+          </div>
+          <p class="ledger-foot">
+            <em>state stayed BUILD.</em> A signature you did not earn is not a signature, so the pipeline
+            moved backwards on purpose and the next <code>aisdlc next</code> says who is blocked.
+          </p>
+        </figure>
+        <p class="ledger-note">Nothing here is a status message. Each row is a file with a hash, and the gate reads the file.</p>
       </div>
     </div>
   </section>
 
-  <section class="wrap" style="margin-top:4rem;">
-    <div class="panel">
-      <ol class="flow" id="pipeline" aria-label="The process states">
-        {STAGES.map((s, i) => (
-          <li data-stage={s} class={i < 4 ? "done" : i === 4 ? "now" : ""} style={i < STAGES.length - 1 ? "margin-right:auto" : ""}>
-            {s.toLowerCase()}
-          </li>
-        ))}
-      </ol>
-    </div>
+  <section class="wrap" style="margin-top:clamp(2.5rem,5vw,4rem);" aria-label="The nine process states">
+    <ol class="states panel">
+      {STAGES.map(([s, k], i) => (
+        <>
+          <li class={`state ${k}`}>{s.toLowerCase()}</li>
+          {i < STAGES.length - 1 && <li class="tick" aria-hidden="true">→</li>}
+        </>
+      ))}
+    </ol>
+    <p class="kicker" style="margin-top:0.85rem;">VERIFY is waiting on a recorded run · ACCEPT is held by a human signature</p>
   </section>
 
-  <section class="section wrap split">
-    <div>
-      <h2 class="h2">“All tests pass” is a sentence. A run is a file.</h2>
-      <p class="lede">
-        The agent wrote the sentence it predicted you wanted. Nothing ran. aisdlc only counts a run it recorded itself:
-        command, exit code, output hash, timestamp, appended to an evidence log in your repo, reviewable in a PR.
-      </p>
-      <p class="lede">
-        And when a requirement quietly drifts to match the code at 2 a.m., aisdlc turns the edit into a delta, invalidates
-        the stale approvals, and moves the state backwards on purpose. The agent tried to approve its own plan? Refused.
-      </p>
-    </div>
-    <pre class="term" aria-label="Example terminal session"><span class="c"># example session: the author tried to approve their own plan; the tool said no</span>
+  <section class="section wrap">
+    <div class="hero-grid">
+      <div>
+        <h2 class="h2">“All tests pass” is a sentence. A run is a file.</h2>
+        <p class="lede">
+          The agent wrote the sentence it predicted you wanted. Nothing ran. aisdlc only counts a run it
+          recorded itself: command, exit code, output hash, timestamp, appended to an evidence log in your
+          repo and reviewable in the PR.
+        </p>
+        <p class="lede" style="margin-top:1.1rem;">
+          And when a requirement quietly drifts to match the code at 2 a.m., the edit becomes a delta, the
+          stale approvals go invalid, and the state moves backwards on purpose.
+        </p>
+      </div>
+      <pre class="term" aria-label="Terminal session"><span class="c"># the author tried to approve their own plan</span>
 $ <span class="p">aisdlc evidence payment-retries --label full</span> -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
-<span class="p">evidence/20260906T154412-full.json</span> recorded
+<span class="k">evidence/2026-10-04T09-12-03-full.json</span> recorded
 sha256:e3f1…9b7c · label: full
 
 $ <span class="p">aisdlc approve</span> G1 payment-retries --by "Ansh"
-<span class="e">refused: you authored plan.md</span>
-<span class="c">segregation of duties: approver ≠ author</span>
+<span class="e">✗ segregation of duties: "Ansh" is the author</span>
 
 $ <span class="p">aisdlc next</span> payment-retries --json
-state: VERIFY · blocking: acceptance.md unsigned
-next skill: aisdlc-verify · owner: agent</pre>
+state: <span class="k">BUILD</span> · owner: human · blocking: G1 approval</pre>
+    </div>
   </section>
 
   <section id="how" class="section wrap">
-    <h2 class="h2">Six gates between an idea and production. Each one is a file check.</h2>
-    <p class="lede">
-      The agent runs <code>aisdlc next</code>, gets the state and the skill to load, does the work, and runs it again.
-      Humans are asked for exactly two things: signatures and approvals. Skipped lanes show as <code>skipped</code>, and they
-      are not failures.
+    <h2 class="h2">Six gates. Each one is a file check.</h2>
+    <p class="lede" style="margin-top:1.2rem;">
+      The agent runs <code>aisdlc next</code>, gets the state and the one skill to load, does the work, and runs
+      it again. Humans are asked for exactly two things: signatures and approvals. A lane can skip a gate, and a
+      skip prints as <code>skipped</code>, never as a pass.
     </p>
-    <div class="panel" style="margin-top:2.5rem;">
+    <div class="gate-list" style="margin-top:2.5rem;">
       {GATES.map((g) => (
         <div class="gate">
-          <span class="gid">{g.id}</span><strong>{g.name}</strong>
+          <span class="gid">{g.id}</span>
+          <div>
+            <span class="gname">{g.name}</span>
+            <span class="gwho">{g.who}</span>
+          </div>
           <ul>{g.checks.map((c) => <li>{c}</li>)}</ul>
         </div>
       ))}
@@ -116,14 +161,14 @@ next skill: aisdlc-verify · owner: agent</pre>
   </section>
 
   <section class="section wrap">
-    <h2 class="h2">Eight invariants, written to every project the CLI touches.</h2>
-    <p class="lede">
-      They land in <code>docs/constitution.md</code> and in your agent's instructions file. You add your own below the
-      line; the tool enforces these eight so you never have to remember them.
+    <h2 class="h2">Eight invariants, written into every repo the CLI touches.</h2>
+    <p class="lede" style="margin-top:1.2rem;">
+      They land in <code>docs/constitution.md</code> and in your agent's instructions file. You add your own below
+      the line; these eight are enforced so nobody has to remember them.
     </p>
-    <div class="invariant-grid">
+    <div class="invariants">
       {INVARIANTS.map(([h, p], i) => (
-        <div class="invariant">
+        <div class="inv">
           <span class="n">{String(i + 1).padStart(2, "0")}</span>
           <div><strong>{h}</strong><p>{p}</p></div>
         </div>
@@ -131,25 +176,50 @@ next skill: aisdlc-verify · owner: agent</pre>
     </div>
   </section>
 
+  <section id="guard" class="section wrap">
+    <div class="hero-grid">
+      <div>
+        <h2 class="h2">A referee only sees what gets reported.</h2>
+        <p class="lede">
+          So in Claude Code the guard mod runs inside the agent's process and holds the four moves that used to be
+          invisible. It fails open when it cannot decide, and nothing else in the kit depends on it: the other six
+          harnesses keep the same contract without the interception.
+        </p>
+      </div>
+      <div class="panel">
+        <table class="data data-fluid">
+          <tbody>
+            {HOLDS.map(([what, why, inv]) => (
+              <tr>
+                <td>{what}</td>
+                <td>{why}<br /><span class="kicker">{inv}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <section class="section wrap">
     <h2 class="h2">{skills.length} skills. One entry point per scenario.</h2>
-    <p class="lede">
-      Plain Markdown in the open Agent Skills format, read identically by Claude Code, Codex, Cursor, Gemini, Copilot,
-      Windsurf and OpenCode. <a href={`${base}/skills`}>Browse the full index →</a>
+    <p class="lede" style="margin-top:1.2rem;">
+      Plain Markdown in the open Agent Skills format, read identically by every harness above.
+      <a href={link("/skills")}>Browse the full index</a>.
     </p>
-    <div class="skillet panel" style="padding:0.4rem 1.4rem 1rem;">
+    <div class="skillet panel" style="padding:0.5rem 1.4rem 1.25rem;margin-top:2rem;">
       {stageGroups.map((g) => {
         const rows = skills.filter((s) => s.stage === g).slice(0, g === "any" ? 4 : 99);
         if (!rows.length) return null;
         return (
           <div>
             <h3>{groupLabel(g)}</h3>
-            <table class="skill">
+            <table class="data">
               <tbody>
                 {rows.map((s) => (
                   <tr>
-                    <td><a href={`${base}/skills/${skillSlug(s.name)}`}>{s.name}</a></td>
-                    <td>{s.description.split(/(?<=\.)\s/)[0]}</td>
+                    <td><a href={link(`/skills/${skillSlug(s.name)}`)}>{s.name}</a></td>
+                    <td>{shortDesc(s.description)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -160,51 +230,45 @@ next skill: aisdlc-verify · owner: agent</pre>
     </div>
   </section>
 
-  <section id="faq" class="section wrap" style="max-width:48rem;">
+  <section id="faq" class="section wrap" style="max-width:52rem;">
     <h2 class="h2">Short answers.</h2>
-    <div style="margin-top:2rem;border-bottom:1px solid var(--line);">
+    <div style="margin-top:2rem;">
       {FAQ.map(([q, a]) => <details class="faq"><summary>{q}</summary><p>{a}</p></details>)}
     </div>
   </section>
 
-  <section class="section wrap" style="max-width:44rem;">
-    <div class="panel" style="padding:3rem 1.5rem;text-align:center;">
-      <h2 class="h2" style="margin-inline:auto;">Install it in the repo you are working on right now.</h2>
-      <p class="lede" style="margin-inline:auto;">
-        Then tell your agent: <code>use aisdlc-brainstorm, I want to build …</code>. It picks the lane, asks only what
-        changes the outcome, and hands you a spec you can sign.
-      </p>
-      <div class="cmdline" style="margin:2rem auto 0;text-align:left;">
-        <code>npx skills add AnshRoshan/aisdlc</code><button data-copy="cmd-cta">copy</button>
-      </div>
+  <section class="section wrap" style="max-width:52rem;">
+    <h2 class="h2">Install it where you are working right now.</h2>
+    <p class="lede" style="margin-top:1.2rem;">
+      Then tell your agent <code>use aisdlc-brainstorm, I want to build …</code>. It picks the lane, asks only what
+      changes the outcome, and hands you a spec you can sign.
+    </p>
+    <div class="cmdline" style="margin-top:1.5rem;"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy>copy</button></div>
+    <div class="cta-row">
+      <a href={link("/docs")} class="btn btn-primary">Read the tour</a>
+      <a href="https://github.com/AnshRoshan/aisdlc" class="btn btn-ghost">Repository</a>
     </div>
   </section>
 
   <script>
-    // The one authored motion moment: the pipeline ticks forward on a loop.
-    const items = [...document.querySelectorAll("#pipeline li")];
-    const heroState = document.getElementById("hero-state");
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (items.length && !reduced) {
-      let i = items.findIndex((el) => el.classList.contains("now"));
-      if (i < 0) i = 0;
-      setInterval(() => {
-        items[i].classList.remove("now");
-        items[i].classList.add("done");
-        i = (i + 1) % items.length;
-        if (i === 0) items.forEach((el) => el.classList.remove("done"));
-        items[i].classList.remove("done");
-        items[i].classList.add("now");
-        if (heroState) heroState.textContent = items[i].dataset.stage;
-      }, 2200);
+    if (!reduced && "IntersectionObserver" in window) {
+      document.querySelectorAll(".hero-grid > *, .gate, .inv, .ledger, .term, .panel").forEach((el) => el.classList.add("reveal"));
+      const io = new IntersectionObserver((rows) => {
+        for (const r of rows) {
+          if (r.isIntersecting) { r.target.classList.add("in"); io.unobserve(r.target); }
+        }
+      }, { rootMargin: "0px 0px -10% 0px" });
+      document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     }
     document.querySelectorAll("button[data-copy]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const el = btn.closest("div").querySelector("code") ?? document.getElementById(btn.dataset.copy);
-        if (el) navigator.clipboard.writeText(el.textContent.replace(/^ \$ /, "").trim());
-        const t = btn.textContent;
-        btn.textContent = "copied ✓";
-        setTimeout(() => (btn.textContent = t), 1400);
+      btn.addEventListener("click", async () => {
+        const code = btn.closest(".cmdline")?.querySelector("code");
+        if (code) {
+          try { await navigator.clipboard.writeText(code.textContent.trim()); } catch { /* clipboard blocked */ }
+        }
+        btn.textContent = "copied";
+        setTimeout(() => (btn.textContent = "copy"), 1400);
       });
     });
   </script>

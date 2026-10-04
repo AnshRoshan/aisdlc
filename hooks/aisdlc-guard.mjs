@@ -13,10 +13,10 @@
 // Fail-open discipline: a guard that throws must never cost the user their work. Every handler
 // catches and calls next().
 
-const CLI_CANDIDATES = [
-  ["aisdlc", "next", "--json"],
-  ["node", "packages/cli/bin/aisdlc.js", "next", "--json"],
-];
+// What counts as a completion claim. "done" alone is ordinary English, so it only matters
+// against the gate state; a claim that the *suite* passed is the one that needs a run behind it.
+const SUITE_CLAIM = /\b(all (?:the )?tests? pass\w*|tests? (?:are |all )?(?:green|passing)|suite (?:is |passes )?(?:green|clean)|everything passes|all green|no failures)\b/i;
+const DONE_CLAIM = /\b(done|finished|complete|shipped|ready to (?:ship|merge|release))\b/i;
 
 // Runners whose green output means "verified". If the agent runs one bare, nothing is recorded.
 const TEST_RUNNER = /(^|[\s&;|])(npm|pnpm|yarn|bun|deno|make|cargo|go|uv|pip|pytest|npx|node|dotnet|mvn|gradle|rspec)\s\S*(test|vitest|jest|pytest|mocha|check|verify|spec|tsc|build)/i;
@@ -89,6 +89,31 @@ export function register(on) {
     return next(e);
   });
 
+  // The other side of invariant 5. The Bash hold stops an unrecorded run from happening; this
+  // one catches the case where no run happened at all and the answer reads like one did. The
+  // model's turn is over by then, so this is for the human reading it, not a correction loop.
+  on("turn.complete", async ($, e, next) => {
+    try {
+      const answer = String(e.answer ?? "");
+      if (e.isAborted || e.agentId || !turn || !answer) return next(e);
+      const claimsSuite = SUITE_CLAIM.test(answer);
+      const claimsDone = DONE_CLAIM.test(answer);
+      if (!claimsSuite && !claimsDone) return next(e);
+      const log = await readLog($, turn.slug);
+      if (!log) return next(e);
+      if (claimsSuite && log.runs === 0) {
+        $.ui.log(`aisdlc: the answer says the suite passed, and ${turn.slug} has no recorded run at all. That is a sentence, not evidence (invariant 5).`);
+      } else if (claimsSuite && log.stale) {
+        $.ui.log(`aisdlc: the answer says the suite passed, but the newest full run predates the last code change. Re-record: aisdlc evidence ${turn.slug} --label full -- <test command>`);
+      } else if (claimsDone && log.state !== "DONE") {
+        $.ui.log(`aisdlc: the answer says done. ${turn.slug} is ${log.state}${log.missing ? `, waiting on ${log.missing}` : ""} (invariant 2).`);
+      }
+    } catch {
+      /* fail open */
+    }
+    return next(e);
+  });
+
   // Where the feature actually is, always visible, without anyone remembering to ask.
   on("ui.render", { component: "AbovePrompt" }, ($, e, next) => {
     if (!turn) return next(e);
@@ -111,37 +136,55 @@ export function register(on) {
   });
 }
 
-// ---- state ---------------------------------------------------------------------
+// ---- the CLI, as the only source of state ---------------------------------------
 
-async function readState($) {
-  for (const argv of CLI_CANDIDATES) {
+const CLI_BASES = [["aisdlc"], ["node", "packages/cli/bin/aisdlc.js"]];
+let workingCli = null;
+
+async function runCli($, args) {
+  const order = workingCli ? [workingCli, ...CLI_BASES.filter((c) => c[0] !== workingCli[0])] : CLI_BASES;
+  for (const base of order) {
     let run;
     try {
-      run = await $.process.run(argv, { timeoutMs: 8000 });
+      run = await $.process.run([...base, ...args], { timeoutMs: 8000 });
     } catch {
       continue;
     }
-    if (!run || run.code !== 0) continue;
-    let j;
+    // report exits 3 when it found something stale; that is an answer, not a failure.
+    if (!run || (run.code !== 0 && run.code !== 3)) continue;
     try {
-      j = JSON.parse(String(run.stdout ?? "").trim());
+      return { json: JSON.parse(String(run.stdout ?? "").trim()), cli: base[0] };
     } catch {
       continue;
     }
-    if (!j || !j.state) return null;
-    return {
-      cli: argv[0],
-      state: j.state,
-      slug: j.feature ?? "",
-      lane: j.lane ?? "standard",
-      skill: j.skill ?? "aisdlc-flow",
-      owner: j.owner ?? "agent",
-      blocking: (j.blocking ?? []).slice(0, 3).join("; "),
-      specSigned: !!j.spec?.signedBy,
-      gates: Object.entries(j.gates ?? {}).map(([id, g]) => ({ id, passed: !!g.passed, required: g.required !== false && !g.skipped })),
-    };
   }
   return null;
+}
+
+async function readState($) {
+  const out = await runCli($, ["next", "--json"]);
+  const j = out?.json;
+  if (!j || !j.state) return null;
+  workingCli = out.cli;
+  return {
+    state: j.state,
+    slug: j.feature ?? "",
+    lane: j.lane ?? "standard",
+    skill: j.skill ?? "aisdlc-flow",
+    owner: j.owner ?? "agent",
+    blocking: (j.blocking ?? []).slice(0, 3).join("; "),
+    specSigned: !!j.spec?.signedBy,
+    gates: Object.entries(j.gates ?? {}).map(([id, g]) => ({ id, passed: !!g.passed, required: g.required !== false && !g.skipped })),
+  };
+}
+
+// report answers the one question turn.complete cannot settle from the transcript alone:
+// is there a run behind the claim, and is it newer than the code?
+async function readLog($, slug) {
+  const out = await runCli($, slug ? ["report", slug, "--json"] : ["report", "--json"]);
+  const j = Array.isArray(out?.json) ? out.json.find((r) => r.feature === slug) ?? out.json[0] : null;
+  if (!j) return null;
+  return { state: j.state, runs: j.runs?.total ?? 0, stale: !!j.evidence?.stale, missing: (j.gates?.missing ?? []).join(", ") };
 }
 
 async function currentAt($, path) {

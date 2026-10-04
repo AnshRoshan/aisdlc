@@ -115,6 +115,7 @@ agent's process - and it closes the three holes that cost the most:
 | any `aisdlc approve` the agent tries to run | approvals are human actions, refused before the call rather than after (invariants 3 and 4) |
 | an edit to a signed `spec.md`, or a hand-written `Approved-by:` line | intent changes go through a delta; the signature is yours (invariants 1 and 4) |
 | a write to `evidence/` or `approvals.json` | those are the files the gates trust; a hand-made one is a forged one |
+| an answer that says the suite passed | if no run is recorded, or the newest one predates the last code change, the log line says so in front of you (invariant 5) |
 
 It also reads `aisdlc next` once per turn and puts the real state in front of the model *and* in your
 status line, so "where are we" has an answer you did not have to ask for. Everything else stays the

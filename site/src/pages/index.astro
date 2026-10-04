@@ -35,6 +35,7 @@ const HOLDS = [
   ["any aisdlc approve the agent tries to run", "approvals are human actions, held before the call", "invariants 3 and 4"],
   ["an edit to a signed spec.md", "intent changes go through a delta, not a quiet rewrite", "invariant 1"],
   ["a write to evidence/ or approvals.json", "those are the files the gates trust; a hand-made one is a forged one", "invariant 2"],
+  ["an answer claiming the suite passed", "no recorded run, or a run older than the code, and the log says so in front of you", "invariant 5"],
 ];
 
 const FAQ = [

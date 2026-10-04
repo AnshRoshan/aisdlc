@@ -1,5 +1,8 @@
 # aisdlc: Constitution
 
+Version: 1.1
+Amended: 2026-10-07
+
 Non-negotiables every agent and human in this project obeys. Add project-specific rules below the line.
 
 1. The spec is the source of truth. Code is generated output; intent changes go through deltas.

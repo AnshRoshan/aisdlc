@@ -33,3 +33,15 @@ Approved-by: ______  Date: ______
 
 ## 7. Seams (where tests attach)
 - [NEEDS CLARIFICATION: the public interface the tests will use: route / CLI / exported function / UI flow]
+
+## 8. UX & interaction (n/a: backend)
+- n/a: backend is not a UI kind.
+
+## 9. Value sourcing
+Every value this feature produces, computes or displays, and where it comes from. A value with
+no named source is an owed decision, not wiring - name the source or raise it before the plan.
+| Value | Source | How obtained |
+|---|---|---|
+| <each user-visible field, computed number, state and message> | <spec requirement / API response / stored record / derived from X> | <the requirement name or the call that yields it> |
+
+n/a: <only when the feature produces no values a user ever sees, with the reason>

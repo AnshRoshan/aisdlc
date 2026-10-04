@@ -38,8 +38,12 @@ marked.use({
 const anchorId = (s) => s.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
 export function renderMarkdown(md) {
+  // The skill files are the product's canonical prose and stay as written; the *page* is a
+  // rendering surface, and typographic dashes read as AI copy there. Same call clean() makes
+  // for descriptions.
+  const body = (md || "").replace(/\s*[—–]\s*/g, " - ");
   return marked
-    .parse(md || "", { gfm: true })
+    .parse(body, { gfm: true })
     .replace(/<h([23])>(.*?)<\/h\1>/g, (_, n, inner) => `<h${n} id="${anchorId(inner)}">${inner}</h${n}>`);
 }
 
@@ -61,9 +65,8 @@ export function getSkills() {
       const description = clean((fm.match(/^description:\s*(.+)$/m)?.[1] ?? "").trim());
       // stage is nested under metadata:, so it is indented in the frontmatter
       const stage = fm.match(/^\s+stage:\s*(.+)$/m)?.[1]?.trim() ?? "any";
-      const version = fm.match(/^\s+version:\s*"?([\d.]+)"?$/m)?.[1] ?? "";
       const body = raw.slice(raw.indexOf("---", 3) + 3).replace(/^\s*#\s+.+\n/, "").trim();
-      return { name, description, stage, version, body, html: renderMarkdown(body) };
+      return { name, description, stage, body, html: renderMarkdown(body) };
     });
 }
 

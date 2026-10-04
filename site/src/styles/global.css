@@ -84,8 +84,8 @@ strong { font-weight: 600; color: var(--fg); }
 .nav-links a { color: var(--fog); }
 .nav-links a:hover { color: var(--fg); text-decoration: none; }
 .nav-links a[aria-current="page"] { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
-.nav-cta { font: 500 0.8rem var(--mono); border: 1px solid var(--edge); border-radius: var(--r-md); padding: 0.4rem 0.75rem; color: var(--fg) !important; transition: border-color var(--dur-hover) var(--ease), color var(--dur-hover) var(--ease); }
-.nav-cta:hover { border-color: var(--accent); color: var(--accent) !important; }
+.nav-links a.nav-cta { font: 500 0.8rem var(--mono); border: 1px solid var(--edge); border-radius: var(--r-md); padding: 0.4rem 0.75rem; color: var(--fg); transition: border-color var(--dur-hover) var(--ease), color var(--dur-hover) var(--ease); }
+.nav-links a.nav-cta:hover { border-color: var(--accent); color: var(--accent); }
 
 .site-footer { border-top: 1px solid var(--line); margin-top: var(--section-y); background: var(--well); }
 .footer-grid {

@@ -1,0 +1,6 @@
+{
+  "description": "aisdlc guard: in-process enforcement of the eight invariants for Claude Code. Holds agent actions the CLI would otherwise have to trust: a test run that records nothing, an edit to a signed spec, a hand-written approval.",
+  "modules": [
+    "./aisdlc-guard.mjs"
+  ]
+}

@@ -24,6 +24,10 @@ Your first job is always to find out **where the feature actually is**, from dis
 7. **Secrets never land in files.** Placeholders only. Fail closed.
 8. **Fail loud, never fake green.** If infra is down, the result is `IMPLEMENTED-NOT-VERIFIED`, not PASS.
 
+In Claude Code the `aisdlc-guard` mod may hold one of your calls and say which invariant it protects.
+That is the disk rule arriving early, not an obstacle to route around: do the thing it names (record the
+run, open the delta, ask the human). It fails open when it cannot decide, so a hold is a signal, not noise.
+
 ## Procedure
 
 1. **Classify the request in one line** before touching state:

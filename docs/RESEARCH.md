@@ -162,3 +162,73 @@ since we already ship a real site.
 `analyze-token-usage.mjs` (their cache-read-vs-fresh-cost breakdown over Claude Code transcripts) is
 the best remaining candidate and is still unbuilt: it measures chat cost, which is outside the
 process state machine and does not belong in a gate. Tracked as a possible `aisdlc cost`.
+
+## 11. Claude Code mods — from pull enforcement to push enforcement (2026-10-04)
+
+Everything in §1–§10 shares one structural weakness: the CLI can only judge what the agent chooses to
+report to it. Invariant 5 says "done means a recorded run", but an agent that runs `npm test` directly
+and writes a sentence instead of an evidence file never touches the gate at all. Same for a signed spec
+quietly edited, or a name typed into `Approved-by:`. Prose in a SKILL.md asks; the CLI verifies what it
+is shown. Neither intercepts.
+
+Claude Code **mods** (shipped after plugins; primary sources at the bottom) do: a mod is JavaScript
+running inside the agent's process, registered against lifecycle events, that can observe an event,
+rewrite it, answer it, or drop it. That is the missing layer, and it is exactly the layer our thesis was
+already arguing for - so we built the smallest one worth shipping.
+
+### What shipped: `hooks/aisdlc-guard.mjs`
+
+Four holds, each mapped to an invariant that was previously unenforceable, plus one always-on readout:
+
+| hook | holds | invariant |
+|---|---|---|
+| `tool.call {tool:"Bash"}` | a bare test runner while a feature is open; the deny message prints the `aisdlc evidence <slug> --label full -- …` form that would count | 5 (done = recorded run), 8 (never fake green) |
+| `tool.call {tool:"Bash"}` | any `aisdlc approve` the agent tries to run | 3 (approver ≠ author), 4 (humans sign) |
+| `tool.call {tool:["Edit","Write","MultiEdit"]}` | writes to `evidence/` and `approvals.json`, edits to a signed `spec.md`, and a filled `Approved-by:` line where the file still has underscores | 1 (spec is truth), 2 (gates are transitions), 4 |
+| `prompt.submit` | nothing - it runs `aisdlc next --json` once per turn and appends the real state to the model's context | 6 (disk is state) |
+| `ui.render {component:"AbovePrompt"}` | nothing - draws `lane · state → skill · gate lights · waiting on you` | the same, for the human |
+
+Design constraints that shaped it:
+
+- **Fail open, always.** Every handler catches and calls `next()`. A guard that throws must never cost
+  the user their work; a hold is therefore a signal, not noise. If the CLI cannot be found or its JSON
+  cannot be parsed, the mod is inert.
+- **One process per turn, not one per tool call.** `prompt.submit` caches the derived state; the Bash and
+  Edit guards read the cache. `$.process.run` has a hard time cap, and a spawn per command would make the
+  session slow enough that a user would turn the guard off, which is worse than not shipping it.
+- **Deny with the exact replacement, never a lecture.** The message names the artifact to produce
+  (`aisdlc evidence …`, `aisdlc-delta`, "ask the human"), because the model's next action is the point.
+- **Portable contract untouched.** A mod exists only inside Claude Code. Nothing in the skills, the engine
+  or the other six harnesses may depend on it, so `check-skills.mjs` rule 10 checks the mod against the
+  documented API (`register(on)`, literal `$.noun.method(...)` calls - the host parses them from source -
+  known event names, known `$` namespaces, a 16 KB budget) and nothing else references it.
+
+### What we deliberately did not build
+
+- **Prompt rewriting.** `prompt.submit` can replace `e.text`. Injecting state into `e.context` is honest;
+  silently editing what the user typed is the surveillance-flavoured half of this API, and it is not ours
+  to use.
+- **A gate-blocking UI.** `$.ui` has no modal confirmation - `open()`/`toast()`/`status()`/`resolve()`
+  only - and panes do not render headless or in WSL, so any "click to approve" flow would work in exactly
+  the terminals where the human is not watching.
+- **Risk classification of shell commands generally** (`rm -rf`, force push, migrations). That is
+  Anthropic's own `blast-radius` sample and does it better; duplicating it would put a second hold loop
+  on the same event.
+- **Anything that answers a tool call itself** (`{ result: … }`). Fabricating a tool result is how an
+  agent ends up believing a run happened.
+
+### Honest limits
+
+Mods are new, the API will churn, and they run **unsandboxed with full OS privileges** - which is why
+this one reads state and blocks actions instead of writing anything. `sec-default` loads before it, so it
+cannot widen its own permissions. A user on another harness, or on Claude Code with mods administratively
+disabled, gets exactly the §1–§10 behaviour: the gates still hold, the *invitation* to dodge them returns.
+The mod narrows the gap between "the tool refuses" and "the tool never sees it"; it does not close it.
+
+### Sources
+
+1. `code.claude.com/docs/en/plugins/mods/overview` - what a mod is, `plugin.json` + `hooks.json` + `register.js`, observe/rewrite/answer.
+2. `code.claude.com/docs/en/plugins/mods/events` - event names and payloads: `tool.call`, `tool.check`, `prompt.submit`, `turn.start`, `turn.step`, `turn.complete`, `ui.render`, `classic.*`; `{ deny }` / `{ result }` / `{ drop }` / `{ decision }` returns; tool-name matchers.
+3. `code.claude.com/docs/en/plugins/mods/api` - the `$` namespaces (`ui`, `fs`, `process`, `session`, `clock`, `command`, `tool`, `model`, `store`, `env`, `settings`, `http`, `mcp`, `prompt`, `agent`), `next()` and `next.signal`, the 10 s handler cap with `$` calls excluded, 30 s `process.run` cap, no native globals, timers lost on hot reload.
+4. `claude.com/blog/claude-code-mods` - motivation (earlier integrations could not rewrite events, draw UI or replace features), `sec-default`, admin controls, distribution through the plugin directory.
+5. `github.com/anthropics/claude-code-playground` → `claude-code/mods/{blast-radius,token-weather,replay-theater}` - the real file layout (`hooks/hooks.json` with `modules`, `.claude-plugin/plugin.json` carrying no hooks field), the hold-and-poll loop, `$.ui.resolve(e)` returning `Box`/`Text`/`Button`, and the source-spelling rule quoted in this repo's checker.

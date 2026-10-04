@@ -18,6 +18,8 @@
  *     no shell glue that dies on PowerShell
  *  8  byte budget per file, and a budget per *hot path* (what a real run actually loads)
  *  9  every relative markdown link target in the corpus exists on disk
+ * 10  the Claude Code mod in hooks/ matches the documented API (register(on), literal
+ *     `$.noun.method(...)` calls, known event names, known $ namespaces, a byte budget)
  */
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, dirname, relative, resolve } from "node:path";
@@ -62,9 +64,52 @@ const NON_SKILL_TOKENS = new Map([
   ["aisdlc-json", "the project marker file (aisdlc.json)"],
   ["aisdlc-specific", "prose: the phrase 'not aisdlc-specific', not a skill name"],
   ["aisdlc-mcp", "roadmap item named in docs/RESEARCH.md, not a shipped skill"],
+  ["aisdlc-guard", "the Claude Code mod in hooks/, not a skill"],
 ]);
 
-// Claude Code slash commands are aisdlc-<verb> too, and they are real files, not skills.
+// Claude Code mod: the guard hook, its manifest, and the API contract the host parses from source.
+function checkMod() {
+  const manifest = join(root, "hooks/hooks.json");
+  if (!existsSync(manifest)) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(LF(readFileSync(manifest, "utf8")));
+  } catch (e) {
+    err("hooks/hooks.json", `does not parse: ${e.message}`);
+    return;
+  }
+  const modules = parsed.modules || [];
+  if (!modules.length) err("hooks/hooks.json", "lists no modules");
+  for (const m of modules) {
+    const file = join(root, "hooks", m.replace(/^\.\//, ""));
+    if (!existsSync(file)) {
+      err("hooks/hooks.json", `module ${m} does not exist`);
+      continue;
+    }
+    // Comments describe the API in the API's own words; only code is checked.
+    const src = LF(readFileSync(file, "utf8"))
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((l) => !/^\s*\/\//.test(l))
+      .join("\n");
+    const where = rel(file);
+    if (!/export function register\(on\)/.test(src)) err(where, "must export `register(on)` - the host calls it once on load");
+    if (/const\s*\{[^}]*\}\s*=\s*\$(?:\.\w+)?\s*[;\n]/.test(src)) err(where, "destructures $ or a $ namespace itself - the host reads `$.noun.method(...)` from source, so the call must be spelled literally (taking the *result* of a call apart is fine)");
+    if (/\$\.process\s*=|\$\.ui\s*=|\$\.fs\s*=/.test(src)) err(where, "reassigns a $ namespace");
+    for (const call of src.matchAll(/\$\.(\w+)\.(\w+)\(/g)) {
+      if (!KNOWN_DOLLAR[call[1]]) err(where, `$.${call[1]} is not a documented mod namespace (known: ${Object.keys(KNOWN_DOLLAR).join(", ")})`);
+    }
+    for (const ev of src.matchAll(/on\(\s*"([^"]+)"/g)) {
+      if (!MOD_EVENTS.has(ev[1]) && !ev[1].endsWith(".*") && ev[1] !== "*") err(where, `on("${ev[1]}") is not a documented mod event`);
+    }
+    const bytes = Buffer.byteLength(src);
+    if (bytes > 16 * KB) err(where, `${bytes} B over the 16 KB mod budget - a mod loads into every Claude Code session`);
+  }
+}
+
+const KNOWN_DOLLAR = { ui: 1, process: 1, fs: 1, session: 1, clock: 1, command: 1, tool: 1, model: 1, store: 1, env: 1, settings: 1, http: 1, mcp: 1, prompt: 1, agent: 1 };
+const MOD_EVENTS = new Set(["tool.call", "tool.check", "prompt.submit", "turn.start", "turn.step", "turn.complete", "ui.render", "classic.Stop", "classic.SessionEnd", "classic.PostToolUse"]);
+
 function slashCommands() {
   const dir = join(root, "commands");
   if (!existsSync(dir)) return new Set();
@@ -290,6 +335,10 @@ for (const hp of HOT_PATHS) {
   else if (total > budget * WARN_AT) wrn("hot path", `${hp.name}: ${Math.round((total / budget) * 100)}% of budget - prune before adding`);
   pathRows.push({ name: hp.name, files: hp.required.length + 1, total, budget: budget ?? 0 });
 }
+
+/* ───────────── rule 10: the Claude Code mod ───────────── */
+
+checkMod();
 
 /* ───────────── report ───────────── */
 

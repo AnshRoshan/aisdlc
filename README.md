@@ -102,6 +102,25 @@ use aisdlc-brainstorm, I want to build payment retries
 
 The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
 
+### Hard mode: the Claude Code mod
+
+Comes with the plugin install, nothing to enable. The CLI is the referee, but a referee only sees what
+gets reported to it. `hooks/aisdlc-guard.mjs` is a
+Claude Code [mod](https://code.claude.com/docs/en/plugins/mods/overview) - code that runs inside the
+agent's process - and it closes the three holes that cost the most:
+
+| it holds | because |
+|---|---|
+| a bare `npm test` / `pytest` / `cargo test` while a feature is open | the run records nothing; re-run it as `aisdlc evidence <feature> --label full -- …` (invariant 5) |
+| any `aisdlc approve` the agent tries to run | approvals are human actions, refused before the call rather than after (invariants 3 and 4) |
+| an edit to a signed `spec.md`, or a hand-written `Approved-by:` line | intent changes go through a delta; the signature is yours (invariants 1 and 4) |
+| a write to `evidence/` or `approvals.json` | those are the files the gates trust; a hand-made one is a forged one |
+
+It also reads `aisdlc next` once per turn and puts the real state in front of the model *and* in your
+status line, so "where are we" has an answer you did not have to ask for. Everything else stays the
+portable contract: the mod is an accelerator for one harness, it fails open when it cannot decide, and
+the other six harnesses lose nothing but the interception.
+
 <details open>
 <summary><strong>Lanes: how much process a feature carries</strong> (set by <code>aisdlc-brainstorm</code>, ratchets only up)</summary>
 <br>
@@ -222,6 +241,7 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 | [`agents/`](agents/) | two read-only subagent definitions `init` installs for Claude Code |
 | [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18); `node packages/cli/bin/aisdlc.js` until it is on npm |
 | [`commands/`](commands/) | Claude Code plugin slash commands (`/aisdlc-next`, `/aisdlc-status`) |
+| [`hooks/`](hooks/) | the `aisdlc-guard` Claude Code mod; it ships with the plugin install |
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |
 | [`site/`](site/) | Astro static site; the deploy workflow runs, Pages itself is not enabled yet |
 | [`docs/conventions.md`](docs/conventions.md) | how a skill is written: what earns a line, when to split a file, the budgets |

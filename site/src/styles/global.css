@@ -231,9 +231,31 @@ details.faq p { color: var(--fog); font-size: 0.9375rem; line-height: 1.65; marg
 .doc-body { max-width: 68ch; }
 .doc-body h1 { font-size: clamp(2rem, 4vw, 2.75rem); }
 .doc-body h2 { font-size: 1.35rem; font-weight: 600; margin-top: 3.5rem; scroll-margin-top: 5rem; }
+.doc-body .panel > h2:first-child, .doc-body .panel > h3:first-child { margin-top: 0; }
 .doc-body > p, .doc-body .lede { margin-top: 1.1rem; }
 .step-n { font: 500 0.75rem var(--mono); color: var(--accent); display: block; margin-bottom: 0.4rem; }
 @media (max-width: 900px) { .doc { grid-template-columns: 1fr; gap: 2rem; } .doc-rail { position: static; grid-auto-flow: column; overflow-x: auto; } }
+
+/* ---------- rendered SKILL.md ---------- */
+.md { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 2.5rem; }
+.md > *:first-child { margin-top: 0; }
+.md h2 { font-size: 1.3rem; font-weight: 600; margin: 3rem 0 0.9rem; scroll-margin-top: 5rem; }
+.md h3 { font-size: 1.03rem; font-weight: 600; margin: 2.25rem 0 0.6rem; color: var(--fg); scroll-margin-top: 5rem; }
+.md h4 { font-size: 0.95rem; font-weight: 600; margin: 1.75rem 0 0.5rem; }
+.md p { color: var(--fog); margin: 0.9rem 0; max-width: 70ch; }
+.md strong { color: var(--fg); }
+.md ul, .md ol { color: var(--fog); margin: 0.9rem 0; padding-left: 1.35rem; max-width: 70ch; }
+.md li { margin: 0.35rem 0; }
+.md li::marker { color: var(--meta); }
+.md code { font-family: var(--mono); font-size: 0.85em; background: var(--well); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.08em 0.35em; color: var(--fg); }
+.md pre { background: var(--well); border: 1px solid var(--line); border-radius: var(--r-md); padding: 1rem 1.15rem; overflow-x: auto; margin: 1.25rem 0; }
+.md pre code { background: none; border: 0; padding: 0; font-size: 0.8rem; line-height: 1.65; color: var(--fog); white-space: pre; }
+.md blockquote { margin: 1.25rem 0; padding: 0.1rem 0 0.1rem 1rem; border-left: 2px solid var(--edge); color: var(--fog); }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+.md table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin: 1.5rem 0; display: block; overflow-x: auto; }
+.md th, .md td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--fog); }
+.md th { font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--meta); }
+.md a { color: var(--accent); }
 
 /* ---------- motion layer ---------- */
 .reveal { opacity: 1; }

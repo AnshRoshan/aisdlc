@@ -1,7 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { base } from "../../lib/base.js";
-import { getSkills, skillSlug } from "../../lib/skills";
+import { getSkills, skillSlug, outline } from "../../lib/skills";
 
 export function getStaticPaths() {
   return getSkills().map((s) => ({ params: { slug: skillSlug(s.name) }, props: { skill: s } }));
@@ -10,30 +10,40 @@ export function getStaticPaths() {
 const { skill } = Astro.props;
 const sentences = skill.description.split(/(?<=\.)\s/);
 const [first, ...rest] = sentences;
+const sections = outline(skill.html);
 const link = (href) => `${base}${href}`;
 const REPO_FILE = `https://github.com/AnshRoshan/aisdlc/blob/main/skills/${skill.name}/SKILL.md`;
 ---
 <Base title={`/${skill.name}`} description={skill.description.slice(0, 150)}>
-  <article class="wrap doc-body" style="padding-top:3.5rem;">
-    <p class="kicker"><a href={link("/skills")}>all skills</a> / {skill.stage === "any" ? "cross-cutting" : skill.stage}</p>
-    <h1 style="font-family:var(--mono);font-size:clamp(1.75rem,4vw,2.5rem);font-weight:500;letter-spacing:-0.02em;margin-top:0.9rem;">{skill.name}</h1>
-    <p class="lede" style="margin-top:1.5rem;font-size:1.125rem;color:var(--fg);">{first}</p>
-    {rest.length > 0 && <p class="lede" style="margin-top:1.1rem;">{rest.join(" ")}</p>}
+  <div class="wrap doc">
+    <nav class="doc-rail" aria-label="Sections in this skill">
+      {sections.map((s) => <a href={`#${s.id}`}>{s.text}</a>)}
+      <a href={REPO_FILE}>source</a>
+    </nav>
 
-    <div class="panel" style="margin-top:2.75rem;padding:1.5rem 1.5rem 1.6rem;">
-      <h2 class="h3">Install everything, or just this one</h2>
-      <div class="cmdline" style="margin-top:1.1rem;"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy>copy</button></div>
-      <div class="cmdline" style="margin-top:0.6rem;"><code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code><button data-copy>copy</button></div>
-      <p class="install-note">
-        Claude Code: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then
-        <code>/plugin install aisdlc@aisdlc</code>. Skills work without the CLI; the CLI is what makes done mean something.
+    <article class="doc-body">
+      <p class="kicker"><a href={link("/skills")}>all skills</a> / {skill.stage === "any" ? "cross-cutting" : skill.stage}</p>
+      <h1 style="font-family:var(--mono);font-size:clamp(1.75rem,4vw,2.5rem);font-weight:500;letter-spacing:-0.02em;margin-top:0.9rem;">{skill.name}</h1>
+      <p class="lede" style="margin-top:1.5rem;font-size:1.125rem;color:var(--fg);">{first}</p>
+      {rest.length > 0 && <p class="lede" style="margin-top:1.1rem;">{rest.join(" ")}</p>}
+
+      <p class="kicker" style="margin-top:1.5rem;">
+        v{skill.version || "2"} · MIT · <a href={REPO_FILE}>skills/{skill.name}/SKILL.md</a> · read the same way by every supported harness
       </p>
-    </div>
 
-    <p class="kicker" style="margin-top:2rem;">
-      source: <a href={REPO_FILE}>skills/{skill.name}/SKILL.md</a> · MIT · read by every supported harness
-    </p>
-  </article>
+      <div class="panel" style="margin-top:2rem;padding:1.4rem 1.5rem 1.5rem;">
+        <h2 class="h3" style="font-size:1rem;">Install everything, or just this one</h2>
+        <div class="cmdline" style="margin-top:1rem;"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy>copy</button></div>
+        <div class="cmdline" style="margin-top:0.6rem;"><code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code><button data-copy>copy</button></div>
+        <p class="install-note">
+          Claude Code: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then
+          <code>/plugin install aisdlc@aisdlc</code>. Skills work without the CLI; the CLI is what makes done mean something.
+        </p>
+      </div>
+
+      <div class="md" set:html={skill.html} />
+    </article>
+  </div>
   <script>
     document.querySelectorAll("button[data-copy]").forEach((btn) => {
       btn.addEventListener("click", async () => {

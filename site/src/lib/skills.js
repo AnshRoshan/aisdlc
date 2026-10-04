@@ -20,17 +20,50 @@ function readdirSyncSafe(dir) {
 }
 const SKILLS_DIR = skillsDir();
 
+import { marked } from "marked";
+
+// Skill bodies are full of placeholders like <slug> and <feature>. marked passes raw HTML through
+// by default, so an unescaped <title> would vanish into an unknown element. Neutralise it at the
+// renderer instead of pre-escaping the source: pre-escaping makes marked escape the ampersand a
+// second time and the page then shows "&lt;slug&gt;".
+const escapeHtml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+marked.use({
+  renderer: {
+    html(token) {
+      return escapeHtml(typeof token === "string" ? token : (token?.text ?? ""));
+    },
+  },
+});
+
+const anchorId = (s) => s.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+
+export function renderMarkdown(md) {
+  return marked
+    .parse(md || "", { gfm: true })
+    .replace(/<h([23])>(.*?)<\/h\1>/g, (_, n, inner) => `<h${n} id="${anchorId(inner)}">${inner}</h${n}>`);
+}
+
+// Heading text arrives already entity-encoded from the renderer; the rail re-encodes it once,
+// so decode first or "&lt;" shows up literally in the navigation.
+const decodeEntities = (s) => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+
+export function outline(html) {
+  return [...html.matchAll(/<h2 id="([^"]+)">([\s\S]*?)<\/h2>/g)].map(([, id, text]) => ({ id, text: decodeEntities(text.replace(/<[^>]+>/g, "")) }));
+}
+
 export function getSkills() {
   return readdirSync(SKILLS_DIR)
     .filter((d) => d.startsWith("aisdlc-"))
     .map((dir) => {
-      const raw = readFileSync(path.join(SKILLS_DIR, dir, "SKILL.md"), "utf8");
+      const raw = readFileSync(path.join(SKILLS_DIR, dir, "SKILL.md"), "utf8").replace(/\r\n/g, "\n");
       const fm = raw.slice(raw.indexOf("---") + 3, raw.indexOf("---", 3));
       const name = dir;
       const description = clean((fm.match(/^description:\s*(.+)$/m)?.[1] ?? "").trim());
       // stage is nested under metadata:, so it is indented in the frontmatter
       const stage = fm.match(/^\s+stage:\s*(.+)$/m)?.[1]?.trim() ?? "any";
-      return { name, description, stage };
+      const version = fm.match(/^\s+version:\s*"?([\d.]+)"?$/m)?.[1] ?? "";
+      const body = raw.slice(raw.indexOf("---", 3) + 3).replace(/^\s*#\s+.+\n/, "").trim();
+      return { name, description, stage, version, body, html: renderMarkdown(body) };
     });
 }
 

@@ -3,6 +3,10 @@ import "../styles/global.css";
 import { base } from "../lib/base.js";
 const { title, description = "Agents write code, aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
 const REPO = "https://github.com/AnshRoshan/aisdlc";
+const ORIGIN = "https://anshroshan.github.io";
+const canonical = `${ORIGIN}${base}/`;
+const ogImage = `${ORIGIN}${base}/og.png`;
+const page = title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process";
 const path = Astro.url.pathname.replace(base, "") || "/";
 const link = (href) => `${base}${href}`;
 const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
@@ -13,10 +17,17 @@ const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta property="og:title" content={title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process"} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={page} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <title>{title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process"}</title>
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    <title>{page}</title>
     <link rel="icon" href={link("/favicon.svg")} type="image/svg+xml" />
   </head>
   <body>

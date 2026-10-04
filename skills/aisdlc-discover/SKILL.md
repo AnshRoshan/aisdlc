@@ -23,7 +23,16 @@ Turn a fuzzy intention into a brief that a spec can be written from. Ten minutes
 
 ## Before the first question (silent, 2 minutes)
 
-Read `docs/constitution.md`, `docs/taste.md`, `docs/glossary.md`, existing briefs, the README, and `git log -20 --oneline`. In an existing repo, skim the entrypoints the idea would touch. Write down the facts; you will not ask about them.
+Read `docs/constitution.md`, `docs/taste.md`, `docs/glossary.md`, existing briefs, the README, and `git log -20 --oneline`. Write down the facts; you will not ask about them.
+
+Two kinds of fact, two mechanisms, both before question 1 and neither on the main thread:
+
+- **Repo facts** (what exists today, what the idea would touch): where the harness supports subagents, dispatch a read-only scout on a fast, low-cost tier (Claude Code: `aisdlc-scout`; Cursor: `Explore`; Codex: `spawn_agent`; else any subagent, or work inline) for a compact map with `file:line`, not file contents.
+- **Prior art** (does this already exist as a feature, a package, or a paid tool): dispatch a read-only researcher (Claude Code: `aisdlc-researcher`) to find the credible options and confirm each source exists and says what it is claimed to say. Cap it at a handful of searches; a citation you did not open is worse than no citation.
+
+You write the brief and the verdict yourself. A delegated paragraph is an unowned one, and the
+verdict is the part a human will hold you to. If the prior-art answer is "someone already sells
+this", that is a finding for the verdict, not a detail to bury in a footnote.
 
 ## The diamond, question by question
 

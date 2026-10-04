@@ -158,6 +158,51 @@ test("lanes: quick is DONE after G4, never asks for rollout/runbook", () => {
   assert.equal(f.gates.G6.skipped, true);
 });
 
+/* ---------------- log analysis ---------------- */
+import { summarizeLog, formatDuration } from "../src/engine.js";
+
+const RUNS = [
+  { file: "a.json", label: "green", exitCode: 0, startedAt: "2026-10-01T10:00:00.000Z" },
+  { file: "b.json", label: "green", exitCode: 1, startedAt: "2026-10-01T11:00:00.000Z" },
+  { file: "c.json", label: "full", exitCode: 0, startedAt: "2026-10-01T12:00:00.000Z" },
+];
+const logCtx = (over = {}) => ({ lane: "quick", author: "Ansh", spec: SPEC, plan: "# Plan\n## Traceability\nx", tasks: "- [x] T1 [R:Login] a\n- [ ] T2 [R:Lockout] b", approvals: [], evidence: RUNS, acceptance: "", deltas: [], ...over });
+
+test("report reads the log back instead of leaving it write-only", () => {
+  const s = summarizeLog(logCtx(), { codeChangedAt: "2026-10-02T00:00:00Z" });
+  assert.equal(s.runs.total, 3);
+  assert.equal(s.runs.passRate, 67, "two of three runs green");
+  assert.equal(s.runs.labels.full, 1);
+  assert.equal(s.runs.wallClockMs, 2 * 3600 * 1000, "first run to last run is the time on disk");
+  assert.equal(s.evidence.stale, true, "code changed after the last full run");
+  assert.deepEqual(s.tasks.open, ["T2"]);
+
+  assert.equal(summarizeLog(logCtx(), { codeChangedAt: "2026-09-30T00:00:00Z" }).evidence.stale, false, "a run newer than the code is fresh");
+  assert.equal(summarizeLog(logCtx()).evidence.stale, false, "no git answer means no staleness claim");
+});
+
+test("report counts stale approvals, classifies the review, and finds where the feature waited", () => {
+  assert.equal(summarizeLog(logCtx({ approvals: [{ gate: "G1", by: "Priya", hash: artifactHashFor("G1", logCtx()), at: "2026-10-01T13:00:00Z" }] })).approvals.stale, 0, "an approval on the current hash is not stale");
+  assert.equal(summarizeLog(logCtx({ approvals: [{ gate: "G1", by: "Priya", hash: "old", at: "2026-10-01T13:00:00Z" }] })).approvals.stale, 1, "an approval on a superseded hash is stale");
+  assert.equal(summarizeLog(logCtx({ approvals: [{ gate: "G1", by: "Ansh", hash: "old", at: "2026-10-01T13:00:00Z" }] })).approvals.notAuthor, 0, "author-signed entries are reported separately");
+
+  const acc = (notes) => logCtx({ acceptance: "| ID | R | S | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | c.json | pass |\n" + notes });
+  assert.equal(summarizeLog(acc("")).review, "unrecorded");
+  assert.equal(summarizeLog(acc("\nAuthor model: claude-opus-4.1 · Reviewer model: gpt-5.2")).review, "independent");
+  assert.equal(summarizeLog(acc("\nAuthor model: gpt-5.2 · Reviewer model: gpt-5.3")).review, "same-family");
+  assert.equal(summarizeLog(acc("\nAuthor model: opus · Reviewer model: opus · Cross-model: degraded (one provider)")).review, "degraded");
+
+  const waited = summarizeLog(logCtx({ approvals: [{ gate: "G1", by: "Priya", hash: "h", at: "2026-10-01T10:00:00Z" }, { gate: "G4", by: "Ravi", hash: "h2", at: "2026-10-03T10:00:00Z" }] }));
+  assert.equal(waited.slowestGap.to, "G4");
+  assert.equal(waited.slowestGap.ms, 2 * 24 * 3600 * 1000);
+});
+
+test("formatDuration never reports 0m for work that happened", () => {
+  assert.equal(formatDuration(45_000), "<1m");
+  assert.equal(formatDuration(3 * 3600 * 1000), "3h 0m");
+  assert.equal(formatDuration(null), "n/a");
+});
+
 /* ---------------- value sourcing + cross-model review ---------------- */
 
 test("G2: an untraced value with no named source blocks the gate", () => {

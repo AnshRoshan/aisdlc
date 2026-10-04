@@ -6,10 +6,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, basename } from "node:path";
 import { spawnSync } from "node:child_process";
-import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, sha256, short } from "./engine.js";
+import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, summarizeLog, formatDuration, sha256, short } from "./engine.js";
 import { HARNESSES, resolveHarnessList, detectHarnesses, COMPANIONS, detectCompanions } from "./harnesses.js";
 import * as T from "./templates.js";
-import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot } from "./fsx.js";
+import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange } from "./fsx.js";
 
 const VERSION = "0.2.0";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -77,6 +77,12 @@ function resolveSlug(root, cfg, input) {
   fail(`Unknown feature "${input}". Known: ${feats.join(", ") || "(none)"}`);
 }
 
+function loadDeltas(dir) {
+  const dd = join(dir, "deltas");
+  if (!existsSync(dd)) return [];
+  return readdirSync(dd).filter((f) => f.endsWith(".md")).sort().map((f) => ({ file: f, text: read(join(dd, f)) }));
+}
+
 function loadEvidence(dir) {
   const ed = join(dir, "evidence");
   if (!existsSync(ed)) return [];
@@ -104,6 +110,7 @@ function loadCtx(root, cfg, slug, { scan = true } = {}) {
     evals,
     approvals: readJson(join(dir, "approvals.json"), []),
     evidence: loadEvidence(dir),
+    deltas: loadDeltas(dir),
     secretFindings: scan ? scanRepo(root).slice(0, 50) : [],
     policy: cfg.policy,
     testPolicy: (cfg.test && cfg.test.gate) || cfg.testGate || "configured",
@@ -439,6 +446,37 @@ const commands = {
     if (!chain.ok) process.exit(2);
   },
 
+  async report(args, root) {
+    const cfg = loadConfig(root);
+    const feats = listFeatures(root, cfg);
+    if (!feats.length) fail("No features yet. Run: aisdlc new \"<title>\" --kind <kind>");
+    const wanted = args._[0] ? [resolveSlug(root, cfg, args._[0])] : feats;
+    const rows = wanted.map((slug) => {
+      const ctx = loadCtx(root, cfg, slug, { scan: false });
+      return { slug, flow: deriveFlow(ctx), s: summarizeLog(ctx, { codeChangedAt: lastCodeChange(root) }) };
+    });
+    if (args.flags.json) return console.log(JSON.stringify(rows.map((r) => ({ feature: r.slug, state: r.flow.state, ...r.s })), null, 2));
+
+    for (const { slug, flow, s } of rows) {
+      if (wanted.length > 1) {
+        console.log(`${c.bold(slug.padEnd(26))} ${flow.state.padEnd(9)} ${c.dim(`gates ${s.gates.passed.length}/${s.gates.required.length}`)} ${c.dim(`runs ${s.runs.total}`)} ${c.dim(`approvals ${s.approvals.total}`)}${s.evidence.stale ? c.yellow("  evidence stale") : ""}${s.approvals.stale ? c.red(`  ${s.approvals.stale} stale approval(s)`) : ""}`);
+        continue;
+      }
+      console.log(`${c.bold(slug)} ${c.dim(`lane ${s.lane}`)}`);
+      console.log(`  ${c.bold(flow.state.padEnd(10))} gates ${s.gates.passed.length}/${s.gates.required.length} passed${s.gates.missing.length ? c.dim(` · waiting on ${s.gates.missing.join(", ")}`) : ""} · owner: ${flow.owner}`);
+      console.log(`  runs        ${s.runs.total} recorded · ${s.runs.green} green${s.runs.passRate !== null ? ` (${s.runs.passRate}%)` : ""} · ${s.runs.red} red${s.runs.wallClockMs !== null ? c.dim(` · ${formatDuration(s.runs.wallClockMs)} of work on disk`) : ""}`);
+      console.log(`  labels      ${Object.entries(s.runs.labels).map(([k, v]) => `${k} ${v}`).join(" · ") || c.dim("none")}`);
+      console.log(`  freshness   ${s.evidence.lastFullAt ? `last full run ${s.evidence.lastFullAt}` : c.dim("no full run recorded")}${s.evidence.stale ? c.yellow("  ← code changed after it; re-run before you claim G3") : ""}`);
+      console.log(`  approvals   ${s.approvals.total} · ${s.approvals.notAuthor} not by the author · ${s.approvals.stale} ${s.approvals.stale === 1 ? "stale" : "stale"} (artifact edited after signing)${s.approvals.total ? c.dim(` · ${Object.entries(s.approvals.byGate).map(([g, n]) => `${g}×${n}`).join(" ")}`) : ""}`);
+      console.log(`  review      ${s.review === "independent" ? c.green("independent") : s.review === "degraded" ? c.yellow("declared degraded") : s.review === "same-family" ? c.red("same model family") : c.dim("unrecorded")}${s.review === "unrecorded" ? c.dim(" · acceptance.md has no Author model / Reviewer model") : ""}`);
+      console.log(`  tasks       ${s.tasks.done}/${s.tasks.total} done${s.tasks.open.length ? c.dim(` · open: ${s.tasks.open.join(", ")}`) : ""}`);
+      console.log(`  deltas      ${s.deltas ? `${s.deltas} raised · ${s.deltasDecided} decided` : c.dim("none")}`);
+      if (s.slowestGap) console.log(`  slowest     ${c.dim(`${s.slowestGap.from} → ${s.slowestGap.to} took ${formatDuration(s.slowestGap.ms)}`)}`);
+      console.log(`  next        ${c.cyan(flow.skill)} ${c.dim(flow.blocking[0] || "")}`);
+    }
+    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale)) process.exitCode = 3;
+  },
+
   async skills() {
     for (const s of listSkills()) console.log(`${c.bold(s.name.padEnd(20))} ${c.dim(s.description.split(".")[0])}`);
   },
@@ -491,6 +529,7 @@ ${c.bold("Checks (deterministic, from disk)")}
   aisdlc trace [feature]                 requirement → task matrix
   aisdlc gate <G1..G6> [feature]         one gate       ·  aisdlc gates [feature]  all six
   aisdlc scan                            secrets scan over tracked files
+  aisdlc report [feature] [--json]       read the logs back: runs, staleness, approvals, review
 
 ${c.bold("Evidence & approvals")}
   aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>

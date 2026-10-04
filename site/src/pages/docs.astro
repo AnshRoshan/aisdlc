@@ -11,7 +11,7 @@ const STEPS = [
 <span class="c"># the CLI and the process tree, from a clone until aisdlc-cli is on npm:</span>
 git clone https://github.com/AnshRoshan/aisdlc
 <span class="p">node aisdlc/packages/cli/bin/aisdlc.js init</span>`,
-   "This writes the skills into your harness's skill directories, a `docs/` process tree and an `aisdlc.json` marker. Claude Code can take the plugin instead: `/plugin marketplace add AnshRoshan/aisdlc`, then `/plugin install aisdlc@aisdlc`, which also brings the guard mod. Every `aisdlc` command below is that same binary, whichever way you got it."],
+   "This writes the skills into your harness's skill directories, a `docs/` process tree and an `aisdlc.json` marker. Claude Code can take the plugin instead: `/plugin marketplace add AnshRoshan/aisdlc`, then `/plugin install aisdlc@aisdlc`, which also brings the guard mod and the `/aisdlc-next`, `/aisdlc-status` and `/aisdlc-report` commands. Every `aisdlc` command below is that same binary, whichever way you got it."],
   ["new", "Open a feature with a lane", `<span class="p">aisdlc new</span> "Payment retries" --kind backend --lane standard`,
    "Pick a lane: **spike** (a question), **quick** (bounded change), **standard** (new capability), **regulated** (money, PII, auth). The lane decides which gates apply, and it only moves up. `aisdlc kinds` prints what each kind has to verify."],
   ["brainstorm", "Talk to your agent", `use aisdlc-brainstorm, I want to build payment retries`,
@@ -41,6 +41,7 @@ const COMMANDS = [
   ["aisdlc trace", "requirement to task matrix"],
   ["aisdlc gate / gates", "run one of G1-G6, or all six"],
   ["aisdlc scan", "secrets over tracked files"],
+  ["aisdlc report", "what the evidence and approval logs say: runs, pass rate, staleness, where the feature waited"],
   ["aisdlc evidence", "run a command and record the run as evidence"],
   ["aisdlc approve", "human gate approval (G1, G4, G5); refuses agents and refuses the author"],
   ["aisdlc lane", "show or raise a feature's lane; lowering needs --force with a note"],

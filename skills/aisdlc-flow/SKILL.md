@@ -36,6 +36,7 @@ run, open the delta, ask the human). It fails open when it cannot decide, so a h
    - "actually…", "can we also…", "that's not what I meant" on a signed spec → `aisdlc-delta`.
    - "grill me", "poke holes" → `aisdlc-grill`. "handoff", "I need to stop" → `aisdlc-handoff`. "retro" → `aisdlc-retro`.
    - "analyze", "is this consistent", "does the plan match the spec" → `aisdlc-tasks` (read-only consistency pass; it never edits).
+   - "how is it going", "where did the time go", "is the evidence stale", "how healthy is this repo" → run `npx aisdlc-cli report` (all features) or `report <slug>`, and answer from its numbers. That is measurement, not a stage; do not move state on it.
    - "the plan is wrong, not the spec", "we're going about it backwards", "this approach won't work" → `aisdlc-plan` in re-plan mode (see its Re-plan section; G1 goes stale on purpose, no delta unless behaviour changes).
    - anything else about an existing feature → continue below.
 2. Run `npx aisdlc-cli status`. If the user named a feature (or only one exists), run `npx aisdlc-cli next <feature> --json`.

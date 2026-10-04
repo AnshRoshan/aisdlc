@@ -17,11 +17,12 @@ A retro that ends in feelings changes nothing. This one ends in diffs to the fil
 - `spec.md`, `plan.md`, `tasks.md`, `acceptance.md`, `deltas/*.md`, `evidence/*.json`, `approvals.json`, `handoff.md` if present.
 - `git log --stat` for the feature's commits; count files touched, lines added vs. deleted, dependencies added (`package.json`, lockfiles, `requirements*.txt`, `go.mod`...).
 - `npx aisdlc-cli audit <slug>` for the approval chain and stale approvals.
+- `npx aisdlc-cli report <slug>` (and `report` with no argument, for every feature at once) for the numbers: run count and pass rate, time on disk, whether the last full run predates the last code change, approvals that went stale, how the review scored, and the slowest gate-to-gap. Compute these; do not eyeball a directory listing.
 - For incidents: the runbook, alerts, and the timeline the human gives you.
 
 ## Procedure (20 minutes, one pass)
 
-1. **Timeline from evidence.** Order evidence files and approvals by timestamp. Note gaps longer than a day and the number of red → green cycles per task. This is where the time went.
+1. **Timeline from evidence.** Start from `report`'s numbers, then read the files behind them. Order evidence and approvals by timestamp; note gaps longer than a day and the red → green cycles per task. A red run followed by a green one on the same task is debugging; six is a seam in the wrong place. This is where the time went, and it should be boring arithmetic before it is a story.
 2. **Spec vs. shipped.** For each requirement: unchanged / changed by delta / silently drifted (behaviour exists that no scenario describes → that is a finding, not a footnote).
 3. **Gate scorecard.** For each gate: what it caught (a real defect, a missing artifact, nothing) and how many attempts it took. A gate that never fails in ten features is either perfect or theatre; say which you believe and why.
 4. **Over-build audit (ponytail lens).** Abstractions with one caller, dependencies added for <20 lines of value, files that could be deleted today, comments marked `ponytail:` that never got the promised upgrade or removal. If the official `ponytail-debt` skill is installed, run it.

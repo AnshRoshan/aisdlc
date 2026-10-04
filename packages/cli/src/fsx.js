@@ -7,8 +7,18 @@ import { execSync } from "node:child_process";
 const here = dirname(fileURLToPath(import.meta.url));
 
 /** Skills ship inside the package (packages/cli/skills). In the monorepo checkout they live at <repo>/skills. */
-export function skillsSourceDir() {
-  const candidates = [join(here, "..", "skills"), join(here, "..", "..", "..", "skills")];
+/** When did *code* (not docs, not the site) last change? Null with no git or no commits. */
+export function lastCodeChange(root) {
+  try {
+    const out = execSync('git log -1 --format=%cI -- . ":(exclude)*.md" ":(exclude)docs" ":(exclude)site"', { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString();
+    const iso = out.trim().split("\n")[0].trim();
+    return iso || null;
+  } catch {
+    return null;
+  }
+}
+
+export function skillsSourceDir() {  const candidates = [join(here, "..", "skills"), join(here, "..", "..", "..", "skills")];
   for (const c of candidates) if (existsSync(c) && readdirSync(c).some((d) => existsSync(join(c, d, "SKILL.md")))) return c;
   throw new Error("aisdlc skills directory not found; reinstall the package.");
 }

@@ -299,6 +299,77 @@ export function valueSourcing(text) {
   return { present: true, rows, unnamed, waived };
 }
 
+/* ───────────── Log analysis ─────────────
+ * The gates answer "is this feature allowed to move". Nobody answered "what does the log say",
+ * so the evidence and approval files were write-only. This is the pure half of `aisdlc report`:
+ * same files, same numbers, any machine. The one thing it cannot derive from disk is when code
+ * last changed, so the caller injects that (git), and it is optional.
+ */
+const ts = (s) => { const t = Date.parse(s || ""); return Number.isNaN(t) ? null : t; };
+
+export function summarizeLog(ctx = {}, { codeChangedAt = null } = {}) {
+  const evidence = (ctx.evidence || []).filter((e) => e && e.startedAt);
+  const byTime = [...evidence].sort((a, b) => (ts(a.startedAt) ?? 0) - (ts(b.startedAt) ?? 0));
+  const green = byTime.filter((e) => e.exitCode === 0);
+  const labels = {};
+  for (const e of byTime) labels[e.label || "unlabeled"] = (labels[e.label || "unlabeled"] || 0) + 1;
+
+  const lane = normalizeLane(ctx.lane);
+  const lastFull = [...byTime].reverse().find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
+  const codeAt = ts(codeChangedAt);
+  const fullIsStale = !!(lastFull && codeAt !== null && (ts(lastFull.startedAt) ?? 0) < codeAt);
+
+  const approvals = ctx.approvals || [];
+  const staleApprovals = approvals.filter((a) => a.hash !== artifactHashFor(a.gate, ctx));
+  const notAuthor = approvals.filter((a) => !ctx.author || String(a.by).toLowerCase() !== String(ctx.author).toLowerCase());
+
+  const gates = runAllGates(ctx);
+  const passed = Object.values(gates).filter((g) => g.required && g.passed).map((g) => g.gate);
+  const required = Object.values(gates).filter((g) => g.required).map((g) => g.gate);
+
+  const timed = approvals.filter((a) => ts(a.at) !== null).sort((a, b) => ts(a.at) - ts(b.at));
+  const gaps = [];
+  for (let i = 1; i < timed.length; i += 1) {
+    if (timed[i].gate === timed[i - 1].gate) continue;
+    gaps.push({ from: timed[i - 1].gate, to: timed[i].gate, ms: ts(timed[i].at) - ts(timed[i - 1].at) });
+  }
+  const slowest = gaps.sort((a, b) => b.ms - a.ms)[0] || null;
+
+  const tasks = parseTasks(ctx.tasks || "");
+  const rn = reviewerNotes(ctx.acceptance || "");
+  const review = rn.degraded ? "degraded" : !rn.author || !rn.reviewer ? "unrecorded"
+    : modelFamily(rn.author) === modelFamily(rn.reviewer) ? "same-family" : "independent";
+
+  const first = ts(byTime[0]?.startedAt);
+  const last = ts(byTime[byTime.length - 1]?.startedAt);
+
+  return {
+    lane,
+    runs: { total: byTime.length, green: green.length, red: byTime.length - green.length, labels,
+      passRate: byTime.length ? Math.round((green.length / byTime.length) * 100) : null,
+      wallClockMs: first !== null && last !== null ? last - first : null },
+    evidence: { lastRunAt: byTime[byTime.length - 1]?.startedAt || null, lastFullAt: lastFull?.startedAt || null, stale: fullIsStale },
+    gates: { required, passed, missing: required.filter((g) => !passed.includes(g)) },
+    approvals: { total: approvals.length, notAuthor: notAuthor.length, stale: staleApprovals.length,
+      byGate: approvals.reduce((m, a) => ({ ...m, [a.gate]: (m[a.gate] || 0) + 1 }), {}) },
+    tasks: { total: tasks.length, done: tasks.filter((t) => t.done).length, open: tasks.filter((t) => !t.done).map((t) => `T${t.num}`) },
+    deltas: (ctx.deltas || []).length,
+    deltasDecided: (ctx.deltas || []).filter((d) => /Approved-by:\s*(?!_)\S/.test(d.text || "")).length,
+    review,
+    slowestGap: slowest,
+  };
+}
+
+export function formatDuration(ms) {
+  if (ms === null || ms === undefined) return "n/a";
+  if (ms < 60000) return "<1m";
+  const m = Math.round(ms / 60000);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 48) return `${h}h ${m % 60}m`;
+  return `${Math.round(h / 24)}d`;
+}
+
 /* ───────────── Gates ─────────────
  * ctx = {
  *   spec, plan, tasks(text), acceptance, rollout, guardrails, runbook, evals, kind,

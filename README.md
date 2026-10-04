@@ -37,7 +37,7 @@ your agent cannot fake with prose. Local-first: no server, no account, no teleme
 /plugin install aisdlc@aisdlc
 ```
 
-20 skills plus the `/aisdlc-next` and `/aisdlc-status` commands, updated through the plugin system.
+20 skills, the guard mod, and the `/aisdlc-next`, `/aisdlc-status` and `/aisdlc-report` commands, updated through the plugin system.
 
 </td>
 <td valign="top">
@@ -265,6 +265,7 @@ aisdlc check     spec (EARS) or a delta file
 aisdlc trace     requirement → task matrix
 aisdlc gate      one of G1-G6  ·  aisdlc gates runs all six
 aisdlc scan      secrets over tracked files
+aisdlc report    read the logs back: runs, pass rate, staleness, stale approvals, review state
 aisdlc evidence  run a command and record the run as evidence
 aisdlc approve   human gate approval (G1, G4, G5); refuses agents and refuses the author
 aisdlc audit     approval chain + evidence log

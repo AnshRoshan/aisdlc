@@ -9,9 +9,14 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 
-# aisdlc cli: skills are synced from /skills at pack time
+# aisdlc cli: skills and agents are synced from /skills and /agents at pack time
 packages/cli/skills/
+packages/cli/agents/
 packages/cli/node_modules/
+
+# build caches
+site/.astro/
+.freebuff/
 
 # aisdlc init artifacts (this repo installs into itself when tested)
 .claude/

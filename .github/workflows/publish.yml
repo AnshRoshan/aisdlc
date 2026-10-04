@@ -2,7 +2,7 @@ name: publish cli
 
 # Publishes the aisdlc CLI to npm. Requires one secret:
 #   NPM_TOKEN - an npm automation token (npmjs.com -> Access Tokens -> Generate)
-# Trigger: push a tag (git tag v0.1.1 && git push --tags) or run manually.
+# Trigger: push a version tag (git tag vX.Y.Z && git push --tags) or run the workflow manually.
 on:
   workflow_dispatch:
   push:

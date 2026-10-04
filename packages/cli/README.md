@@ -56,7 +56,7 @@ npx aisdlc-cli gates magic-link-login
 
 ```
 aisdlc init [--harness auto|all|claude-code,codex,cursor,gemini-cli,copilot,windsurf,opencode] [--link]
-aisdlc doctor · aisdlc skills · aisdlc addon [ponytail|grilling|all] [--print]
+aisdlc doctor · aisdlc skills · aisdlc kinds · aisdlc addon [ponytail|grilling|code-craft|quality-tools|all] [--print]
 aisdlc new "<title>" --kind <frontend|backend|mobile|data|ml|infra|docs|lib|other> [--lane spike|quick|standard|regulated]
 aisdlc lane <feature> [lane]
 aisdlc status [--json] · aisdlc next [feature] [--json]
@@ -72,11 +72,13 @@ Set `AISDLC_AGENT=1` in your agent's environment to make `approve` refuse outrig
 ## Layout it creates
 
 ```
-aisdlc.json · AGENTS.md / CLAUDE.md / GEMINI.md / .cursor/rules · .agents/skills + per-harness skill dirs
-docs/constitution.md · docs/taste.md · docs/brief.md
-docs/constitution.md · docs/taste.md · docs/glossary.md · docs/brief.md · docs/decisions/
-docs/features/<slug>/{feature.json (kind, lane), spec.md, plan.md, tasks.md, acceptance.md, rollout.md,
-                      guardrails.yaml, runbook.md, evidence/, approvals.json, deltas/, handoff.md, retro.md}
+init    aisdlc.json · AGENTS.md / CLAUDE.md / GEMINI.md / .cursor/rules · .agents/skills + per-harness
+        skill dirs · docs/constitution.md · docs/taste.md
+        (Claude Code only: .claude/agents/aisdlc-scout.md and aisdlc-researcher.md)
+new     docs/features/<slug>/{feature.json, spec.md, plan.md, tasks.md, acceptance.md, rollout.md,
+        guardrails.yaml, runbook.md, evidence/, approvals.json, deltas/}
+later   docs/brief.md, docs/glossary.md, docs/decisions/ and, inside a feature folder, deltas/*.md,
+        handoff.md, retro.md, evals.md - each written by the skill that owns it, never seeded empty
 ```
 
 MIT. Part of the [aisdlc monorepo](https://github.com/AnshRoshan/aisdlc).

@@ -9,13 +9,16 @@ import Base from "../layouts/Base.astro";
     <section style="margin-top:3.5rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Install into the repo you are already in</h2>
       <pre class="term">cd /path/to/your/repo
-<span class="p">npx aisdlc-cli init</span></pre>
-      <p class="lede">This writes the skills into your harness's skill directories, a <code>docs/</code> process tree, and an <code>aisdlc.json</code> marker. Claude Code users can instead install the plugin: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then <code>/plugin install aisdlc@aisdlc</code> for the skills plus <code>/aisdlc-next</code> and <code>/aisdlc-status</code> commands.</p>
+<span class="p">npx skills add AnshRoshan/aisdlc</span>        <span class="c"># the skills, into every harness it finds</span>
+<span class="c"># the CLI + process tree, from a clone until aisdlc-cli is on npm:</span>
+git clone https://github.com/AnshRoshan/aisdlc
+<span class="p">node aisdlc/packages/cli/bin/aisdlc.js init</span></pre>
+      <p class="lede">This writes the skills into your harness's skill directories, a <code>docs/</code> process tree, and an <code>aisdlc.json</code> marker. Claude Code users can instead install the plugin: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then <code>/plugin install aisdlc@aisdlc</code> for the skills plus <code>/aisdlc-next</code> and <code>/aisdlc-status</code> commands. Every <code>aisdlc</code> command below is that same binary, whichever way you got it.</p>
     </section>
 
     <section style="margin-top:3rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Open a feature with a lane</h2>
-      <pre class="term"><span class="p">npx aisdlc-cli new</span> "Payment retries" --kind backend</pre>
+      <pre class="term"><span class="p">aisdlc new</span> "Payment retries" --kind backend</pre>
       <p class="lede">Pick a lane: <strong>spike</strong> (a question), <strong>quick</strong> (bounded change), <strong>standard</strong> (new capability), <strong>regulated</strong> (money, PII, auth). The lane decides which gates apply, and only moves up.</p>
     </section>
 
@@ -27,20 +30,20 @@ import Base from "../layouts/Base.astro";
 
     <section style="margin-top:3rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Let the gates referee</h2>
-      <pre class="term"><span class="p">npx aisdlc-cli next</span> payment-retries --json</pre>
+      <pre class="term"><span class="p">aisdlc next</span> payment-retries --json</pre>
       <p class="lede">Every stage ends with this. It reads the files, derives the state, names the blocking items and the one skill to load next. The agent obeys the disk, not the chat.</p>
     </section>
 
     <section style="margin-top:3rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Approve as a human</h2>
-      <pre class="term"><span class="p">npx aisdlc-cli approve</span> G1 payment-retries
+      <pre class="term"><span class="p">aisdlc approve</span> G1 payment-retries --by "Ansh"
 <span class="e">refused: you authored plan.md</span></pre>
       <p class="lede">Approvals are bound to the hash of the artifact. Edit the plan afterwards and the approval goes stale, and the CLI sends the state backwards. Agents can never approve; the approver can never be the author.</p>
     </section>
 
     <section style="margin-top:3rem;">
       <h2 style="font-size:1.35rem;font-weight:650;">Verify, don't trust</h2>
-      <pre class="term"><span class="p">npx aisdlc-cli evidence payment-retries --label full</span> -- npm test
+      <pre class="term"><span class="p">aisdlc evidence payment-retries --label full</span> -- npm test
 <span class="c">… 41 passed (41), exit 0, 8.2s</span>
 <span class="p">evidence/20260906T154412-full.json</span> recorded</pre>
       <p class="lede"><code>aisdlc evidence</code> runs the command itself and records a hash-chained evidence file. "Tests pass" without a recorded run is not a state the process accepts.</p>
@@ -51,15 +54,19 @@ import Base from "../layouts/Base.astro";
       <div class="panel" style="padding:0.4rem 1.4rem;margin-top:1rem;">
         <table class="skill">
           <tbody>
-            <tr><td>aisdlc init</td><td>install skills + process scaffolding into a repo</td></tr>
-            <tr><td>aisdlc new</td><td>open a feature with a lane</td></tr>
-            <tr><td>aisdlc next</td><td>derive state; print blocking items and the next skill</td></tr>
-            <tr><td>aisdlc status</td><td>list every feature and its state</td></tr>
-            <tr><td>aisdlc evidence</td><td>run a command and record evidence</td></tr>
-            <tr><td>aisdlc gate / check</td><td>run one of G1-G6; validate spec and delta files</td></tr>
-            <tr><td>aisdlc approve</td><td>human gate approval (G1, G5, acceptance)</td></tr>
-            <tr><td>aisdlc lane</td><td>raise a feature's lane (never lowers)</td></tr>
-            <tr><td>aisdlc doctor</td><td>check installation health</td></tr>
+            <tr><td>aisdlc init</td><td>install skills, instructions, slash commands and read-only subagents, detected for your harness</td></tr>
+            <tr><td>aisdlc doctor</td><td>what is installed where, which companions, which test gate</td></tr>
+            <tr><td>aisdlc skills / kinds</td><td>list the bundled skills; print each kind's verify model and each lane's gates</td></tr>
+            <tr><td>aisdlc new</td><td>open a feature with a kind and a lane</td></tr>
+            <tr><td>aisdlc next / status</td><td>derive state from disk: blockers, next task, the skill to load; or every feature at once</td></tr>
+            <tr><td>aisdlc check</td><td>validate a spec (EARS) or a delta file</td></tr>
+            <tr><td>aisdlc trace</td><td>requirement → task matrix</td></tr>
+            <tr><td>aisdlc gate / gates</td><td>run one of G1-G6, or all six</td></tr>
+            <tr><td>aisdlc scan</td><td>secrets over tracked files</td></tr>
+            <tr><td>aisdlc evidence</td><td>run a command and record the run as evidence</td></tr>
+            <tr><td>aisdlc approve</td><td>human gate approval (G1, G4, G5); refuses agents and refuses the author</td></tr>
+            <tr><td>aisdlc lane</td><td>show or raise a feature's lane; lowering needs --force with a note</td></tr>
+            <tr><td>aisdlc audit</td><td>approval chain integrity plus the evidence log</td></tr>
           </tbody>
         </table>
       </div>

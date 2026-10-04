@@ -9,11 +9,9 @@
 <br>
 
 [![CI](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/aisdlc-cli)](https://www.npmjs.com/package/aisdlc)
-[![Node](https://img.shields.io/node/v/aisdlc)](packages/cli/package.json)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![docs](https://img.shields.io/badge/docs-anshroshan.github.io%2Faisdlc-0c100d)](https://anshroshan.github.io/aisdlc/)
 [![skills](https://img.shields.io/badge/agent_skills-20-b1e57c)](#the-20-skills)
+[![Node](https://img.shields.io/node/v/aisdlc-cli)](packages/cli/package.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A process kit for AI-assisted engineering that installs into any coding agent.
 EARS specs, six evidence gates, hash-bound human approvals, and an evidence log
@@ -27,20 +25,11 @@ your agent cannot fake with prose. Local-first: no server, no account, no teleme
 
 <table>
 <tr>
-<th width="33%" align="left"><sub>NPM · ALL HARNESSSES</sub></th>
 <th width="33%" align="left"><sub>CLAUDE CODE PLUGIN</sub></th>
 <th width="33%" align="left"><sub>SKILLS.SH · SKILLS ONLY</sub></th>
+<th width="33%" align="left"><sub>NPM · CLI + SKILLS</sub></th>
 </tr>
 <tr>
-<td valign="top">
-
-```bash
-npx aisdlc-cli init
-```
-
-Skills + instructions + slash commands, detected for your harness. The npm package is `aisdlc-cli`; it installs the `aisdlc` command, so `aisdlc new`, `next`, `verify`, `approve`, `doctor` work after install.
-
-</td>
 <td valign="top">
 
 ```
@@ -60,6 +49,18 @@ npx skills add AnshRoshan/aisdlc
 The skills only, symlinked into every harness it finds. One skill: `--skill aisdlc-debug`.
 
 </td>
+<td valign="top">
+
+```bash
+git clone https://github.com/AnshRoshan/aisdlc
+node aisdlc/packages/cli/bin/aisdlc.js init --harness all
+```
+
+Not published to the registry yet; `aisdlc-cli` is cut on the next release, then this cell becomes
+`npx aisdlc-cli init`. The two paths beside it install the skills today, and the CLI above installs
+skills, instructions, slash commands **and** the read-only subagents, detected for your harness.
+
+</td>
 </tr>
 </table>
 
@@ -71,6 +72,16 @@ use aisdlc-brainstorm, I want to build payment retries
 
 > It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx aisdlc-cli next`, and the agent obeys the disk, not the chat.
 
+## Where to start
+
+| you have | start here |
+|---|---|
+| a new idea, nothing written yet | `aisdlc-brainstorm` → it picks the lane, then routes to `aisdlc-discover` → `aisdlc-spec` |
+| an existing codebase you must not break | `aisdlc-brownfield` first: baseline, characterization tests, named seams, then the normal spine |
+| one bounded change or a bug | `aisdlc new "…" --lane quick`, then `aisdlc-flow`; `aisdlc-debug` when it misbehaves |
+| a spec that changed after signature | `aisdlc-delta` - never a quiet edit; approvals go stale on purpose |
+| no idea where a feature actually is | `aisdlc next <feature>` (or `aisdlc-flow`, which reads the same disk) |
+
 ## Why
 
 <table>
@@ -78,6 +89,7 @@ use aisdlc-brainstorm, I want to build payment retries
 <tr><td>"All tests pass."</td><td>Nothing ran. The agent wrote the sentence it predicted you wanted.</td><td>Only counts a run it recorded itself: command, exit code, output hash.</td></tr>
 <tr><td>The spec drifted at 2 a.m.</td><td>A requirement was quietly rewritten to match the code.</td><td>Turns the edit into a delta, invalidates stale approvals, moves state backwards on purpose.</td></tr>
 <tr><td>The agent approved its own plan.</td><td>Segregation of duties is a policy nobody enforces on a Friday.</td><td>Refuses approvals from the author, and refuses agents entirely.</td></tr>
+<tr><td>The review agreed with the code.</td><td>The model that wrote it reviewed it, saw its own reasoning, and called it clean.</td><td>G4 records the author model and the reviewer model, and fails a match. No second family available means saying `degraded`, out loud, in the artifact.</td></tr>
 </table>
 
 ## The gate model
@@ -117,6 +129,44 @@ The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does
 8. **Fail loud, never fake green.** Infra down means `IMPLEMENTED-NOT-VERIFIED`, not PASS.
 
 </details>
+
+## Who writes what
+
+State lives in files, so *who may touch each file* is the part that decides whether a project
+survives many sessions and many agents. One owner per artifact; `evidence/` and `approvals.json` are
+written by the CLI and by nobody else, which is what makes them evidence rather than prose.
+
+| artifact | written by | read by | who may change it |
+|---|---|---|---|
+| `aisdlc.json` | `aisdlc init` | every CLI command | you: policy, harnesses, `test.gate` |
+| `docs/constitution.md` | init, then `aisdlc-retro` | every stage | amendment a human agrees to |
+| `docs/taste.md` | `aisdlc-taste` | plan, implement, review | you; retro proposes edits |
+| `docs/brief.md` | `aisdlc-discover` | brainstorm, spec, retro | a new discovery run, not an edit |
+| `docs/glossary.md` | discover or taste, then anyone who meets a new term | spec, plan, tasks, review | additive, one line per term |
+| `docs/decisions/*.md` | `aisdlc-plan` for cross-feature calls | plan, review | supersedes with a new ADR; never rewritten |
+| `spec.md` | `aisdlc-spec` | plan, tasks, implement, verify, review | **only** through `aisdlc-delta` once signed |
+| `plan.md` | `aisdlc-plan` | tasks, implement | author until G1; an edit after G1 makes the approval stale on purpose |
+| `tasks.md` | `aisdlc-tasks` | implement, verify | `aisdlc-implement` checks boxes; only tasks/plan adds or reorders them |
+| `acceptance.md` | `aisdlc-review` | verify, release, the human | reviewer fills rows, **only a human signs** |
+| `rollout.md`, `guardrails.yaml`, `runbook.md` | `aisdlc-release` | operate, retro | before G5/G6; after, through a delta |
+| `deltas/*.md` | `aisdlc-delta` | spec, plan, tasks | author writes, human decides |
+| `evidence/*.json` | the CLI, from a run it spawned | `next`, G3, G4, review | nobody. Appending-only; an edited run is a forged run |
+| `approvals.json` | the CLI, from `aisdlc approve` | every gate | nobody. The hash chain reports the edit |
+| `handoff.md` | `aisdlc-handoff` | `aisdlc-flow` on the next start | the next handoff replaces it |
+| `retro.md` | `aisdlc-retro` | the next feature's discovery | you |
+
+## What aisdlc will not do
+
+- It will not tell you where a feature is from the chat. `next` reads disk; if the two disagree, disk wins.
+- It will not let an agent approve anything, or the author approve their own work, and it refuses the
+  environment flag an agent sets (`AISDLC_AGENT`).
+- It will not call work "done" without a run it recorded itself. Placeholders in `acceptance.md` do not
+  count as evidence, and neither does a model name copied from the seed template.
+- It will not silently lower a lane, rewrite your spec to match the code, or rewrite an artifact
+  another skill owns.
+- It will not phone home: no server, no account, no telemetry, and the code never leaves your machine.
+- It will not guarantee a correct program. Six gates catch a large class of lies and none of them can
+  read your intent for you - the signature lines are yours.
 
 ## The 20 skills
 
@@ -169,10 +219,12 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 | path | what |
 |---|---|
 | [`skills/`](skills/) | the 20 canonical skills (source of truth) |
-| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18), installed as `npx aisdlc-cli` |
+| [`agents/`](agents/) | two read-only subagent definitions `init` installs for Claude Code |
+| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18); `node packages/cli/bin/aisdlc.js` until it is on npm |
 | [`commands/`](commands/) | Claude Code plugin slash commands (`/aisdlc-next`, `/aisdlc-status`) |
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |
-| [`site/`](site/) | Astro static site, deployed to GitHub Pages |
+| [`site/`](site/) | Astro static site; the deploy workflow runs, Pages itself is not enabled yet |
+| [`docs/conventions.md`](docs/conventions.md) | how a skill is written: what earns a line, when to split a file, the budgets |
 | [`docs/RESEARCH.md`](docs/RESEARCH.md) | design decisions and their sources (Spec Kit, BMAD, superpowers, ponytail, grilling) |
 | [`docs/COMPETITORS.md`](docs/COMPETITORS.md) | raw research notes on the six competing process kits (read-only; cited by RESEARCH §7-§9) |
 
@@ -181,15 +233,21 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 <br>
 
 ```
-aisdlc init      install skills + process scaffolding into a repo
-aisdlc new       open a feature with a lane
-aisdlc next      derive state; print blocking items and the next skill
-aisdlc status    list every feature and its state
-aisdlc evidence  run a command and record evidence
-aisdlc gate      run one of G1-G6; aisdlc check validates spec and delta files
-aisdlc approve   human gate approval (G1, G5, acceptance)
-aisdlc lane      raise a feature's lane (never lowers)
-aisdlc doctor    check installation health
+aisdlc init      skills + instructions + slash commands + subagents, detected for your harness
+aisdlc doctor    what is installed where, which companions, which test gate
+aisdlc skills    list the bundled skills
+aisdlc kinds     kind verify models and lane gate sets
+aisdlc new       open a feature with a kind and a lane
+aisdlc lane      show or raise a feature's lane (a downgrade needs --force --note)
+aisdlc status    every feature and its state
+aisdlc next      derive state from disk: blockers, next task, the skill to load
+aisdlc check     spec (EARS) or a delta file
+aisdlc trace     requirement → task matrix
+aisdlc gate      one of G1-G6  ·  aisdlc gates runs all six
+aisdlc scan      secrets over tracked files
+aisdlc evidence  run a command and record the run as evidence
+aisdlc approve   human gate approval (G1, G4, G5); refuses agents and refuses the author
+aisdlc audit     approval chain + evidence log
 ```
 
 </details>
@@ -232,12 +290,34 @@ Yes — they are different layers. aisdlc runs the <em>per-change</em> pipeline 
 MIT. Fork it, vendor it, ship it inside your company. If you find it useful, star the repo and file issues.
 </details>
 
+<details>
+<summary><strong>What does this cost my agent in context?</strong></summary>
+<br>
+A skill loads in full whenever the run takes that branch, so every line is a recurring cost. Most
+skills are one file because splitting short, common content costs more in missed reads than it saves in
+tokens; the two rare branches that were genuinely long moved to `references/` (`aisdlc-flow`,
+`aisdlc-review`). <code>node packages/cli/scripts/check-skills.mjs</code> prints the bytes a real run
+loads per path and fails the build when a path or a file goes over budget, so the number is watched
+rather than promised.
+</details>
+
+<details>
+<summary><strong>Why should I believe the README about the CLI?</strong></summary>
+<br>
+You should not, on sight - which is why the corpus is checked. <code>check-skills.mjs</code> reads every
+skill, doc and page against <code>packages/cli/src/cli.js</code>: a documented command must exist, an
+<code>aisdlc-*</code> token must name a real skill or subagent, a referenced sub-file must be on disk, a
+relative link must resolve, frontmatter must be uniform. It runs in CI. The phantom
+<code>aisdlc verify</code> this README shipped with - advertised, never implemented - is exactly the
+defect class it kills.
+</details>
+
 ---
 
 <div align="center">
 
-**Contributing** · see [CONTRIBUTING.md](CONTRIBUTING.md): skills are prose, the CLI is law. Behaviour goes in a SKILL.md; anything that must be enforced deterministically goes in `packages/cli/src/engine.js` as a pure function over files.
+**Contributing** · see [CONTRIBUTING.md](CONTRIBUTING.md): skills are prose, the CLI is law. Behaviour goes in a SKILL.md; anything that must be enforced deterministically goes in `packages/cli/src/engine.js` as a pure function over files. Skill authoring rules and the budgets that enforce them: [docs/conventions.md](docs/conventions.md).
 
-**[MIT](LICENSE)** © Ansh Roshan · [docs](https://anshroshan.github.io/aisdlc/) · [CHANGELOG](CHANGELOG.md)
+**[MIT](LICENSE)** © Ansh Roshan · [docs](docs/) · [CHANGELOG](CHANGELOG.md)
 
 </div>

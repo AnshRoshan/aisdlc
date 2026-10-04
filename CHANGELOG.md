@@ -5,6 +5,24 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 ## [Unreleased]
 
 ### Added
+- **`packages/cli/scripts/check-skills.mjs`**: the corpus is now a tested artifact, not prose someone re-read. Checks every skill's frontmatter (uniform fields, `name` equals the folder, description length), that every `aisdlc-*` token names a real skill, slash command or subagent, that every command documented in a skill, doc, page or README exists in `cli.js`, that every `references/` file a skill promises is on disk, that relative links resolve, plus portability lint (no harness-specific model alias in spawn prose, no naming one client's subagent tool, no POSIX-only shell glue) and byte budgets per file **and per hot path** - what a run actually loads. Runs in CI as the `corpus` job.
+- **Cross-model review enforcement (G4)**: `acceptance.md` records `Author model:` and `Reviewer model:`, and the gate fails when both name the same model family, fails when either is missing or still a template placeholder, and passes a declared `Cross-model: degraded (why)` while printing that it is not the guarantee. `aisdlc-review` gained the detection ladder (settings files and env, never self-introspection, because `/model` switching makes a model's own answer stale), the one recommended confirm question, and the contrast table.
+- **Value sourcing (spec §9, checked at G2)**: the spec must list every value the feature produces, computes or displays with a named source, or say `n/a: <why>`. This replaces "do I feel like I'm inventing something" - which the build model always rationalises - with an enumeration the gate can fail.
+- **Evidence-citation check (G4)**: a row in `acceptance.md` that names an evidence file must name one the CLI actually recorded, so prose cannot borrow a filename.
+- **Test policy, three states** (`aisdlc.json` → `test.gate`): `configured` (default), `none-by-design` (full suite waived, the waiver printed, a recorded run still required), `none-yet` (no escape hatch). `aisdlc doctor` shows which is in force.
+- **`agents/aisdlc-scout.md` and `agents/aisdlc-researcher.md`**: read-only subagent definitions installed by `init` for Claude Code, with the cheap model pinned in the definition rather than in prose, so skill text stays harness-neutral. `aisdlc-implement` and `aisdlc-plan` route their reading through them and keep the writing on the main thread.
+- **`aisdlc kinds`**: prints each kind's verify model and each lane's gate set, replacing a reference to a command that did not exist.
+- `docs/conventions.md`: the authoring constitution - what earns a line, when a file is worth splitting, the budgets and why a warning means prune, the portability rules, and the rule that a check that can be satisfied by cleverer prose is not a check.
+- Progressive disclosure for the two rarest long branches: `aisdlc-flow/references/manual-derivation.md` (deriving state with no CLI) and `aisdlc-review/references/pushback-and-exit.md`. Every router's cost dropped; the branch costs what it takes.
+
+### Fixed
+- README advertised `aisdlc verify`, a command that was never implemented, and the commit that claimed to remove it had only edited the reference table. The corpus checker now makes that class of claim unfalsifiable-by-omission.
+- Badges pointed at the `aisdlc` npm slug (404) instead of `aisdlc-cli`; the npm and GitHub Pages install paths are now labelled honestly as not-live-yet rather than presented as working installs.
+- `aisdlc scan` flagged the kit's own test fixture, so the tool could not pass its own G3; the fixture now carries the `aisdlc:allow-secret` marker and CI runs `scan` on every push.
+- CONTRIBUTING and `aisdlc-flow` referenced an `aisdlc/` directory that no command creates.
+- Reviewer-notes placeholders in the seeded `acceptance.md` satisfied the cross-model check; a filled line under an untouched template line now wins.
+
+### Added
 - `aisdlc check delta <path|feature>`: machine-validates a delta file — Change table types (`modify`/`add`/`remove`/`rename`), Reason + Migration on removals, FROM/TO + Reason on renames, full-text `modify` rows, non-empty change, required sections (`Trigger`/`Change`/`Impact`/`Decision`). Engine `validateDelta`, covered by tests; `aisdlc-delta` runs it alongside its two-directional read.
 - Skills depth pass against six competing process kits (research: `docs/COMPETITORS.md`, `docs/RESEARCH.md` §8–§9): constitution check, data model, interface contracts, research table and smoke path in the plan; read-only consistency pass with PASS/CONCERNS/FAIL readiness in tasks; waves, subagent delegation contract, worktree setup and baseline-commit evidence in implement; three review lenses, pushback handling and branch exit decision in review; discovery verdicts (build / spike first / defer / do not build) with optional PR-FAQ; spec §8 UX & interaction; delta `rename` type; constitution amendment procedure and skill-edit hygiene in retro; refusal lists in taste, quality, brownfield, release; re-plan path in plan + flow.
 - `test/templates.test.js`: locks the seeds to the skills (constitution header, spec §8, plan's 14 sections, acceptance triage, G5/G6 seed behaviour, always-on steering line).
@@ -17,7 +35,6 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 - Claude Code plugin support: `/plugin marketplace add AnshRoshan/aisdlc` then `/plugin install aisdlc@aisdlc` installs the 20 skills plus `/aisdlc-next` and `/aisdlc-status` commands (`.claude-plugin/`, `commands/`).
 - `publish cli` workflow: tag `vX.Y.Z` (or run manually) to publish the CLI to npm as `aisdlc-cli`; requires the `NPM_TOKEN` repository secret.
 
-### Changed
 - Rewrote the README as a proper front page: install matrix (npx, Claude Code plugin, skills.sh, manual), mermaid gate flow, lanes, gates, invariants, skill index.
 - Repository homepage now points at the live GitHub Pages site.
 - Rebuilt the repository from scratch with clean history.

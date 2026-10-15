@@ -7,8 +7,8 @@ Run `npx aisdlc-cli next $ARGUMENTS --json` (or `npx aisdlc-cli next --json` if 
 
 Read the returned JSON: `state`, `lane`, `blocking[]`, `skill`, `owner`, `nextTask`. Then:
 
-1. Load the skill named in `skill` and do exactly its next action.
-2. If `owner` is `human`, stop and ask the human for exactly that thing. Do not simulate approvals, signatures or evidence.
+1. If `owner` is `human`, stop and ask for exactly that action. Never simulate approvals, signatures or evidence.
+2. Otherwise load the skill named in `skill` and do its next action.
 3. When the work for this stage is done, run `npx aisdlc-cli next $ARGUMENTS --json` again to confirm the transition happened on disk, and paste its output.
 
-If the CLI is unavailable, say "derived manually; CLI unavailable" and follow the manual derivation order in skills/aisdlc-flow/SKILL.md without writing approvals or evidence files by hand.
+If the CLI is unavailable, load `aisdlc-flow` and read its `references/manual-derivation.md` in full. Report tentative state only; never fabricate approvals, signatures or CLI evidence.

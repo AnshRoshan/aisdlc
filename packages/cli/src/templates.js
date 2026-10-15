@@ -180,6 +180,8 @@ export const ACCEPTANCE = (title) => `# Acceptance: ${title}
 
 ## Reviewer notes
 Reviewed by: <agent, session id> · axes run separately: yes/no · diff base: <sha>
+- Security review: <security-review.md path or evidenced applicability reason>
+- Security readiness: NOT_VERIFIED until applicable controls have evidence; keep its control table separate.
 Author model: <the model that wrote this code> · Reviewer model: <a different family> · Cross-model: independent
 _If no second family was available, replace "independent" with "degraded" and say why - a degraded review is honest, not the guarantee._
 
@@ -208,9 +210,9 @@ Approved-by: ______  Date: ______
 
 export const GUARDRAILS = `# Every number below must come from a measured baseline or a stated SLO - never from this template.
 budgets:
-  latency_p95_ms: 800
-  error_rate_pct: 1.0
-  monthly_cost: 5000
+  latency_p95_ms: <measured baseline or agreed SLO>
+  error_rate_pct: <measured baseline or agreed SLO>
+  monthly_cost: <measured baseline or agreed budget>
 kill_switch: <FLAG_NAME>   # must exist in the deployed config; name who can flip it
 alerts:
   - on: error_rate_pct > budget for 5m

@@ -35,6 +35,10 @@ The mechanical complement to `aisdlc-craft` (judgment) and `aisdlc-ponytail` (sc
 4. **Secrets are the CLI's job.** G3's secrets scan runs inside `aisdlc gate G3`; bandit/semgrep findings complement it and route as findings.
 5. **New tool commands the project should always run?** Put them in the project's own verification command (the one you record with `aisdlc evidence`), not in a side script - the gate is the contract.
 
+## Final security verification
+
+A green lint/CVE scan does not verify authorization, CSRF, JWTs or runtime controls. For a security audit or web/API/auth/data/infra change, use `aisdlc-verify`'s Final security verification protocol and record the tool findings in `security-review.md`. Confirmed vulnerabilities become fix tasks; after permitted upgrades, inspect the lockfile and rerun the full suite/build and audit. Scanner failure is NOT_VERIFIED, never zero vulnerabilities.
+
 ## Smells to refuse
 
 - Pasting a linter's output in chat and calling it evidence. Wrap the run: `npx aisdlc-cli evidence <slug> --label quality -- <command>`.

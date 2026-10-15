@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <title id="title">aisdlc: agents write code, aisdlc runs the process</title>
+  <desc id="desc">Illustrative BUILD state and evidence record, with the nine engineering stages, EARS specs and six evidence gates.</desc>
   <rect x="16" y="16" width="1168" height="268" rx="22" fill="#ffffff" stroke="#dbe2ea"/>
 
   <!-- wordmark -->
@@ -11,7 +13,7 @@
 
   <!-- tagline -->
   <text x="64" y="152" font-size="21" fill="#4a5765" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif">Agents write code. <tspan fill="#0f172a" font-weight="600">aisdlc runs the process.</tspan></text>
-  <text x="64" y="180" font-size="14" fill="#64748b" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif">EARS specs, six evidence gates, hash-bound approvals, and an evidence log your agent cannot fake.</text>
+  <text x="64" y="180" font-size="14" fill="#64748b" font-family="ui-sans-serif, system-ui, 'Segoe UI', sans-serif">EARS specs, six evidence gates, hash-bound approvals, and a CLI-recorded evidence log.</text>
 
   <!-- pipeline -->
   <g font-size="13" text-anchor="middle">
@@ -24,7 +26,6 @@
     <rect x="400" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dbe2ea"/>
     <text x="449" y="228" fill="#4a5765">tasks</text>
     <rect x="512" y="206" width="98" height="34" rx="8" fill="#15803d" stroke="#15803d">
-      <animate attributeName="opacity" values="1;0.78;1" dur="2.4s" repeatCount="indefinite"/>
     </rect>
     <text x="561" y="228" fill="#ffffff" font-weight="600">build</text>
     <rect x="624" y="206" width="98" height="34" rx="8" fill="#f2f5ef" stroke="#dbe2ea"/>

@@ -78,7 +78,7 @@ Chat is not state. When the frontier is empty:
    - delta → `deltas/D<n>-*.md`
    - anything else → `docs/decisions/<yyyy-mm-dd>-<slug>.md` (ADR: context, decision, consequences)
 2. Print a **decision ledger**: `D1 <decision> (Q3)`, one line each. Ask: "Shared understanding? yes / edit". Do not act until the answer is yes.
-3. If the user said "just build it" mid-interview: record the remaining questions as `[NEEDS CLARIFICATION]` rows, state the defaults you will take, and proceed only if the lane allows it (`spike` or `quick`). `standard`/`regulated` lanes block on an unsigned spec by design.
+3. If the user says "just build it" mid-interview, propose defaults for the remaining decisions and wait for confirmation. Resolve all `[NEEDS CLARIFICATION]` markers before building in any lane; `quick` also requires a human-signed spec.
 
 ## 5. Ways to invoke
 

@@ -4,7 +4,7 @@ import { base } from "../lib/base.js";
 const { title, description = "Agents write code, aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
 const REPO = "https://github.com/AnshRoshan/aisdlc";
 const ORIGIN = "https://anshroshan.github.io";
-const canonical = `${ORIGIN}${base}/`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? ORIGIN).href;
 const ogImage = `${ORIGIN}${base}/og.png`;
 const page = title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process";
 const path = Astro.url.pathname.replace(base, "") || "/";
@@ -75,12 +75,16 @@ const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
           <ul>
             <li><a href={`${REPO}/#install`}>Claude Code plugin</a></li>
             <li><a href="https://github.com/AnshRoshan/aisdlc#install">skills.sh</a></li>
-            <li><a href="https://www.npmjs.com/package/aisdlc">npm (pending)</a></li>
+            <li><a href="https://www.npmjs.com/package/aisdlc-cli">npm (pending)</a></li>
             <li><a href={`${REPO}/issues`}>Issues</a></li>
           </ul>
         </div>
       </div>
       <p class="footer-bar">MIT · © Ansh Roshan · agents write code, aisdlc runs the process</p>
     </footer>
+    <script>
+      import { bindCopyButtons } from "../lib/copy.js";
+      bindCopyButtons(document);
+    </script>
   </body>
 </html>

@@ -262,15 +262,5 @@ state: <span class="k">BUILD</span> · owner: human · blocking: G1 approval</pr
       }, { rootMargin: "0px 0px -10% 0px" });
       document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     }
-    document.querySelectorAll("button[data-copy]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const code = btn.closest(".cmdline")?.querySelector("code");
-        if (code) {
-          try { await navigator.clipboard.writeText(code.textContent.trim()); } catch { /* clipboard blocked */ }
-        }
-        btn.textContent = "copied";
-        setTimeout(() => (btn.textContent = "copy"), 1400);
-      });
-    });
   </script>
 </Base>

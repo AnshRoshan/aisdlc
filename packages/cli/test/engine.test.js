@@ -57,7 +57,7 @@ test("parseTasks + traceMatrix", () => {
 
 test("scanSecrets catches real keys, ignores placeholders", () => {
   assert.equal(scanSecrets("AWS_KEY=AKIA" + "ABCDEFGHIJKLMNOP").length, 1);
-  assert.equal(scanSecrets("key = <your-aws-key> AKIA" + "ABCDEFGHIJKLMNOP").length, 0);
+  assert.equal(scanSecrets("key = <your-aws-key> AKIA" + "ABCDEFGHIJKLMNOP").length, 1, "nearby placeholder must not hide a real key");
   assert.equal(scanSecrets('password: "correct-horse-battery"').length, 1); // aisdlc:allow-secret
   assert.equal(scanSecrets('password: "${DB_PASSWORD}"').length, 0);
 });
@@ -86,7 +86,7 @@ test("flow walks forward with evidence", () => {
   assert.equal(deriveFlow(ctx).state, "VERIFY");
   ctx.evidence.push({ file: "2026-01-02-full.json", label: "full", exitCode: 0, command: "npm test" });
   assert.equal(deriveFlow(ctx).state, "ACCEPT");
-  ctx.acceptance = "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/2026-01-02-full.json | pass |\n\nAuthor model: gpt-5.2 · Reviewer model: claude-opus-4.1 · Cross-model: independent\n\nApproved-by: Priya  Date: 2026-01-02\n";
+  ctx.acceptance = "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/2026-01-02-full.json | pass |\n| A2 | Lockout | lock | evidence/2026-01-02-full.json | pass |\n\nAuthor model: gpt-5.2 · Reviewer model: claude-opus-4.1 · Cross-model: independent\n\nApproved-by: Priya  Date: 2026-01-02\n";
   assert.equal(deriveFlow(ctx).state, "RELEASE");
   ctx.rollout = "# Rollout\n\n## Strategy\nflag\n\n## Rollback\n1. flip flag\n2. revert\n";
   ctx.approvals.push({ gate: "G5", by: "Priya", hash: artifactHashFor("G5", ctx) });
@@ -256,7 +256,7 @@ test("G4: evidence a row cites must exist in the log", () => {
 
 test("lanes: regulated requires two SoD approvals on G1", () => {
   const plan = "# Plan\n## Architecture\nlots of words here to pass the stub check, more than forty characters\n## Traceability\n| Export CSV | T1 |";
-  const hash = artifactHashFor("G1", { plan });
+  const hash = artifactHashFor("G1", { plan, spec: signedSpec });
   const one = deriveFlow({ ...base, lane: "regulated", spec: signedSpec, plan, tasks: "- [ ] T1 [R:Export CSV] x", approvals: [{ gate: "G1", by: "Priya", hash }] });
   assert.equal(one.state, "PLAN");
   const two = deriveFlow({ ...base, lane: "regulated", spec: signedSpec, plan, tasks: "- [ ] T1 [R:Export CSV] x", approvals: [{ gate: "G1", by: "Priya", hash }, { gate: "G1", by: "Ravi", hash }] });

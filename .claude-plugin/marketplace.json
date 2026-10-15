@@ -1,5 +1,6 @@
 {
   "name": "aisdlc",
+  "metadata": { "description": "Local-first engineering process skills, evidence gates and human approvals." },
   "owner": {
     "name": "Ansh Roshan",
     "url": "https://github.com/AnshRoshan"

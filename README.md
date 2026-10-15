@@ -14,8 +14,9 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A process kit for AI-assisted engineering that installs into any coding agent.
-EARS specs, six evidence gates, hash-bound human approvals, and an evidence log
-your agent cannot fake with prose. Local-first: no server, no account, no telemetry.
+EARS specs, six evidence gates, hash-bound approval records, and a checksummed evidence log
+that prose alone cannot satisfy. Local-first: no server, no account, no telemetry.
+Local files and identity fields are trusted inputs, not an adversarial security boundary.
 
 </div>
 
@@ -175,18 +176,26 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 | `handoff.md` | `aisdlc-handoff` | `aisdlc-flow` on the next start | the next handoff replaces it |
 | `retro.md` | `aisdlc-retro` | the next feature's discovery | you |
 
-## What aisdlc will not do
+## Verification contract and limits
 
-- It will not tell you where a feature is from the chat. `next` reads disk; if the two disagree, disk wins.
-- It will not let an agent approve anything, or the author approve their own work, and it refuses the
-  environment flag an agent sets (`AISDLC_AGENT`).
-- It will not call work "done" without a run it recorded itself. Placeholders in `acceptance.md` do not
-  count as evidence, and neither does a model name copied from the seed template.
-- It will not silently lower a lane, rewrite your spec to match the code, or rewrite an artifact
-  another skill owns.
-- It will not phone home: no server, no account, no telemetry, and the code never leaves your machine.
-- It will not guarantee a correct program. Six gates catch a large class of lies and none of them can
-  read your intent for you - the signature lines are yours.
+- `next` reads disk, not chat. G3 needs a current-source recorded run; G4 requires a real green run
+  for every acceptance row, complete spec-scenario coverage and a recorded independent or explicitly
+  degraded review. Neither a green exit nor a scenario name proves test quality: humans still review it.
+- Approval counts use distinct normalized names, excluding the author. G1 binds spec + plan, G4
+  spec + acceptance, and G5 spec + acceptance + rollout. Old-format approvals become stale and need
+  human re-review; never rewrite their history. Regulated acceptance requires two approval records.
+- New evidence has a record checksum, exact requested/executed argv, source fingerprint and a flag
+  for source changed during the run. Legacy evidence remains readable history but cannot earn a gate;
+  record a new run. A `none-by-design` test waiver needs a non-placeholder `test.reason` in config.
+- The CLI refuses approval and lane downgrades when `AISDLC_AGENT` is set. Names, environment and local
+  files are **trusted inputs**: the chain is not an authenticated identity system. Someone with write
+  access can rewrite records and recompute hashes. Protect the repository with your normal controls.
+- The Claude guard is heuristic and fail-open, not a sandbox. For an agreed delta, the human clears
+  the old spec signature in their own editor before the agent applies the change; no Bash bypass.
+- Secret detection is pattern-based, not exhaustive. Common credential flags and recognized output
+  secrets are rejected/redacted, but use environment variables and never persist raw sensitive logs.
+- No account, server or telemetry is added. Explicit addon installation and commands you choose to
+  record can access the network; aisdlc cannot promise those third-party commands are local-only.
 
 ## The 20 skills
 
@@ -291,7 +300,7 @@ Whatever you already have. The skills are plain Markdown; Claude Code, Codex, Cu
 <details>
 <summary><strong>How is this different from Spec Kit or BMAD?</strong></summary>
 <br>
-Those give you excellent templates and advice. aisdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, an evidence log that cannot be faked by prose, and segregation of duties the agent cannot bypass.
+Those give you excellent templates and advice. aisdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, recorded evidence that prose alone cannot satisfy, and separation-of-duties checks over trusted local identity fields.
 </details>
 
 <details>

@@ -1,42 +1,64 @@
 # Contributing to aisdlc
 
-Thanks for looking under the hood. The project is small and opinionated; here is how it fits together so your PR lands cleanly.
+## Layout and ownership
 
-## Layout
+- `skills/`: 20 canonical Agent Skills. Read `docs/conventions.md` before editing; load rare, long branches explicitly from `references/`.
+- `agents/`: read-only scout/researcher definitions; harness model pinning belongs here, not in portable skills.
+- `packages/cli/`: zero-dependency Node CLI (Node ≥18). Enforced behavior lives in pure engine functions; filesystem/process boundaries live in the CLI and helpers.
+- `hooks/`: Claude Code guard mod and contract-based regressions. It is heuristic/fail-open, not an adversarial security boundary.
+- `site/`: Astro7 static site, lockfile, rendering/clipboard tests and production build. Astro requires Node≥22.12; use the latest22 patch or Node24 for locked dependency compatibility.
+- `docs/`: authoring conventions, project steering, historical research and feature artifacts. The demo is deliberately unfinished scaffolding, not evidence of a passing feature.
 
-- `skills/` — one folder per skill, each with a `SKILL.md` (open Agent Skills format, MIT). A skill may
-  grow `references/*.md` for content that is rare *and* long; the trigger to read it must be explicit.
-- `agents/` — the two read-only subagent definitions `init` installs for Claude Code. Model pinning lives
-  here, never in skill prose.
-- `packages/cli/` — zero-dependency Node CLI (Node ≥ 18). Tests: `cd packages/cli && npm test`.
-- `site/` — Astro static site; the deploy workflow builds and uploads it, Pages is not enabled yet.
-- `docs/conventions.md` — how a skill is written and what it costs. Read it before editing `skills/`.
-- `docs/RESEARCH.md` — where design decisions and their sources are recorded, gap analyses included.
+## Rules
 
-## Rules of the road
+1. **Skills are prose; the CLI is law.** A deterministic check cannot be replaced by advice.
+2. **Keep the CLI dependency-free.** Node standard library only.
+3. **Gate changes need regression tests and matching prose.** Test the prevented failure, not just the happy path.
+4. **Do not manufacture signatures or evidence.** Tests use temporary fixture projects; leave real feature approvals alone.
+5. **Respect the trust boundary.** Names, environment and local files are trusted inputs. Hashes detect partial/accidental tampering, not authenticated authorship.
+6. **Preserve portability.** CLI CI covers Node18/20/22. Avoid implicit shell interpolation; Windows argument/junction regressions must stay covered.
+7. **Keep context costs measured.** Descriptions stay under512 characters, skills under13KB, references under9KB and operational hot paths under their existing budgets. Prune instead of raising limits.
+8. **Review test quality.** A label named full and a zero exit code cannot establish that a command actually tested every behavior.
 
-1. **Skills are prose, the CLI is law.** Behavioural guidance goes in a SKILL.md; anything that must be enforced deterministically belongs in `packages/cli/src/engine.js` as a pure function over files. A check that can be satisfied by rephrasing the prose is not a check.
-2. **No dependencies in the CLI.** It must stay runnable with nothing but Node.
-3. **Gate changes need evidence.** If you change what G1–G6 check, update the tests and the skill docs that reference them in the same PR, and add a test that names the failure the check prevents.
-4. **Skill descriptions are load-bearing.** The `description` frontmatter is what makes a harness trigger the skill; keep it concrete (what the user says, when to use it). The format allows 1024 characters; keep it under 512, because every installed description loads into every session.
-5. **The corpus is checked, not reviewed.** `cd packages/cli && npm run check:skills` verifies that every command a skill or doc advertises exists, every `aisdlc-*` token names a real skill or agent, every referenced sub-file is on disk, every relative link resolves, and no path exceeds its byte budget. CI runs it. When it warns about a budget, prune; do not raise the ceiling.
+## Local validation
 
-## PR checklist
+Run from the repository root, stopping on any failed command:
 
-- [ ] `npm test` passes in `packages/cli` (CI runs it on Node 18/20/22)
-- [ ] `npm run check:skills` passes (the `corpus` job)
-- [ ] `node bin/aisdlc.js scan` is clean in `packages/cli` - the kit must pass its own gates
-- [ ] `npm run build` passes in `site` if you touched it
-- [ ] New behaviour is documented in the affected SKILL.md files or the README, and in CHANGELOG.md
+```text
+npm --prefix packages/cli test
+node packages/cli/scripts/check-skills.mjs
+node packages/cli/bin/aisdlc.js scan
+node --test hooks/test/*.test.mjs
+npm --prefix site test
+npm --prefix site run build
+claude plugin validate .
+git diff --check
+```
+
+The installed Claude CLI is optional for source tests but required to claim actual host manifest validation.
+The static corpus checker does not validate arbitrary plugin API field shapes: keep runtime-shaped mocks
+and check the official docs when the API changes. A build is not a browser or accessibility audit.
+
+After changing canonical skills/agents, run `node packages/cli/scripts/sync-skills.mjs`. `npm pack` also
+runs the sync hook. Generated copies are not the source of truth.
+
+## Compatibility checks
+
+- Old approval hashes intentionally become stale when their binding format or intent changes. Humans re-review/re-approve; never rewrite a chain to fake compatibility.
+- Legacy evidence remains history but cannot earn a gate. A new checksummed source-bound run restores proof without deleting history.
+- `test.gate: none-by-design` requires a meaningful `test.reason`; it never waives recorded evidence or human review.
+- Installer copy mode preserves extra files; link mode must not delete a user directory. Platform fixtures must cover physical aliases and different drives where available.
 
 ## Reporting bugs
 
-Open an issue with: the harness you used, `aisdlc doctor` output (`node packages/cli/bin/aisdlc.js doctor` if you run it from a clone), and the smallest repo state that reproduces (the `aisdlc.json` and `docs/features/` files are enough — no need for your code).
+Include harness/runtime versions, `aisdlc doctor`, the failing command and the smallest sanitized artifact
+state. Do not attach private code, credentials or unredacted output. State what was actually executed.
 
-## Releasing the CLI
+## Release checklist
 
-1. Bump `version` in `packages/cli/package.json` and add a CHANGELOG.md entry.
-2. `cd packages/cli && npm test` — the publish workflow runs the tests again before publishing.
-3. `git tag vX.Y.Z && git push --tags`. The `publish cli` workflow publishes to npm and opens a GitHub release.
-   - One-time setup: add an npm **automation** token as the repository secret `NPM_TOKEN` (npmjs.com → Access Tokens → Generate Token → Automation).
-   - Local alternative: `npm login`, then `cd packages/cli && npm publish --access public` (`prepack` syncs `skills/` into the tarball automatically).
+1. Update CLI/plugin/marketplace versions consistently and add a changelog entry.
+2. Run every local check above; inspect the package with `npm pack --dry-run` in `packages/cli`.
+3. Confirm published tarball includes all20 skills, both agents, the CLI and MIT attribution.
+4. Push a `vX.Y.Z` tag matching the package version. The publish workflow tests, publishes using the
+   configured npm token and creates a release. Verify registry publication and Pages activation separately;
+   a workflow definition is not proof that either service is live.

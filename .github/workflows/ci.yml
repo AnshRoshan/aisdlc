@@ -1,5 +1,7 @@
 name: ci
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   corpus:
     runs-on: ubuntu-latest
@@ -29,6 +31,14 @@ jobs:
           node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js new "Demo" --kind backend
           node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js next --json
           node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js doctor
+  hooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node --check hooks/aisdlc-guard.mjs
+      - run: node --test hooks/test/*.test.mjs
   site:
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +46,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: site/package-lock.json }
       - run: npm ci
+        working-directory: site
+      - run: npm test
         working-directory: site
       - run: npm run build
         working-directory: site

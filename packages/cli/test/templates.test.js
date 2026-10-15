@@ -69,17 +69,17 @@ test("acceptance seed carries finding triage and reviewer notes", () => {
   assert.match(a, /^\| ID \| Requirement \| Scenario \| Evidence \| Result \|$/m);
 });
 
-test("rollout seed satisfies G5's rollback check; guardrails seed fails only on the placeholder flag", () => {
+test("rollout seed carries rollback steps; guardrails require measured budgets and a real flag", () => {
   const g5 = runGate("G5", { rollout: ROLLOUT("Demo"), policy: { minApprovals: {} }, approvals: [], author: "a" });
   const rb = g5.checks.find((x) => /Rollback/.test(x.name));
   assert.equal(rb.ok, true, "seed rollback steps must satisfy the gate");
 
   const seed = runGate("G6", { guardrails: GUARDRAILS, runbook: RUNBOOK("Demo"), kind: "backend", policy: { minApprovals: {} }, approvals: [], author: "a" });
-  assert.equal(seed.checks.find((x) => /budgets/.test(x.name)).ok, true);
+  assert.equal(seed.checks.find((x) => /budgets/.test(x.name)).ok, false, "template budgets must not be mistaken for measured policy");
   assert.equal(seed.checks.find((x) => /Symptoms/.test(x.name)).ok, true);
   assert.equal(seed.checks.find((x) => /kill_switch/.test(x.name)).ok, false, "placeholder flag must not pass");
 
-  const filled = runGate("G6", { guardrails: GUARDRAILS.replace("<FLAG_NAME>", "EXPORT_KILL"), runbook: RUNBOOK("Demo"), kind: "backend", policy: { minApprovals: {} }, approvals: [], author: "a" });
+  const filled = runGate("G6", { guardrails: GUARDRAILS.replace("<FLAG_NAME>", "EXPORT_KILL").replace(/<measured baseline or agreed (?:SLO|budget)>/g, "100"), runbook: RUNBOOK("Demo"), kind: "backend", policy: { minApprovals: {} }, approvals: [], author: "a" });
   assert.equal(filled.checks.find((x) => /kill_switch/.test(x.name)).ok, true);
 });
 

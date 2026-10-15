@@ -14,7 +14,7 @@ Turn a fuzzy intention into a brief that a spec can be written from. Ten minutes
 
 ## Rules of engagement
 
-- Interview discipline comes from `aisdlc-grill`: facts are your job, decisions are theirs; every question must be able to change the build; always offer a recommended answer or 2-3 example answers so a non-technical person can respond fast.
+- Interview discipline comes from `aisdlc-grill`: facts are your job, decisions are theirs; every question must be able to change the build; give exactly one recommended answer with a one-line reason; add example alternatives when useful.
 - **Pacing by audience.** Non-technical user: one question per turn. Technical user or a user who says "batch them": rounds of 3-5 independent questions (the frontier).
 - Reflect the answer back in one sentence before moving on. If the user rambles, extract and confirm.
 - Stop early when you already have a clear answer from context (brief, README, issues, code, taste). Never ask for its own sake.

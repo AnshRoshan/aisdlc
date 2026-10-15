@@ -85,7 +85,7 @@ Lane: <lane> · duration: <first evidence → last approval> · tasks: <n> · de
 
 - Change the **smallest** section that would have prevented the miss. A skill is read in full by every session; a paragraph added casually is a paragraph forever.
 - If the miss is about *discovery* rather than *execution*, the fix belongs in the `description` frontmatter (what the user says / when it triggers), not the body — the body does not exist until the skill has already been chosen.
-- Keep the body under ~500 lines; if an edit pushes toward it, move the detail into a file the skill points at, with a clear "read this when".
+- Follow `docs/conventions.md`: SKILL.md ≤13 KB, sub-files ≤9 KB, and checker hot-path budgets. Split only long, rarely needed content with an explicit read trigger.
 - In this repository: edit `skills/<name>/SKILL.md`, then run `node packages/cli/scripts/sync-skills.mjs` so `packages/cli/skills/` matches. A skill edited only in `packages/cli/` is lost on the next sync.
 - Re-read the neighbouring skills you touched. If a rule moves or a section is renamed, every skill that points at it has to be updated in the same turn.
 

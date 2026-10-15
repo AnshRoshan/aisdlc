@@ -21,7 +21,7 @@ Everything in the baseline that a command can answer, you answer: stack, build/t
 Produce `docs/features/<slug>/baseline.md`:
 
 - **Stack & entrypoints:** languages, frameworks, build & test commands that actually work today (run them, record exit codes with `npx aisdlc-cli evidence <slug> -- <command>`).
-- **Hotspots:** top 10 files by churn (`git log --format= --name-only | sort | uniq -c | sort -rn | head`), plus TODO/FIXME density.
+- **Hotspots:** count file appearances from `git log --format= --name-only` with the available shell's grouping tools; report the top 10 plus TODO/FIXME density.
 - **Pain points** from the user, verbatim.
 - **Must-never-change list:** public APIs, data formats, schedules, integrations. Each becomes a golden-master candidate.
 - **Unknowns:** things you could not determine. Never guess; list them as `[NEEDS CLARIFICATION]` so `aisdlc-spec` blocks until resolved.

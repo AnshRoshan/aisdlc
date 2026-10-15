@@ -4,7 +4,7 @@
 style: minimal & explicit      naming: descriptive, no abbreviations      comments: why, not what      errors: fail loud
 
 ## Tests
-philosophy: test-first for behaviour, characterization for legacy   runner: <runner>   green means: unit + integration
+philosophy: test-first for behaviour, characterization for legacy   runner: node --test   full suite: `npm --prefix packages/cli test`   green means: unit + integration
 
 ## Agent behaviour
 verbosity: short rationale per change   laziness: full   interview: rounds   ask before: deleting files, changing schemas   never: fill Approved-by

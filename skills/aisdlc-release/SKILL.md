@@ -14,7 +14,7 @@ Shipping is a reversible decision or it is a gamble. This skill makes it reversi
 
 ## Lane check first
 
-`npx aisdlc-cli next <slug> --json` → read `lane`. Lanes `spike` and `quick` do not require G5/G6; they show as `skipped` and the feature is DONE after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc-cli lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
+`npx aisdlc-cli next <slug> --json` → read `lane`. Lanes `spike` and `quick` skip G5/G6: spike finishes after G3, quick after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc-cli lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
 
 ## G5: Release approval
 
@@ -42,7 +42,7 @@ Changelog entry · status page · stakeholder note
 Approved-by: ______  Date: ______
 ```
 
-G5 requires a `## Rollback` section with concrete steps and a human approval bound to the current rollout hash:
+G5 requires concrete `## Rollback` steps and a human approval bound to the current spec, acceptance and rollout:
 `npx aisdlc-cli approve G5 <slug> --by "<release owner>"` (never the author, never you).
 
 ## G6: Runtime guardrails
@@ -85,6 +85,10 @@ G6 requires `budgets`, `kill_switch` and a runbook with a Symptoms section. For 
 ## Ponytail applies here too
 
 The smallest rollout that is still reversible wins: one flag, one canary step, one smoke command. Do not invent a five-stage canary for a copy change. Do not skip the flag for a schema change.
+
+## Final security verification before deployment
+
+Review `security-review.md` against the actual production configuration/build: public bundles/maps, secrets/logs, cookies, auth/permissions, RLS, rate limits, webhook signatures and egress/SSRF controls where applicable. If absent or stale, use `aisdlc-verify`'s Final security verification protocol. FAILED or applicable NOT_VERIFIED blocks a security-ready release claim; record required human risk decisions without relabeling outcomes. G5/G6 do not automatically evaluate this report. Include security results and residual risks in the final handoff.
 
 ## After release
 

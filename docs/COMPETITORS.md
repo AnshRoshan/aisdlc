@@ -134,7 +134,7 @@ Relevant to how much the skills ask a session to load every turn:
 - "Never send an LLM to do a linter's job" — deterministic tools for mechanical rules. *aisdlc already follows this: `aisdlc-quality` is tool-first, and the CLI is law.*
 - Add an instruction when the agent repeats a mistake; delete it when it stops earning its place. *aisdlc's `aisdlc-retro` applies this to constitution/taste/glossary but not systematically to the skills themselves.*
 
-## 7. `jsmastery-pro/skills` - the cost-discipline kit (researched 2026-10-07)
+## 9. `jsmastery-pro/skills` - the cost-discipline kit (researched 2026-10-07)
 
 Nine skills, 28 sub-files, two read-only subagents, two zero-dep Node scripts, one CI job, **no CLI and
 no state machine**. 5,447 lines of Markdown; routers are the cheap part (their `check` router is 52

@@ -112,7 +112,7 @@ strong { font-weight: 600; color: var(--fg); }
 .kicker { font: 500 0.75rem var(--mono); color: var(--meta); letter-spacing: 0.02em; }
 
 /* ---------- hero ---------- */
-.hero { padding: clamp(3.5rem, 8vw, 6.5rem) 0 0; }
+.hero { padding-top: clamp(3.5rem, 8vw, 6.5rem); }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
 /* grid items default to min-width:auto, and a long mono path inside one of them will
    widen the whole page instead of wrapping. Every grid child gets a zero floor. */
@@ -276,7 +276,8 @@ details.faq p { color: var(--fog); font-size: 0.9375rem; line-height: 1.65; marg
   .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .nav-links a:not(.nav-cta) { display: none; }
+  .nav { flex-wrap: wrap; gap: 0.8rem; }
+  .nav-links { flex-wrap: wrap; gap: 0.9rem; }
   .footer-grid { grid-template-columns: 1fr; }
   .ledger-row { grid-template-columns: 1fr auto; }
   .ledger-row .out { grid-column: 1 / -1; }

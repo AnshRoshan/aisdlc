@@ -26,7 +26,7 @@ One SHALL per requirement. No "and/or", no "quickly", no "user-friendly", no "et
 
 ## File contract: `docs/features/<slug>/spec.md`
 
-The validator (`npx aisdlc-cli check spec docs/features/<slug>/spec.md`) enforces exactly this:
+Use this artifact shape; `npx aisdlc-cli check spec docs/features/<slug>/spec.md` checks the EARS rules below, not every section:
 
 ```markdown
 # Spec: <title>
@@ -84,7 +84,7 @@ Hard rules the validator checks:
 - Zero `[NEEDS CLARIFICATION: ...]` markers remain when you claim the spec is ready. While drafting, **use them liberally**; a marker is honest, a guess is not.
 - §5 `Approved-by:` is left for a human. Never fill it. Underscores mean unsigned. (Lane `spike` does not require a signature.)
 - §6 rows whose Status is not `done`/`resolved`/`closed`/`n/a` are reported as warnings.
-- §9 exists. Every value has a named source, or the section says `n/a: <why>` (G2 fails either way otherwise). A value with no source is not wiring, it is a decision the spec has not made yet.
+- G2 (not `check spec`) requires §9: named sources for every value, or `n/a: <why>`. A value with no source is an owed decision.
 
 Rules the validator cannot check but the reviewer will:
 - Every requirement has at least one **unhappy** scenario (IF/THEN) unless it is genuinely impossible to fail; say so if so.
@@ -106,7 +106,7 @@ Rules the validator cannot check but the reviewer will:
    - **Within each requirement:** "what input breaks this?", "what if it happens twice?", "what if it happens while \<other state\>?", "who must not be able to do this?". Add scenarios or mark clarifications.
    - **Between requirements:** read every pair that could interact and ask "can both of these hold at once?" Contradictions, overlapping ownership ("who is responsible for X?" answered twice differently), and one requirement quietly superseding another all hide here. Also sweep for unnumbered quantifiers. Fix by merging, narrowing, or a `[NEEDS CLARIFICATION]` — never by picking a winner yourself.
 5. Run `npx aisdlc-cli check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
-6. Ask the human to sign §5 (name + date) or run `npx aisdlc-cli approve`-equivalent in their tool. Do not proceed to `aisdlc-plan` until `aisdlc next` moves to PLAN (or to TASKS/BUILD in the quick lane).
+6. Ask the human to sign §5 (name + date); `aisdlc approve` does not sign specs. Do not proceed until `aisdlc next` moves to PLAN (or TASKS/BUILD in the quick lane).
 
 ## Compact mode (lane `quick`)
 

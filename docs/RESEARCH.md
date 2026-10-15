@@ -1,6 +1,6 @@
 # aisdlc Platform — Analysis, research & product decisions
 
-This is the written answer to "analyze the PRD, research the right approach, tell me what's good and what's bad, then build it". Everything below was applied in this repository.
+Historical research and product decisions, not the shipped-product contract. §§1–6 describe an earlier cloud-platform design; its accounts, billing, API and deployment claims do not describe this local-first CLI/skills repository. Later sections record successive audits and can quote superseded behaviour. Use the current CLI and skills for operational instructions.
 
 ## 1. Verdict on the PRD (v1.1 rebuild blueprint)
 

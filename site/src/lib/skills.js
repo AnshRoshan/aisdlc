@@ -8,7 +8,7 @@ import path from "node:path";
 function skillsDir() {
   const fromCwd = path.resolve(process.cwd(), "../skills");
   if (readdirSyncSafe(fromCwd)) return fromCwd;
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../skills");
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../skills");
 }
 function readdirSyncSafe(dir) {
   try {
@@ -38,13 +38,17 @@ marked.use({
 const anchorId = (s) => s.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
 
 export function renderMarkdown(md) {
-  // The skill files are the product's canonical prose and stay as written; the *page* is a
-  // rendering surface, and typographic dashes read as AI copy there. Same call clean() makes
-  // for descriptions.
-  const body = (md || "").replace(/\s*[—–]\s*/g, " - ");
+  // Preserve the canonical source, especially punctuation in code examples.
+  const used = new Set();
   return marked
-    .parse(body, { gfm: true })
-    .replace(/<h([23])>(.*?)<\/h\1>/g, (_, n, inner) => `<h${n} id="${anchorId(inner)}">${inner}</h${n}>`);
+    .parse(md || "", { gfm: true })
+    .replace(/<h([23])>(.*?)<\/h\1>/g, (_, n, inner) => {
+      const stem = anchorId(decodeEntities(inner.replace(/<[^>]+>/g, ""))) || "section";
+      let id = stem;
+      for (let suffix = 1; used.has(id); suffix++) id = `${stem}-${suffix}`;
+      used.add(id);
+      return `<h${n} id="${id}">${inner}</h${n}>`;
+    });
 }
 
 // Heading text arrives already entity-encoded from the renderer; the rail re-encodes it once,

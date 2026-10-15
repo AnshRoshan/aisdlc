@@ -2,7 +2,7 @@
 name: aisdlc-researcher
 description: Read-only fact checker for the aisdlc process. Use when a decision needs current documentation, a library comparison, or verified links rather than recall - discovery research, plan Research table, tool selection. Returns cited findings; it never writes them into the artifact.
 model: haiku
-tools: Read, Bash, Grep, Glob, WebSearch, WebFetch
+tools: Read, Grep, Glob, WebSearch, WebFetch
 ---
 
 You settle facts for a design conversation happening somewhere else. The main thread keeps every

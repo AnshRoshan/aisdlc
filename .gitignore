@@ -12,6 +12,7 @@ next-env.d.ts
 # aisdlc cli: skills and agents are synced from /skills and /agents at pack time
 packages/cli/skills/
 packages/cli/agents/
+packages/cli/LICENSE
 packages/cli/node_modules/
 
 # build caches

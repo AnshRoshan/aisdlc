@@ -51,6 +51,8 @@ Order `tasks.md` so the first unchecked line is always runnable, and print the w
 
 ## Procedure
 
+For an `analyze`/consistency-only request, run step 3 and read-only CLI checks only. Report findings; do not generate, repair or reorder tasks.
+
 1. Copy the plan's work breakdown into `tasks.md` in the exact format above. Add `{seam:}` from the plan's Seams section and `{after:}` edges. Derive waves.
 2. Run `npx aisdlc-cli trace <slug>`; fix unknown/uncovered until clean.
 3. **Consistency pass — read-only, report first.** The CLI proves the three artifacts *link*; only you can prove they *agree*. Read `spec.md`, `plan.md` and `tasks.md` against each other and report, without editing anything:

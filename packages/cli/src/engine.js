@@ -50,12 +50,16 @@ export const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 export const short = (h) => (h || "").slice(0, 12);
 
 /* ───────────── Approved-by (lookahead terminator so "Date:" never becomes a name) ───────────── */
+const isPlaceholder = (v) => !String(v || "").trim() || /^(?:[_\-\s]+|\[?\s*\]?|<.*>|tbd|todo|unknown|none|pending)$/i.test(String(v).trim());
+const identity = (v) => String(v || "").trim().replace(/[ \t]+/g, " ").toLowerCase();
+
 export function approvedBy(text) {
-  const m = (text || "").match(/Approved-by:\s*(.*?)(?=\s{2,}|\s*Date:|$)/m);
-  if (!m) return null;
-  const v = m[1].trim();
-  if (!v || /^[_\-\s]+$/.test(v) || /^\[?\s*\]?$/.test(v)) return null;
-  return v;
+  // Horizontal whitespace only: a blank signature must never consume the next line.
+  for (const m of (text || "").matchAll(/\bApproved-by:[ \t]*([^\r\n]*?)(?=[ \t]*Date:|$)/gm)) {
+    const v = m[1].trim();
+    if (!isPlaceholder(v)) return v;
+  }
+  return null;
 }
 
 /* ───────────── EARS spec validation ───────────── */
@@ -161,7 +165,7 @@ export function validateDelta(text) {
     if (!/TO:/i.test(text)) errors.push("rename row(s) present but no `TO:` line.");
     if (!/^-?\s*Reason:/mi.test(text)) errors.push("rename row(s) present but no `Reason:` line.");
   }
-  if (/^##\s+Decision\b.*$/m.test(text) && !/Approved-by:/i.test(text)) {
+  if (/^##\s+Decision\b.*$/m.test(text) && !approvedBy((text.split(/^##\s+Decision\b.*$/m)[1] || "").split(/^##\s+/m)[0])) {
     warnings.push("No `Approved-by:` in ## Decision - the delta will be applied before anyone agreed to it.");
   }
   return { errors, warnings, rows };
@@ -213,6 +217,7 @@ const SECRET_PATTERNS = [
   ["Stripe/Razorpay live key", /(?:sk_live_[0-9a-zA-Z]{20,}|rzp_live_[0-9A-Za-z]{10,})/g],
   ["JWT", /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g],
   ["Assigned secret literal", /(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*["'][^"'\s]{8,}["']/gi],
+  ["Credential command argument", /--(?:password|passwd|secret|api[_-]?key|(?:access[_-]?)?token)(?:=|[ \t]+)(?:"[^"]+"|'[^']+'|[^\s"']+)/gi],
 ];
 const PLACEHOLDER = /(<[^>]+>|your[-_]|xxxx|example|\$\{|CHANGE_ME|placeholder|dummy|redacted)/i;
 
@@ -222,8 +227,8 @@ export function scanSecrets(text, filename = "input") {
     if (/aisdlc:allow-secret/.test(line)) return;
     for (const [family, re] of SECRET_PATTERNS) {
       re.lastIndex = 0;
-      const m = re.exec(line);
-      if (m && !PLACEHOLDER.test(m[0]) && !PLACEHOLDER.test(line)) {
+      let m;
+      while ((m = re.exec(line))) if (!PLACEHOLDER.test(m[0])) {
         out.push({ family, file: filename, line: i + 1, snippet: `${m[0].slice(0, 6)}…` });
       }
     }
@@ -240,7 +245,8 @@ export function parseAcceptance(text) {
     if (cells.length < 3 || /^id$/i.test(cells[0])) continue;
     const result = (cells[cells.length - 1] || "").toLowerCase();
     const evidence = cells[cells.length - 2] || "";
-    rows.push({ id: cells[0], evidence, result });
+    if (/^\|[\s:|-]+\|$/.test(line)) continue;
+    rows.push({ id: cells[0], requirement: cells[1], scenario: cells.length >= 5 ? cells[2] : "", evidence, result });
   }
   return rows;
 }
@@ -255,6 +261,8 @@ export function modelFamily(value) {
   const v = String(value || "").toLowerCase();
   if (!v.trim()) return null;
   const hit = MODEL_FAMILIES.find((f) => new RegExp(`\\b${f}\\b`).test(v));
+  if (["opus", "sonnet", "haiku", "fable", "claude"].includes(hit)) return "claude";
+  if (["gpt", "o4", "o3", "o1"].includes(hit)) return "openai";
   return hit || v.replace(/[^a-z0-9.]+/g, "-").slice(0, 24);
 }
 
@@ -264,7 +272,7 @@ export function reviewerNotes(text) {
   const field = (label) => {
     // Take the first *filled* occurrence: a seeded placeholder line above a real one must not
     // hide the answer, and a real answer above a placeholder must not be ignored either.
-    for (const m of t.matchAll(new RegExp(`${label}:\\s*([^·\\n|]+)`, "gi"))) {
+    for (const m of t.matchAll(new RegExp(`${label}:[ \\t]*([^·\\r\\n|]+)`, "gi"))) {
       const v = m[1].trim();
       if (!blank(v)) return v;
     }
@@ -274,8 +282,8 @@ export function reviewerNotes(text) {
   return {
     author: field("Author model"),
     reviewer: field("Reviewer model"),
-    degraded: /degraded/i.test(note),
-    independent: /independent/i.test(note),
+    degraded: /^degraded\b[ \t]*(?:\([^<>]+\)|[:—-][ \t]*[^<>]+)$/i.test(note) && !/\b(?:why|reason|todo|tbd)\b/i.test(note),
+    independent: /^independent\b/i.test(note),
     note,
   };
 }
@@ -289,7 +297,8 @@ export function valueSourcing(text) {
   const sec = (text || "").split(/^##\s+9\.\s*Value sourcing/im)[1];
   if (!sec) return { present: false, rows: [], unnamed: [], waived: false };
   const body = sec.split(/^##\s+/m)[0];
-  const waived = /^[\s>]*n\/a:?\s+\S/im.test(body);
+  const waiver = body.match(/^[ \t>]*n\/a:?[ \t]+([^\r\n]+)/im)?.[1]?.trim();
+  const waived = !!waiver && !isPlaceholder(waiver) && !/[<>]|\[NEEDS CLARIFICATION/i.test(waiver);
   const rows = body
     .split("\n")
     .filter((l) => /^\|/.test(l) && !/^\|[\s:|-]+$/.test(l))
@@ -317,7 +326,9 @@ export function summarizeLog(ctx = {}, { codeChangedAt = null } = {}) {
   const lane = normalizeLane(ctx.lane);
   const lastFull = [...byTime].reverse().find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
   const codeAt = ts(codeChangedAt);
-  const fullIsStale = !!(lastFull && codeAt !== null && (ts(lastFull.startedAt) ?? 0) < codeAt);
+  const fullIsStale = !!(lastFull && (ctx.sourceSha256
+    ? lastFull.sourceSha256 !== ctx.sourceSha256 || !!lastFull.sourceChangedDuringRun
+    : codeAt !== null && (ts(lastFull.startedAt) ?? 0) < codeAt));
 
   const approvals = ctx.approvals || [];
   const staleApprovals = approvals.filter((a) => a.hash !== artifactHashFor(a.gate, ctx));
@@ -354,7 +365,7 @@ export function summarizeLog(ctx = {}, { codeChangedAt = null } = {}) {
       byGate: approvals.reduce((m, a) => ({ ...m, [a.gate]: (m[a.gate] || 0) + 1 }), {}) },
     tasks: { total: tasks.length, done: tasks.filter((t) => t.done).length, open: tasks.filter((t) => !t.done).map((t) => `T${t.num}`) },
     deltas: (ctx.deltas || []).length,
-    deltasDecided: (ctx.deltas || []).filter((d) => /Approved-by:\s*(?!_)\S/.test(d.text || "")).length,
+    deltasDecided: (ctx.deltas || []).filter((d) => approvedBy((d.text || "").split(/^##\s+Decision\b.*$/m)[1] || "")).length,
     review,
     slowestGap: slowest,
   };
@@ -379,11 +390,12 @@ export function formatDuration(ms) {
  */
 export function artifactHashFor(gate, ctx) {
   const map = {
-    G1: ctx.plan || "",
-    G2: (ctx.spec || "") + (ctx.plan || "") + (ctx.tasks || ""),
+    // Explicit framing prevents concatenation ambiguity; signed intent participates in approvals.
+    G1: JSON.stringify([ctx.spec || "", ctx.plan || ""]),
+    G2: JSON.stringify([ctx.spec || "", ctx.plan || "", ctx.tasks || ""]),
     G3: ctx.tasks || "",
-    G4: ctx.acceptance || "",
-    G5: ctx.rollout || "",
+    G4: JSON.stringify([ctx.spec || "", ctx.acceptance || ""]),
+    G5: JSON.stringify([ctx.spec || "", ctx.acceptance || "", ctx.rollout || ""]),
     G6: (ctx.guardrails || "") + (ctx.runbook || ""),
   };
   return sha256(map[gate]);
@@ -392,15 +404,19 @@ export function artifactHashFor(gate, ctx) {
 function freshSodApprovals(ctx, gate) {
   const hash = artifactHashFor(gate, ctx);
   const all = (ctx.approvals || []).filter((a) => a.gate === gate);
-  const sod = all.filter((a) => !ctx.author || a.by.toLowerCase() !== String(ctx.author).toLowerCase());
-  const fresh = sod.filter((a) => a.hash === hash);
+  const sod = all.filter((a) => !isPlaceholder(a.by) && identity(a.by) !== identity(ctx.author));
+  const distinct = new Map();
+  if (ctx.approvalsIntact !== false) for (const a of sod) if (a.hash === hash) distinct.set(identity(a.by), a);
+  const fresh = [...distinct.values()];
   return { all, sod, fresh, hash };
 }
 
 export function runGate(gate, ctx) {
   const checks = [];
   const lane = normalizeLane(ctx.lane);
-  const need = Math.max(ctx.policy?.minApprovals?.[gate] ?? 1, LANE_MIN_APPROVALS[lane]);
+  const configuredNeed = ctx.policy?.minApprovals?.[gate] ?? 1;
+  const need = Number.isSafeInteger(configuredNeed) && configuredNeed > 0
+    ? Math.max(configuredNeed, LANE_MIN_APPROVALS[lane]) : Infinity;
   const push = (name, ok, detail = "") => checks.push({ name, ok, detail });
   const nonEmpty = (s, n = 40) => (s || "").trim().length > n;
 
@@ -448,7 +464,8 @@ export function runGate(gate, ctx) {
     case "G3": {
       const f = ctx.secretFindings || [];
       push("secrets scan clean", f.length === 0, f.length ? `${f.length} finding(s): ${[...new Set(f.map((x) => x.family))].join(", ")}` : "0 findings");
-      const latestFull = [...(ctx.evidence || [])].reverse().find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
+      const ordered = (ctx.evidence || []).filter((e) => !e.legacy).sort((a, b) => (ts(a.startedAt) ?? 0) - (ts(b.startedAt) ?? 0)).reverse();
+      const latestFull = ordered.find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
       push("test evidence present", (ctx.evidence || []).length > 0, (ctx.evidence || []).length ? `${(ctx.evidence || []).length} recorded run(s)` : "no run artifact: IMPLEMENTED-NOT-VERIFIED");
       // Three states, from aisdlc.json test.gate: a repo with a runner, one that deliberately has
       // none, and one that simply never set it up. Only the second relaxes the suite, and it says so.
@@ -458,8 +475,11 @@ export function runGate(gate, ctx) {
       } else {
         push("full suite recorded", !!latestFull, latestFull ? `${latestFull.command}` : policy === "none-yet" ? `no runner configured (aisdlc.json test.gate): either set one up or declare none-by-design with a reason` : "run: aisdlc evidence <slug> --label full -- <test cmd>");
       }
-      const green = policy === "none-by-design" && !latestFull ? [...(ctx.evidence || [])].reverse().find((e) => e.exitCode === 0) : latestFull;
+      const green = policy === "none-by-design" && !latestFull ? ordered[0] : latestFull;
       push("latest full run green", !!green && green.exitCode === 0, green ? `exit ${green.exitCode} (${green.command})` : policy === "none-by-design" ? "no green run at all, by design or not" : "");
+      push("evidence log intact", !(ctx.evidenceErrors || []).length, (ctx.evidenceErrors || []).join("; "));
+      if (ctx.sourceSha256) push("test evidence matches current source", !!green && green.sourceSha256 === ctx.sourceSha256 && !green.sourceChangedDuringRun,
+        green?.sourceSha256 ? "source fingerprint must match; re-run after a code change" : "legacy or missing source fingerprint; record a new run");
       const tasks = parseTasks(ctx.tasks || "");
       const open = tasks.filter((t) => !t.done);
       push("all tasks checked off", lane === "spike" ? open.length === 0 : tasks.length > 0 && open.length === 0, open.length ? `open: ${open.map((t) => `T${t.num}`).join(", ")}` : `${tasks.length} done`);
@@ -473,10 +493,28 @@ export function runGate(gate, ctx) {
       const noEv = rows.filter((r) => !r.evidence || /^<|pending|none|tbd|\(none\)/i.test(r.evidence));
       push("every row cites evidence", rows.length > 0 && noEv.length === 0, noEv.length ? `missing: ${noEv.map((r) => r.id).join(", ")}` : "");
       // A cited evidence file must be one the CLI actually recorded, or prose is standing in for a run.
-      const logged = new Set((ctx.evidence || []).map((e) => e.file).filter(Boolean));
-      const named = rows.map((r) => (r.evidence.match(/[\w.-]+\.(?:json|log)/) || [])[0]).filter(Boolean);
+      const logged = new Map((ctx.evidence || []).filter((e) => e.file && !e.legacy).map((e) => [e.file, e]));
+      const citations = rows.map((r) => [...r.evidence.matchAll(/[\w.-]+\.(?:json|log)\b/g)].map((m) => m[0]));
+      const named = citations.flat();
       const ghost = named.filter((f) => !logged.has(f));
-      push("cited evidence exists in the log", named.length > 0 && ghost.length === 0, named.length === 0 ? "no row names a recorded evidence file" : ghost.length ? `not recorded: ${ghost.join(", ")}` : `${named.length} row(s) cite real runs`);
+      push("cited evidence exists in the log", rows.length > 0 && citations.every((c) => c.length > 0) && ghost.length === 0,
+        named.length === 0 ? "no row names a recorded evidence file" : ghost.length ? `not recorded: ${ghost.join(", ")}` : citations.some((c) => !c.length) ? "some rows name no recorded evidence file" : `${rows.length} row(s) cite real runs`);
+      const red = named.filter((f) => logged.has(f) && logged.get(f).exitCode !== 0);
+      push("cited evidence is green", named.length > 0 && red.length === 0, red.length ? `non-green: ${red.join(", ")}` : "");
+      if (ctx.sourceSha256) {
+        const stale = named.filter((f) => logged.has(f) && (logged.get(f).sourceSha256 !== ctx.sourceSha256 || logged.get(f).sourceChangedDuringRun));
+        push("cited evidence matches current source", named.length > 0 && !stale.length, stale.length ? `stale: ${stale.join(", ")}` : "");
+      }
+      const ids = rows.map((r) => identity(r.id));
+      push("acceptance IDs are unique", new Set(ids).size === ids.length, "one ID per scenario");
+      if (ctx.spec) {
+        const scenarios = splitReqBlocks(ctx.spec).flatMap((r) => [...r.body.matchAll(/^####\s+Scenario:[ \t]*(.+)$/gm)].map((m) => ({ requirement: r.name, scenario: m[1].trim() })));
+        const missing = scenarios.filter((s) => !rows.some((r) => identity(r.requirement) === identity(s.requirement) && identity(r.scenario) === identity(s.scenario)));
+        const unknown = rows.filter((r) => !scenarios.some((s) => identity(r.requirement) === identity(s.requirement) && identity(r.scenario) === identity(s.scenario)));
+        push("every spec scenario has an acceptance row", scenarios.length > 0 && !missing.length && !unknown.length,
+          [...missing.map((s) => `missing ${s.requirement}/${s.scenario}`), ...unknown.map((r) => `unknown ${r.id}`)].join(", "));
+      }
+      push("evidence log intact", !(ctx.evidenceErrors || []).length, (ctx.evidenceErrors || []).join("; "));
       const rn = reviewerNotes(ctx.acceptance || "");
       const sameFamily = rn.author && rn.reviewer && modelFamily(rn.author) === modelFamily(rn.reviewer);
       const crossOk = rn.degraded || (!!rn.author && !!rn.reviewer && !sameFamily);
@@ -493,21 +531,24 @@ export function runGate(gate, ctx) {
       );
       const signer = approvedBy(ctx.acceptance || "");
       const { fresh } = freshSodApprovals(ctx, "G4");
-      const signedOk = (!!signer && (!ctx.author || signer.toLowerCase() !== String(ctx.author).toLowerCase())) || fresh.length >= need;
+      const signedOk = (need === 1 && ctx.approvalsIntact !== false && !!signer && identity(signer) !== identity(ctx.author)) || fresh.length >= need;
       push("human sign-off (SoD)", signedOk, signer ? `signed by ${signer}` : fresh.length ? `${fresh.length} approval(s)` : "unsigned");
       break;
     }
     case "G5": {
       push("rollout.md exists", nonEmpty(ctx.rollout), "");
-      push("rollout has ## Rollback with steps", /^##\s+Rollback/m.test(ctx.rollout || "") && /^\s*(1\.|-)\s+/m.test((ctx.rollout || "").split(/^##\s+Rollback/m)[1] || ""), "");
+      push("rollout has ## Rollback with steps", /^##\s+Rollback\b/m.test(ctx.rollout || "") && /^[ \t]*(1\.|-)[ \t]+\S/m.test(((ctx.rollout || "").split(/^##\s+Rollback\b[^\r\n]*/m)[1] || "").split(/^##\s+/m)[0]), "");
       const { fresh, sod } = freshSodApprovals(ctx, "G5");
       push(`G5 approval (SoD, ≥${need})`, fresh.length >= need, `${fresh.length}/${need} on current rollout hash${sod.length > fresh.length ? " (stale ignored)" : ""}`);
       break;
     }
     case "G6": {
       const g = ctx.guardrails || "";
-      push("guardrails.yaml has budgets", /^budgets:/m.test(g) && /latency|error_rate|cost/.test(g), "");
-      push("guardrails.yaml names a kill_switch", /^kill_switch:\s*\S+/m.test(g) && !/kill_switch:\s*<|TODO/.test(g), "");
+      const budgets = (g.split(/^budgets:[ \t]*(?:#.*)?$/m)[1] || "").split(/^[^\s#]/m)[0];
+      const values = [...budgets.matchAll(/^[ \t]+(?:latency[\w]*|error_rate[\w]*|[\w]*cost):[ \t]*([^#\r\n]+)/gm)].map((m) => m[1].trim());
+      push("guardrails.yaml has budgets", values.length > 0 && values.every((v) => /^(?:\d+(?:\.\d+)?|\.\d+)$/.test(v) && Number.isFinite(Number(v))), "budgets must be measured non-negative numbers, not placeholders");
+      const kill = g.match(/^kill_switch:[ \t]*([^#\r\n]*)/m)?.[1]?.trim();
+      push("guardrails.yaml names a kill_switch", !!kill && !isPlaceholder(kill) && !/^(?:null|false|~)$/i.test(kill) && !/[<>]/.test(kill), "");
       push("runbook.md has Symptoms → Actions", /Symptoms/i.test(ctx.runbook || ""), "");
       if (ctx.kind === "ml") push("evals.md present with thresholds", /threshold/i.test(ctx.evals || ""), "");
       break;
@@ -574,7 +615,7 @@ export function deriveFlow(ctx) {
   } else if (req("G4") && !gates.G4.passed) {
     state = "ACCEPT";
     blocking = failing("G4");
-    if (gates.G4.checks.slice(0, 3).every((c) => c.ok)) owner = "human";
+    if (gates.G4.checks.filter((c) => c.name !== "human sign-off (SoD)").every((c) => c.ok)) owner = "human";
   } else if (req("G5") && !gates.G5.passed) {
     state = "RELEASE";
     blocking = failing("G5");
@@ -599,9 +640,12 @@ export function chainApproval(existing, entry) {
 }
 
 export function verifyChain(list) {
+  if (!Array.isArray(list)) return { ok: false, at: 0, reason: "approval log is not an array" };
   let prev = "genesis";
   for (let i = 0; i < list.length; i++) {
+    if (!list[i] || typeof list[i] !== "object" || Array.isArray(list[i])) return { ok: false, at: i, reason: "malformed approval entry" };
     const { id, ...body } = list[i];
+    if (!["G1", "G4", "G5"].includes(body.gate) || isPlaceholder(body.by) || typeof body.hash !== "string") return { ok: false, at: i, reason: "invalid approval fields" };
     if (body.prev !== prev) return { ok: false, at: i, reason: "prev pointer mismatch" };
     if (sha256(JSON.stringify(body)) !== id) return { ok: false, at: i, reason: "entry hash mismatch" };
     prev = id;

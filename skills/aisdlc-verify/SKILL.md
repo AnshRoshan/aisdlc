@@ -1,6 +1,6 @@
 ---
 name: aisdlc-verify
-description: Run the merge-safety gate G3 honestly - full test suite recorded as evidence, secrets scan, and kind-specific verification (visual diff, a11y, integration smoke, dry-run, evals). Use when `aisdlc next` reports VERIFY, the user says "verify", "is it done", "run the gates", "does it work", or before opening a PR or claiming completion. Enforces the iron law, no completion claim without fresh evidence, and separates PASS from IMPLEMENTED-NOT-VERIFIED.
+description: Run merge-safety gate G3 with recorded full-suite evidence, secrets scan and kind-specific checks, then final security verification for web/API/auth/data/infra changes. Use when `aisdlc next` reports VERIFY, before a PR or completion claim, or the user says "verify", "is it done", "run the gates", "security audit" or "review website security". No completion claim without fresh evidence; missing proof is IMPLEMENTED-NOT-VERIFIED.
 license: MIT
 metadata:
   author: aisdlc
@@ -39,11 +39,12 @@ If you have not run the command in this session and recorded it, you cannot say 
 
 ## What G3 checks (`npx aisdlc-cli gate G3 <slug>`)
 
-1. **Secrets scan clean** across tracked files (8 pattern families, placeholders ignored).
+1. **Secrets scan clean** across tracked and non-ignored files (9 detector families; placeholders ignored).
 2. **A run was recorded**: at least one `evidence/*.json` with a real command and an exit code.
 3. **Full suite recorded and green**: the latest `full` evidence has `exitCode: 0`, unless the repo
    declares a test policy (below).
-4. **All tasks checked off.**
+4. **Current evidence integrity:** recorded checksums and source fingerprints match; legacy records must be re-run.
+5. **All tasks checked off.**
 
 ### Test policy (`aisdlc.json` → `test.gate`)
 
@@ -53,10 +54,10 @@ one of them is a choice:
 | state | G3 requires | when it is true |
 |---|---|---|
 | `configured` (default) | a recorded `full` run, green | the repo has a test command in `plan.md` Verification strategy |
-| `none-by-design` | any recorded green run; the suite is waived and the waiver is printed | docs site, IaC glue, a spike - a repo that deliberately ships no runner, with the reason in `docs/taste.md` |
+| `none-by-design` | latest full run green, or latest recorded run green if no full run exists; waiver printed | docs site, IaC glue, a spike - a repo that deliberately ships no runner, with the reason in `docs/taste.md` |
 | `none-yet` | the recorded `full` run, same as configured | the honest state when tests simply were not written. It is not an escape hatch; write them |
 
-Set it in `aisdlc.json`, check it with `npx aisdlc-cli doctor`. Never reach for `none-by-design` to
+Set it in `aisdlc.json`; `none-by-design` also requires a non-placeholder `test.reason`. Check with `npx aisdlc-cli doctor`. Never reach for `none-by-design` to
 make a gate go green: G4's human sign-off is what carries the risk, so say out loud that you are
 handing the trade-off to a person.
 
@@ -90,11 +91,11 @@ handing the trade-off to a person.
 claim:  "the export flow works"
 wrong:  "I ran the tests earlier and they were green."
 right:  IDENTIFY → npm test -- export
-        RUN      → npx aisdlc-cli evidence demo --label full -- npm test -- export
+        RUN      → npx aisdlc-cli evidence demo --label full -- npm test
         READ     → exit 0, 84 passed, 0 failed, 0 skipped
         CLAIM    → "Full suite green: 84 passed (evidence/2026-09-27T10-12-03-full.json).
                     Smoke path ran: curl -s localhost:3000/export returns 200 CSV
-                    (evidence/...-smoke.json). Re-run: npm test -- export."
+                    (evidence/...-smoke.json). Re-run: npm test."
 ```
 
 The difference is not politeness; the second message can be checked by a stranger and the first cannot.
@@ -106,6 +107,12 @@ The difference is not politeness; the second message can be checked by a strange
 - Never delete, skip, or loosen a failing test to get green. Fix the code, or open a delta if the spec was wrong.
 - Flaky test? Record three runs. Three greens are evidence; two out of three is a bug report → `aisdlc-debug`.
 - Words that mean you have not verified: "should", "probably", "seems to", "I believe", "looks good", "Done!" before the command ran. Delete them and run the command.
+
+## Final security verification
+
+Before acceptance or a completion claim, classify the change's security surfaces. For web/API/auth/data/infra changes or an explicit security audit, **read `references/security-verification.md` and follow it**: all 21 controls, architecture-backed applicability, recorded negative tests, OWASP/provider comparison, fixes and retests. Other changes still need secrets/dependency checks and an evidenced reason for excluded surfaces.
+
+Write `docs/features/<slug>/security-review.md`; report VERIFIED, FAILED, NOT_APPLICABLE or NOT_VERIFIED with evidence. Failed or applicable unverified controls block a security-ready claim. CLI gate success is separate; the CLI does not automatically assess this report. End the handoff with security results and residual risks.
 
 ## Hand off
 

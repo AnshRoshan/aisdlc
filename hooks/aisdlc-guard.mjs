@@ -19,16 +19,31 @@ const SUITE_CLAIM = /\b(all (?:the )?tests? pass\w*|tests? (?:are |all )?(?:gree
 const DONE_CLAIM = /\b(done|finished|complete|shipped|ready to (?:ship|merge|release))\b/i;
 
 // Runners whose green output means "verified". If the agent runs one bare, nothing is recorded.
-const TEST_RUNNER = /(^|[\s&;|])(npm|pnpm|yarn|bun|deno|make|cargo|go|uv|pip|pytest|npx|node|dotnet|mvn|gradle|rspec)\s\S*(test|vitest|jest|pytest|mocha|check|verify|spec|tsc|build)/i;
+const TEST_RUNNER = /(?:^|[\s&;|])(?:(?:pytest|rspec|vitest|jest)(?:\s|$)|(?:npm|pnpm|yarn|bun|deno|make|cargo|go|uv|pip|python|python3|npx|node|dotnet|mvn|gradle)\s+[^\n;&|]*\b(?:test|vitest|jest|pytest|mocha|check|verify|spec|tsc|build)\b)/i;
 // Commands that are the process working, not the process being dodged.
-const PROCESS_OK = /aisdlc\s+(evidence|gate|gates|scan|next|status|check|trace|audit|doctor|approve|new|lane|kinds|init|addon|skills)\b/;
+const CLI_COMMAND = String.raw`(?:aisdlc(?:-cli)?|node\s+(?:"[^"]*[/\\]aisdlc\.js"|[^\s]+[/\\]aisdlc\.js))`;
+const RECORDED_RUN = new RegExp(String.raw`^\s*(?:npx\s+)?${CLI_COMMAND}\s+evidence\b`);
+const PROCESS_OK = new RegExp(String.raw`^\s*(?:npx\s+)?${CLI_COMMAND}\s+(?:gate|gates|scan|next|status|check|trace|audit|doctor|new|lane|kinds|init|addon|skills)\b[^;&|\n]*$`);
+const APPROVE_COMMAND = new RegExp(String.raw`\b${CLI_COMMAND}\s+approve\b`);
 // Files only the CLI may write, and the artifact a signed spec cannot be edited into.
 const CLI_OWNED = /(^|\/)docs\/features\/[^/]+\/(evidence\/|approvals\.json)/;
 const SIGNED_SPEC = /(^|\/)docs\/features\/[^/]+\/spec\.md$/;
-const APPROVAL_LINE = /Approved-by:\s*(?!_)(?=\S)([^·\n|]+)/;
+const APPROVAL_LINE = /Approved-by:[ \t]*(?![ \t_])([^·\r\n|]+)/;
 
 // Per-turn cache, refreshed on prompt.submit: { state, slug, lane, blocking, cli }
 let turn = null;
+
+function shellControlOutsideQuotes(command) {
+  let quote = "";
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i];
+    if (ch === "\\" && quote !== "'") { i++; continue; }
+    if (quote) { if (ch === quote) quote = ""; continue; }
+    if (ch === "'" || ch === '"') quote = ch;
+    else if (/[;&|\r\n]/.test(ch)) return true;
+  }
+  return false;
+}
 
 export function register(on) {
   // The state comes from disk once per turn, then every guard below reads the cache instead of
@@ -36,7 +51,8 @@ export function register(on) {
   on("prompt.submit", async ($, e, next) => {
     try {
       turn = await readState($);
-      if (turn) $.ui.status(`aisdlc ${turn.slug} · ${turn.state}`);
+      $.ui.status(turn ? `aisdlc ${turn.slug} · ${turn.state}` : undefined);
+      $.ui.invalidate("ui.render");
     } catch {
       turn = null;
     }
@@ -49,12 +65,13 @@ export function register(on) {
 
   // Invariant 5 and 8: "done" must be a run the tool recorded, not a run the agent watched.
   on("tool.call", { tool: "Bash" }, async ($, e, next) => {
-    const command = String(e.command ?? "");
+    const command = String(e.input?.command ?? e.command ?? "");
     try {
-      if (/\baisdlc(-cli)?\s+approve\b/.test(command)) {
+      if (APPROVE_COMMAND.test(command)) {
         return { deny: "aisdlc guard: approvals are human actions (invariant 3 and 4). Ask the user to run it themselves in their own terminal; do not retry, and do not write the approval into approvals.json by hand." };
       }
-      if (turn && TEST_RUNNER.test(command) && !PROCESS_OK.test(command)) {
+      const recorded = RECORDED_RUN.test(command) && !shellControlOutsideQuotes(command);
+      if (turn && TEST_RUNNER.test(command) && !recorded && !PROCESS_OK.test(command)) {
         const wrapped = `aisdlc evidence ${turn.slug} --label full -- ${command}`;
         $.ui.toast("aisdlc guard: held an unrecorded test run");
         return { deny: `aisdlc guard: this run would not be evidence, and a claim without a recorded run does not count (invariant 5). Re-run it as: ${wrapped}` };
@@ -67,21 +84,34 @@ export function register(on) {
 
   // Invariants 1, 2 and 4: the spine is written by its owner, and a signature is a human's line.
   on("tool.call", { tool: ["Edit", "Write", "MultiEdit"] }, async ($, e, next) => {
-    const path = String(e.path ?? e.file_path ?? e.input?.path ?? e.input?.file_path ?? "");
+    const path = String(e.input?.file_path ?? e.input?.path ?? e.file_path ?? e.path ?? "").replace(/\\/g, "/");
     try {
       if (CLI_OWNED.test(path)) {
         return { deny: `aisdlc guard: ${path} is written by the CLI only. Evidence and approvals are the artifacts the gates trust; a hand-written one is a forged one. Record a run with \`aisdlc evidence\`, and ask the human to approve.` };
       }
       const incoming = String(e.content ?? e.new_text ?? e.newString ?? e.input?.content ?? "");
-      if (incoming && APPROVAL_LINE.test(incoming) && !/^[\s_]*$/.test(incoming.match(APPROVAL_LINE)[1])) {
-        const current = await currentAt($, path);
-        if (current && /Approved-by:\s*_/.test(current) && !/Approved-by:\s*_/.test(incoming)) {
-          $.ui.toast("aisdlc guard: held a hand-written signature");
-          return { deny: "aisdlc guard: humans own the acceptance bar (invariant 4). Leave `Approved-by: ______` exactly as it is and ask the user to sign it." };
+      const edits = e.input?.edits ?? e.edits ?? [];
+      const current = await currentAt($, path);
+      let updated = incoming;
+      if (e.tool !== "Write" && current !== null) {
+        updated = current;
+        for (const edit of edits.length ? edits : [e.input ?? e]) {
+          const oldText = edit.old_string ?? edit.oldString ?? edit.old_text;
+          const newText = edit.new_string ?? edit.newString ?? edit.new_text;
+          if (typeof oldText === "string" && oldText && typeof newText === "string") {
+            updated = edit.replace_all ? updated.split(oldText).join(newText) : updated.replace(oldText, () => newText);
+          }
         }
       }
-      if (SIGNED_SPEC.test(path) && turn?.specSigned) {
-        return { deny: `aisdlc guard: ${path} is signed. Intent changes go through a delta, never a quiet edit (invariant 1). Load aisdlc-delta: it writes the Change table, updates the spec explicitly and invalidates the stale approvals on purpose.` };
+      const signatures = (text) => [...String(text ?? "").matchAll(new RegExp(APPROVAL_LINE.source, "g"))].map((m) => m[1].trim());
+      const previous = signatures(current);
+      if (signatures(updated).some((signature) => !previous.includes(signature))) {
+        $.ui.toast("aisdlc guard: held a hand-written signature");
+        return { deny: "aisdlc guard: humans own the acceptance bar (invariant 4). Leave `Approved-by: ______` exactly as it is and ask the user to sign it." };
+      }
+      const currentSpec = SIGNED_SPEC.test(path) ? current : null;
+      if (currentSpec && APPROVAL_LINE.test(currentSpec)) {
+        return { deny: `aisdlc guard: ${path} is signed. Intent changes go through a delta, never a quiet edit (invariant 1). Load aisdlc-delta: write the Change table, ask the human to agree and clear the old spec signature in their own editor, then apply the explicit change. Approvals go stale on purpose.` };
       }
     } catch {
       /* fail open */
@@ -117,22 +147,26 @@ export function register(on) {
   // Where the feature actually is, always visible, without anyone remembering to ask.
   on("ui.render", { component: "AbovePrompt" }, ($, e, next) => {
     if (!turn) return next(e);
-    const { Box, Text } = $.ui.resolve(e);
-    const lights = (turn.gates ?? [])
-      .map((g) => `${g.id}${g.passed ? "✓" : g.required ? "·" : "-"}`)
-      .join(" ");
-    return Box({
-      key: "aisdlc-band",
-      flexDirection: "column",
-      paddingX: 1,
-      children: [
-        Text({
-          key: "line",
-          dimColor: true,
-          children: `aisdlc · ${turn.slug} · lane ${turn.lane} · ${turn.state} → ${turn.skill} · ${lights}${turn.owner === "human" ? " · waiting on you" : ""}`,
-        }),
-      ],
-    });
+    try {
+      const { Box, Text } = $.ui.resolve(e);
+      const lights = (turn.gates ?? [])
+        .map((g) => `${g.id}${g.passed ? "✓" : g.required ? "·" : "-"}`)
+        .join(" ");
+      return Box({
+        key: "aisdlc-band",
+        flexDirection: "column",
+        paddingX: 1,
+        children: [
+          Text({
+            key: "line",
+            dimColor: true,
+            children: `aisdlc · ${turn.slug} · lane ${turn.lane} · ${turn.state} → ${turn.skill} · ${lights}${turn.owner === "human" ? " · waiting on you" : ""}`,
+          }),
+        ],
+      });
+    } catch {
+      return next(e);
+    }
   });
 }
 
@@ -151,9 +185,9 @@ async function runCli($, args) {
       continue;
     }
     // report exits 3 when it found something stale; that is an answer, not a failure.
-    if (!run || (run.code !== 0 && run.code !== 3)) continue;
+    if (!run || (run.exitCode !== 0 && run.exitCode !== 3)) continue;
     try {
-      return { json: JSON.parse(String(run.stdout ?? "").trim()), cli: base[0] };
+      return { json: JSON.parse(String(run.stdout ?? "").trim()), cli: base };
     } catch {
       continue;
     }
@@ -182,7 +216,7 @@ async function readState($) {
 // is there a run behind the claim, and is it newer than the code?
 async function readLog($, slug) {
   const out = await runCli($, slug ? ["report", slug, "--json"] : ["report", "--json"]);
-  const j = Array.isArray(out?.json) ? out.json.find((r) => r.feature === slug) ?? out.json[0] : null;
+  const j = Array.isArray(out?.json) ? (slug ? out.json.find((r) => r.feature === slug) : out.json[0]) : null;
   if (!j) return null;
   return { state: j.state, runs: j.runs?.total ?? 0, stale: !!j.evidence?.stale, missing: (j.gates?.missing ?? []).join(", ") };
 }

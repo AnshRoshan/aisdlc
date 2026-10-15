@@ -64,7 +64,7 @@ Ponytail governs the *solution*. It never shrinks the *process* or the *reading*
 
 - **Understanding.** Trace the whole flow first. Laziness that skips comprehension ships a confident wrong fix.
 - **The spec.** Every `#### Scenario:` still gets a test. YAGNI removes speculative *code*, never a signed requirement. Want less scope? That is `aisdlc-delta`, not a quiet omission.
-- **Evidence.** Every claim still has an `evidence/*.json` behind it. Non-trivial logic (a branch, loop, parser, money or security path) leaves at least one runnable check; trivial one-liners need none.
+- **Evidence.** Every claim still has a recorded run behind it. Non-trivial logic needs a runnable check; trivial one-liners may need no new test, but existing checks and required gates still run.
 - **Gates and approvals.** Never skipped, never simulated, never signed by you.
 - **Trust boundaries.** Input validation, error handling that prevents data loss, auth, security headers, accessibility basics, and anything explicitly requested stay in. If the human insists on the full version, build it without re-arguing.
 - **Secrets.** Placeholders only, always.

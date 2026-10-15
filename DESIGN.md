@@ -11,7 +11,7 @@ The product's whole promise is that state lives on disk and every claim has a re
 - **Line:** `#1f261f` at 1px. Radii: 10px controls, 14px panels. One elevation declaration (border, no shadow halos).
 
 ## Type
-- Display: **Bricolage Grotesque** (self-hosted via @fontsource) — condensed-to-wide optical axis gives the headings a authored voice; tracking −0.03em, weight 600–700.
+- Display: **Bricolage Grotesque** (self-hosted via @fontsource) — condensed-to-wide optical axis gives the headings an authored voice; tracking −0.03em, weight 600–700.
 - Data/code: **IBM Plex Mono** (self-hosted) — for commands, hashes, gate IDs, file paths, table keys. Mono is never a costume; it marks anything that exists as a file.
 - Body: Bricolage Grotesque 400 at 65–75ch measure.
 

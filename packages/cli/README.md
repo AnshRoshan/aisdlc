@@ -25,7 +25,7 @@ npx skills add AnshRoshan/aisdlc
 | `aisdlc gate G1..G6` | Plan approval · Artifact consistency · Merge safety · Acceptance proof · Release approval · Runtime guardrails |
 | `aisdlc evidence -- <cmd>` | runs a command and records exit code + output hash as an append-only artifact (no fake green) |
 | `aisdlc approve` | human-only, segregation of duties enforced, hash-chained, invalidated when the artifact changes |
-| `aisdlc scan` | secrets scanner over tracked files (8 families, placeholder-aware) |
+| `aisdlc scan` | secrets scanner over tracked and non-ignored files (9 detector families, placeholder-aware) |
 
 ## Ten-minute tour
 
@@ -67,7 +67,27 @@ aisdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]
 aisdlc audit [feature]
 ```
 
-Set `AISDLC_AGENT=1` in your agent's environment to make `approve` refuse outright.
+Set `AISDLC_AGENT=1` in your agent's environment to make `approve` and lane downgrades refuse.
+
+## Evidence and approval compatibility
+
+New run records contain requested and executed argv, a checksum and a source fingerprint covering
+uncommitted changes, deletions and Markdown output. Per-feature process artifacts and installed harness
+skills are excluded. G3 and G4 reject stale/corrupt proof; each acceptance row must cite a green recorded
+run and match a spec scenario. Historical records without checksums remain history, not gate evidence;
+a fresh run restores proof without deleting history.
+
+G1 approvals bind spec + plan, G4 spec + acceptance, and G5 spec + acceptance + rollout. Older hashes
+become stale: humans re-review and re-approve, never rewrite the chain. Repeated names do not satisfy a
+two-approver policy. `test.gate: none-by-design` requires a non-placeholder `test.reason`.
+
+Windows package-manager shims are invoked through their Node entry points without shell interpolation;
+unsupported wrappers fail loudly. Specify an explicit shell executable only when shell semantics are
+intended. Extra files in copied skill directories are preserved; Windows link mode uses junctions.
+
+Checksums and names are not cryptographic identity. Local writers can recompute hashes; the guard is
+heuristic/fail-open, and detector patterns cannot find every secret. Human review and repository access
+controls remain necessary. Until registry publication is verified, use the clone's Node entry point.
 
 ## Layout it creates
 

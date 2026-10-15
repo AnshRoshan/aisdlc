@@ -24,18 +24,16 @@ A model reviewing its own output shares its blind spots. This is orthogonal to d
 who is not the author does not help if the *reviewing reasoning* came from the model that wrote the code.
 G4 checks it, so record it honestly or the gate fails.
 
-1. **Detect the author model from disk, never from introspection.** The "you are powered by…" text is
-   written at session start and is stale the moment the user switches models. Read in order:
-   `ANTHROPIC_MODEL` / `OPENAI_MODEL` / `GEMINI_MODEL` env, `.claude/settings.local.json`,
-   `.claude/settings.json`, `~/.claude/settings.json`, then the harness's session metadata.
-   Note which file answered, in `## Reviewer notes`.
-2. **Confirm with one question, recommended answer first.** "Author model reads as `opus`
-   (from `.claude/settings.local.json`) - review on `sonnet`? (recommended)". A wrong guess silently
-   reviews with the author's own model, so this question is not skippable unless the user already named
-   the reviewer model in this session.
-3. **Use a different family.** opus → sonnet, sonnet → opus, haiku → sonnet (never the reverse: the
-   review is high-value reasoning, do not run it on the cheapest tier), gpt → a claude or gemini family,
-   gemini → either of the other two.
+1. **Find author-model provenance, not the current session's model.** Read the feature's author-session
+   metadata or recorded handoff. Current env/settings are only hints: they may describe another session
+   or a model switch. Record the source in `## Reviewer notes`; if authorship cannot be confirmed,
+   declare degradation instead of inventing provenance.
+2. **Confirm the provenance and reviewer choice with one question, recommended answer first.**
+   Name the author model, its source and the proposed contrasting reviewer. A user naming the reviewer
+   does not establish which model authored the code.
+3. **Use a different provider family.** Claude (including opus/sonnet/haiku) → OpenAI or Gemini;
+   OpenAI (including GPT/o1/o3/o4) → Claude or Gemini; Gemini → Claude or OpenAI. Choose a capable
+   reasoning tier, not the cheapest model. Changing tiers within one family is not independence.
 4. **Spawn the reviewer with that model** and no write power over the code: read/search tools plus one
    findings file. Never `Edit`.
 5. **If you cannot get a second family, write the degradation.** `Cross-model: degraded (why)` in
@@ -96,9 +94,10 @@ Detected from: <the file or env var that named the author model>
 Approved-by: ______  Date: ______
 ```
 
-G4 requires: every row has evidence that is not a placeholder, the evidence file named in a row must be
-one the CLI actually recorded in `evidence/` (a row that cites a run nobody made is prose wearing a filename),
-every row `pass`, and `Approved-by` signed by a human who is not the author. Regulated lane: two approvers.
+G4 requires a unique acceptance row per spec scenario, every row `pass`, and each cited record green
+and present in the intact CLI evidence log. G4 approvals bind spec + acceptance. A non-author human
+signs; regulated lanes require two distinct approvers via the CLI. Reviewer notes must show a contrasting
+family or declare degradation with a reason.
 
 Finding classes:
 - **blocking**: correctness, security, data loss, spec violation, untraced change, missing scenario test, secrets. Blocking findings reopen a task (uncheck it, add a note) or create a delta; the state moves back to BUILD on purpose.
@@ -115,6 +114,10 @@ Every advisory finding gets a triage next to it — `fix now` / `defer` (with th
 - Migrations are reversible; flags default off; contract steps are separate tasks.
 - Lines added vs. deleted and new dependencies are proportionate to the requirements.
 - Evidence timestamps are after the last code change (`git log -1 --format=%cI` vs. `startedAt`); stale evidence is not evidence.
+
+## Final security verification
+
+For web/API/auth/data/infra or requested audits, use `aisdlc-verify`'s Final security verification protocol. Audit `security-review.md`: all S01–S21 outcomes, applicability proof, negative tests, fixes/retests and official standards. Missing proof is NOT_VERIFIED; vulnerabilities reopen safety tasks. Keep its table outside acceptance scenario rows. End with security results/risks; G4 alone is not security readiness.
 
 ## Hand off
 

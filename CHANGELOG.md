@@ -4,6 +4,24 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+### Final security verification
+- Added a 21-control security review protocol to verification, review, quality and release handoffs, covering injection/XSS/CSRF/SSRF, uploads, authorization/BOLA/RLS, tokens/secrets, passwords/MFA/cookies/storage, rate limits, webhooks, source maps, credentials/logging and dependency audits.
+- Require evidence-backed applicability, recorded negative tests, safe fixes/retests, current OWASP and relevant official provider/cloud guidance, and an explicit final security summary. Static-only surfaces can be NOT_APPLICABLE; missing proof is NOT_VERIFIED, never a pass. This is a skill workflow requirement, not a new automatic CLI gate.
+- Seeded acceptance reviewer notes with security-review provenance and unverified readiness; added regression checks for all controls, routing, reporting and context budgets.
+
+### Review hardening
+- Reviewed all 85 original project-owned files, including all 20 skills, demo artifacts, research history, SVGs and the complete site lockfile. Added a file-by-file audit and validation report.
+- Expanded tests from 29 CLI tests to 66 CLI tests plus 12 guard and 6 site regressions, covering every CLI command, all harness installs, gates, corruption, source freshness, Windows argv, junction aliases and legacy history recovery.
+- Approvals now count distinct normalized identities, reject author self-approval even with `--force`, enforce regulated G4 counts, and bind spec intent into G1/G4/G5 hashes. Existing approvals need human re-review; chains are not silently migrated.
+- Acceptance requires every spec scenario and real green, current-source evidence for every row; technical blockers stay agent-owned. Model families group Claude aliases together and OpenAI GPT/o-series together. Blank fields and placeholder waivers no longer borrow later lines or earn a pass.
+- Evidence records exact requested/executed argv, checksum and source fingerprints including uncommitted changes, Markdown and deletions. Legacy records cannot prove a gate but do not poison a new valid run. Corruption fails gate/audit; recognized secret output is redacted and common credential flags rejected.
+- CLI JSON failures/staleness use nonzero exits; skipped gates do not fail lane completion. Malformed config is rejected before installer writes. Unsafe slug/label/task paths fail before commands run. Windows package-manager argv is no longer shell-concatenated.
+- Installer protects physical aliases, handles cross-drive copies, preserves extra user files and uses Windows junctions for link mode. No-Git source walks no longer silently omit deep files. Guardrail seeds require actual measured budgets.
+- Fixed invalid plugin JSON, the actual mods API `exitCode` contract, repeated CLI command caching, target-file signature checks, Edit/MultiEdit handling, compound evidence exemptions and fail-open UI behavior. Agreed signed-spec deltas now explicitly require human unlock.
+- Upgraded Astro from5.18.2 to7.3.8 after npm audit identified critical/high advisories; transitive dependencies are patched and re-audited. CLI remains dependency-free.
+- Fixed site metadata, Markdown/code fidelity, duplicate anchors, clipboard error feedback and mobile navigation. CI runs guard/site regressions; release permissions/action usage and deploy concurrency were corrected. SVG diagrams now place every gate on its actual transition.
+- Documented the trust boundary: names/checksums are not authenticated identities, guard interception is heuristic, detectors are incomplete and recorded commands/addons may access the network.
+
 ### Added
 - **Site: the 20 skill pages now render their `SKILL.md`.** They previously showed the frontmatter description and nothing else, so 20 of the site's 23 pages were near-empty. The body is rendered at build time with a section outline, and placeholders like `<slug>` are neutralised at the markdown renderer rather than by pre-escaping the source (pre-escaping made marked escape the ampersand twice and printed `&lt;slug&gt;` on the page).
 - **`assets` / site: `og.png`** plus `og:image`, `twitter:card` and canonical tags, captured from the redesigned hero so the social card cannot drift from the site. The hero and flow diagrams were recolored from the retired lime-on-green-black palette to the site's slate ink and single accent.

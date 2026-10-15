@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Let an in-flight deployment finish; canceling it can leave Pages half-deployed.
+  cancel-in-progress: false
 
 jobs:
   build:

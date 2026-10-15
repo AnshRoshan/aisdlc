@@ -4,12 +4,13 @@
  * Zero dependencies. Node 18+.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join, relative, basename } from "node:path";
+import { join, relative, basename, resolve, isAbsolute } from "node:path";
+import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, summarizeLog, formatDuration, sha256, short } from "./engine.js";
 import { HARNESSES, resolveHarnessList, detectHarnesses, COMPANIONS, detectCompanions } from "./harnesses.js";
 import * as T from "./templates.js";
-import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange } from "./fsx.js";
+import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange, sourceFingerprint, commandInvocation } from "./fsx.js";
 
 const VERSION = "0.2.0";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -28,6 +29,12 @@ const warn = (s) => `${c.yellow("!")} ${s}`;
 const relp = (from, p) => relative(from, p).replace(/\\/g, "/");
 
 /* ───────────── args ───────────── */
+const BOOLEAN_FLAGS = new Set(["link", "force", "print", "json", "no-scan", "version", "help", "v"]);
+const VALUE_FLAGS = new Set(["harness", "h", "name", "kind", "lane", "slug", "author", "note", "cwd", "label", "task", "by"]);
+const safeName = (value, label) => {
+  if (typeof value !== "string" || !/^[a-z0-9][a-z0-9-]{0,63}$/i.test(value)) throw new Error(`${label} must be a single alphanumeric/hyphen name (1–64 characters)`);
+  return value;
+};
 function parseArgs(argv) {
   const args = { _: [], flags: {}, passthrough: [] };
   const dd = argv.indexOf("--");
@@ -36,12 +43,19 @@ function parseArgs(argv) {
   for (let i = 0; i < own.length; i++) {
     const a = own[i];
     if (a.startsWith("--")) {
-      const [k, v] = a.slice(2).split("=");
-      if (v !== undefined) args.flags[k] = v;
+      const token = a.slice(2), eq = token.indexOf("=");
+      const k = eq < 0 ? token : token.slice(0, eq), v = eq < 0 ? undefined : token.slice(eq + 1);
+      if (BOOLEAN_FLAGS.has(k)) {
+        if (v !== undefined) throw new Error(`--${k} takes no value`);
+        args.flags[k] = true;
+      } else if (v !== undefined) args.flags[k] = v;
       else if (own[i + 1] && !own[i + 1].startsWith("-")) args.flags[k] = own[++i];
-      else args.flags[k] = true;
+      else throw new Error(`--${k} requires a value`);
     } else if (a.startsWith("-") && a.length === 2) {
-      args.flags[a[1]] = own[i + 1] && !own[i + 1].startsWith("-") ? own[++i] : true;
+      const k = a[1];
+      if (k === "v") args.flags[k] = true;
+      else if (own[i + 1] && !own[i + 1].startsWith("-")) args.flags[k] = own[++i];
+      else throw new Error(`-${k} requires a value`);
     } else args._.push(a);
   }
   return args;
@@ -49,7 +63,19 @@ function parseArgs(argv) {
 
 /* ───────────── project + feature context (disk ⇒ ctx) ───────────── */
 function loadConfig(root) {
-  return { docsDir: "docs", featuresDir: "docs/features", policy: { minApprovals: {} }, ...readJson(join(root, "aisdlc.json"), {}) };
+  const raw = readJson(join(root, "aisdlc.json"), {});
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("aisdlc.json must be an object");
+  const cfg = { docsDir: "docs", featuresDir: "docs/features", policy: { minApprovals: {} }, ...raw };
+  for (const key of ["docsDir", "featuresDir"]) {
+    const value = cfg[key];
+    if (typeof value !== "string" || !value.trim() || isAbsolute(value) || /^[A-Za-z]:|^[/\\]/.test(value) || value.split(/[/\\]/).includes("..") || resolve(root, value) === resolve(root)) throw new Error(`${key} must be a relative directory inside the project`);
+  }
+  const minimums = cfg.policy?.minApprovals ?? {};
+  if (!minimums || typeof minimums !== "object" || Array.isArray(minimums) || Object.entries(minimums).some(([gate, n]) => !GATES.includes(gate) || !Number.isSafeInteger(n) || n < 1)) throw new Error("policy.minApprovals must map gates to positive integers");
+  const testPolicy = cfg.test?.gate || cfg.testGate || "configured";
+  if (!["configured", "none-by-design", "none-yet"].includes(testPolicy)) throw new Error("Unknown test.gate policy");
+  if (testPolicy === "none-by-design" && (typeof cfg.test?.reason !== "string" || !cfg.test.reason.trim() || /[<>]|\b(?:todo|tbd)\b/i.test(cfg.test.reason))) throw new Error("test.gate none-by-design requires test.reason");
+  return cfg;
 }
 
 function featureDir(root, cfg, slug) {
@@ -86,13 +112,27 @@ function loadDeltas(dir) {
 function loadEvidence(dir) {
   const ed = join(dir, "evidence");
   if (!existsSync(ed)) return [];
-  return readdirSync(ed).filter((f) => f.endsWith(".json")).sort().map((f) => ({ file: f, ...readJson(join(ed, f), {}) }));
+  return readdirSync(ed).filter((f) => f.endsWith(".json")).sort().map((f) => {
+    const rec = readJson(join(ed, f), {});
+    if (!rec || typeof rec !== "object" || Array.isArray(rec)) throw new Error(`Invalid evidence record ${f}`);
+    return { ...rec, file: f };
+  });
 }
 
 function loadCtx(root, cfg, slug, { scan = true } = {}) {
   const dir = featureDir(root, cfg, slug);
   const meta = readJson(join(dir, "feature.json"), {});
+  if (!meta || typeof meta !== "object" || Array.isArray(meta) || (meta.author != null && typeof meta.author !== "string")) throw new Error("feature.json must contain valid feature metadata");
   const evals = read(join(dir, "evals.md"));
+  const evidence = loadEvidence(dir);
+  const approvals = readJson(join(dir, "approvals.json"), []);
+  if (!Array.isArray(approvals) || approvals.some((a) => !a || typeof a !== "object" || typeof a.by !== "string" || !["G1", "G4", "G5"].includes(a.gate))) throw new Error("Invalid approval log entries");
+  const evidenceErrors = evidence.flatMap(({ file, recordSha256, ...rec }) => {
+    const errors = [];
+    if (recordSha256 && sha256(JSON.stringify(rec)) !== recordSha256) errors.push(`${file}: record checksum mismatched`);
+    if (!Number.isInteger(rec.exitCode) || typeof rec.command !== "string" || !rec.command.trim() || !Number.isFinite(Date.parse(rec.startedAt)) || !/^[a-f0-9]{64}$/.test(rec.outputSha256 || "")) errors.push(`${file}: invalid run fields`);
+    return errors;
+  });
   const ctx = {
     slug,
     dir,
@@ -108,8 +148,11 @@ function loadCtx(root, cfg, slug, { scan = true } = {}) {
     guardrails: read(join(dir, "guardrails.yaml")),
     runbook: read(join(dir, "runbook.md")),
     evals,
-    approvals: readJson(join(dir, "approvals.json"), []),
-    evidence: loadEvidence(dir),
+    approvals,
+    approvalsIntact: verifyChain(approvals).ok,
+    evidence: evidence.map((rec) => ({ ...rec, legacy: !rec.recordSha256 })),
+    evidenceErrors,
+    sourceSha256: sourceFingerprint(root, cfg.featuresDir),
     deltas: loadDeltas(dir),
     secretFindings: scan ? scanRepo(root).slice(0, 50) : [],
     policy: cfg.policy,
@@ -124,7 +167,6 @@ function scanRepo(root) {
   const out = [];
   for (const f of repoFiles(root)) {
     if (!isTextFile(f)) continue;
-    if (/\/docs\/features\/[^/]+\/evidence\//.test(f)) continue;
     let txt;
     try { txt = readFileSync(f, "utf8"); } catch { continue; }
     for (const x of scanSecrets(txt, relp(root, f))) out.push(x);
@@ -154,6 +196,7 @@ const commands = {
     const src = skillsSourceDir();
     const skills = listSkills(src);
     const project = args.flags.name || basename(root);
+    const cfg = loadConfig(root); // Validate policy and paths before replacing any installed files.
     console.log(c.bold(`aisdlc ${VERSION}: installing into ${relp(process.cwd(), root) || "."}`));
     console.log(c.dim(`harnesses: ${harnesses.join(", ")}  ·  skills: ${skills.length}  ·  mode: ${link ? "symlink" : "copy"}`));
 
@@ -184,7 +227,6 @@ const commands = {
       }
     }
 
-    const cfg = loadConfig(root);
     const created = [];
     if (writeIfMissing(join(root, "aisdlc.json"), JSON.stringify({ version: 1, project, docsDir: cfg.docsDir, featuresDir: cfg.featuresDir, harnesses, policy: { minApprovals: { G1: 1, G5: 1 } } }, null, 2) + "\n")) created.push("aisdlc.json");
     if (writeIfMissing(join(root, cfg.docsDir, "constitution.md"), T.CONSTITUTION(project))) created.push(`${cfg.docsDir}/constitution.md`);
@@ -208,7 +250,7 @@ const commands = {
     const lane = args.flags.lane || "standard";
     if (!LANES.includes(lane)) fail(`--lane must be one of ${LANES.join(", ")}`);
     const cfg = loadConfig(root);
-    const slug = args.flags.slug || slugify(title);
+    const slug = safeName(args.flags.slug || slugify(title), "--slug");
     const dir = featureDir(root, cfg, slug);
     if (existsSync(dir)) fail(`Feature "${slug}" already exists at ${relp(root, dir)}`);
     const author = args.flags.author || gitUser(root) || "unknown";
@@ -249,7 +291,9 @@ const commands = {
       return;
     }
     if (!LANES.includes(target)) fail(`lane must be one of ${LANES.join(", ")}`);
-    if (LANES.indexOf(target) < LANES.indexOf(cur) && !args.flags.force) fail(`Lanes only ratchet up (${cur} → ${target} is a downgrade). A human may pass --force with a --note.`);
+    const downgrade = LANES.indexOf(target) < LANES.indexOf(cur);
+    if (downgrade && process.env.AISDLC_AGENT) fail("Agents cannot lower a feature lane");
+    if (downgrade && !args.flags.force) fail(`Lanes only ratchet up (${cur} → ${target} is a downgrade). A human may pass --force with a --note.`);
     if (args.flags.force && !args.flags.note) fail("--force requires --note explaining why the lane is being lowered.");
     meta.lane = target;
     meta.laneHistory = [...(meta.laneHistory || []), { from: cur, to: target, at: new Date().toISOString(), by: gitUser(root) || process.env.USER || "unknown", note: args.flags.note || "" }];
@@ -273,8 +317,8 @@ const commands = {
       console.log(`${c.bold(id)}: ${cpn.about}`);
       console.log(`  ${c.cyan(cpn.install)}`);
       if (args.flags.print) { for (const alt of cpn.alternatives) console.log(c.dim(`  ${alt}`)); continue; }
-      const [cmd, ...rest] = cpn.install.split(" ");
-      const r = spawnSync(cmd, rest, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
+      const [cmd, ...rest] = commandInvocation(cpn.install.split(" "));
+      const r = spawnSync(cmd, rest, { cwd: root, stdio: "inherit", shell: false });
       if (r.status !== 0) {
         console.log(warn(`${id} install did not complete (exit ${r.status ?? "?"}). Alternatives:`));
         for (const alt of cpn.alternatives) console.log(c.dim(`  ${alt}`));
@@ -286,7 +330,7 @@ const commands = {
   async status(args, root) {
     const cfg = loadConfig(root);
     const feats = listFeatures(root, cfg);
-    if (!feats.length) return console.log(c.dim('No features. Run: aisdlc new "<title>" --kind <kind>'));
+    if (!feats.length) return console.log(args.flags.json ? "[]" : c.dim('No features. Run: aisdlc new "<title>" --kind <kind>'));
     const rows = feats.map((slug) => {
       const ctx = loadCtx(root, cfg, slug, { scan: !args.flags["no-scan"] });
       const f = deriveFlow(ctx);
@@ -356,9 +400,9 @@ const commands = {
     const cfg = loadConfig(root);
     const slug = resolveSlug(root, cfg, args._[1]);
     const res = runGate(g, loadCtx(root, cfg, slug));
-    if (args.flags.json) return console.log(JSON.stringify(res, null, 2));
-    printGate(res);
-    if (!res.passed) process.exit(2);
+    if (args.flags.json) console.log(JSON.stringify(res, null, 2));
+    else printGate(res);
+    if (res.required && !res.passed) process.exitCode = 2;
   },
 
   async gates(args, root) {
@@ -366,7 +410,7 @@ const commands = {
     const slug = resolveSlug(root, cfg, args._[0]);
     const ctx = loadCtx(root, cfg, slug);
     let allOk = true;
-    for (const g of GATES) { const r = runGate(g, ctx); printGate(r); allOk &&= r.passed; }
+    for (const g of GATES) { const r = runGate(g, ctx); printGate(r); allOk &&= !r.required || r.passed; }
     if (!allOk) process.exit(2);
   },
 
@@ -375,7 +419,11 @@ const commands = {
     const slug = resolveSlug(root, cfg, args._[0]);
     const ctx = loadCtx(root, cfg, slug, { scan: false });
     const tr = traceMatrix(ctx.spec, parseTasks(ctx.tasks));
-    if (args.flags.json) return console.log(JSON.stringify(tr, null, 2));
+    if (args.flags.json) {
+      console.log(JSON.stringify(tr, null, 2));
+      if (tr.uncovered.length || tr.unknown.length) process.exitCode = 2;
+      return;
+    }
     for (const r of tr.rows) console.log(`${r.tasks.length ? ok(r.requirement) : bad(r.requirement)} ${c.dim(`${r.scenarios} scenario(s)`)} → ${r.tasks.length ? r.tasks.map((t) => `T${t}`).join(", ") : c.red("uncovered")}`);
     if (tr.unknown.length) console.log(bad(`unknown references: ${tr.unknown.join(", ")}`));
     if (tr.uncovered.length || tr.unknown.length) process.exit(2);
@@ -384,7 +432,11 @@ const commands = {
 
   async scan(args, root) {
     const findings = scanRepo(root);
-    if (args.flags.json) return console.log(JSON.stringify(findings, null, 2));
+    if (args.flags.json) {
+      console.log(JSON.stringify(findings, null, 2));
+      if (findings.length) process.exitCode = 2;
+      return;
+    }
     for (const f of findings) console.log(bad(`${f.file}:${f.line}  ${f.family}  ${c.dim(f.snippet)}`));
     console.log(findings.length ? c.red(`${findings.length} finding(s). Remove them or add a placeholder; never commit secrets.`) : c.green("secrets scan clean"));
     if (findings.length) process.exit(2);
@@ -395,9 +447,13 @@ const commands = {
     const slug = resolveSlug(root, cfg, args._[0]);
     const cmd = args.passthrough;
     if (!cmd.length) fail('Usage: aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>');
-    const label = args.flags.label || "full";
+    const label = safeName(args.flags.label || "full", "--label");
+    if (args.flags.task && !/^T[1-9]\d*$/.test(args.flags.task)) fail("--task must be a task ID such as T3");
+    if (scanSecrets(cmd.join(" ")).length) fail("Command contains a secret literal; pass secrets through the environment instead");
+    const sourceSha256 = sourceFingerprint(root, cfg.featuresDir);
     const started = new Date();
-    const r = spawnSync(cmd[0], cmd.slice(1), { cwd: root, shell: process.platform === "win32", encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+    const invocation = commandInvocation(cmd);
+    const r = spawnSync(invocation[0], invocation.slice(1), { cwd: root, shell: false, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
     const stdout = r.stdout || "";
     const stderr = r.stderr || (r.error ? String(r.error.message) : "");
     process.stdout.write(stdout);
@@ -406,9 +462,10 @@ const commands = {
     const outHash = sha256(stdout + stderr);
     const dir = join(featureDir(root, cfg, slug), "evidence");
     const stamp = started.toISOString().replace(/[:.]/g, "-");
-    const file = `${stamp}-${label}${args.flags.task ? `-${args.flags.task}` : ""}.json`;
-    const rec = { label, task: args.flags.task || null, command: cmd.join(" "), cwd: ".", exitCode, startedAt: started.toISOString(), durationMs: Date.now() - started.getTime(), outputSha256: outHash, outputTail: (stdout + stderr).split("\n").slice(-25).join("\n"), recordedBy: gitUser(root) || process.env.USER || "unknown", node: process.version };
-    write(join(dir, file), JSON.stringify(rec, null, 2) + "\n");
+    const file = `${stamp}-${label}${args.flags.task ? `-${args.flags.task}` : ""}-${randomUUID()}.json`;
+    const outputTail = (stdout + stderr).split("\n").slice(-25).map((line) => scanSecrets(line).length ? "[redacted: detected secret literal]" : line).join("\n");
+    const rec = { label, task: args.flags.task || null, command: cmd.join(" "), argv: cmd, executedArgv: invocation, cwd: ".", exitCode, startedAt: started.toISOString(), durationMs: Date.now() - started.getTime(), outputSha256: outHash, outputTail, sourceSha256, sourceChangedDuringRun: sourceSha256 !== sourceFingerprint(root, cfg.featuresDir), recordedBy: gitUser(root) || process.env.USER || "unknown", node: process.version };
+    write(join(dir, file), JSON.stringify({ ...rec, recordSha256: sha256(JSON.stringify(rec)) }, null, 2) + "\n");
     console.log(`\n${exitCode === 0 ? ok("recorded") : warn(`recorded (exit ${exitCode})`)} ${c.dim(relp(root, join(dir, file)))}`);
     process.exit(exitCode === 0 ? 0 : 3);
   },
@@ -416,13 +473,13 @@ const commands = {
   async approve(args, root) {
     const g = (args._[0] || "").toUpperCase();
     if (!["G1", "G4", "G5"].includes(g)) fail("Usage: aisdlc approve <G1|G4|G5> <feature> --by \"<name>\" [--note text]   (human only)");
-    const by = args.flags.by;
-    if (!by || by === true) fail("--by \"<your name>\" is required. Approvals are human actions; agents must never run this.");
+    const by = typeof args.flags.by === "string" ? args.flags.by.trim() : "";
+    if (!by || /^(?:unknown|none|tbd|todo|[_-]+|<.*>)$/i.test(by)) fail("--by \"<your name>\" is required. Approvals are human actions; agents must never run this.");
     if (process.env.AISDLC_AGENT) fail("Refusing: AISDLC_AGENT is set. Agents cannot approve (segregation of duties).");
     const cfg = loadConfig(root);
     const slug = resolveSlug(root, cfg, args._[1]);
     const ctx = loadCtx(root, cfg, slug, { scan: false });
-    if (ctx.author && ctx.author.toLowerCase() === String(by).toLowerCase() && !args.flags.force) fail(`Segregation of duties: "${by}" is the author of ${slug}. A different human must approve.`);
+    if (ctx.author && ctx.author.trim().toLowerCase() === by.toLowerCase()) fail(`Segregation of duties: "${by}" is the author of ${slug}. A different human must approve.`);
     const hash = artifactHashFor(g, ctx);
     const list = ctx.approvals;
     const chain = verifyChain(list);
@@ -443,7 +500,8 @@ const commands = {
     for (const a of ctx.approvals) console.log(`  ${a.gate} ${a.by.padEnd(20)} ${a.at} ${c.dim(short(a.hash))}${a.hash === artifactHashFor(a.gate, ctx) ? "" : c.yellow(" stale")}`);
     console.log(c.bold("\nevidence"));
     for (const e of ctx.evidence) console.log(`  ${e.exitCode === 0 ? c.green("0") : c.red(String(e.exitCode))} ${(e.label || "").padEnd(8)} ${e.startedAt} ${c.dim(e.command)}`);
-    if (!chain.ok) process.exit(2);
+    for (const error of ctx.evidenceErrors) console.log(bad(error));
+    if (!chain.ok || ctx.evidenceErrors.length) process.exit(2);
   },
 
   async report(args, root) {
@@ -452,9 +510,10 @@ const commands = {
     if (!feats.length) fail("No features yet. Run: aisdlc new \"<title>\" --kind <kind>");
     const wanted = args._[0] ? [resolveSlug(root, cfg, args._[0])] : feats;
     const rows = wanted.map((slug) => {
-      const ctx = loadCtx(root, cfg, slug, { scan: false });
+      const ctx = loadCtx(root, cfg, slug);
       return { slug, flow: deriveFlow(ctx), s: summarizeLog(ctx, { codeChangedAt: lastCodeChange(root) }) };
     });
+    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale)) process.exitCode = 3;
     if (args.flags.json) return console.log(JSON.stringify(rows.map((r) => ({ feature: r.slug, state: r.flow.state, ...r.s })), null, 2));
 
     for (const { slug, flow, s } of rows) {
@@ -499,8 +558,9 @@ const commands = {
     console.log(existsSync(join(root, "docs", "constitution.md")) ? ok("docs/constitution.md") : warn("docs/constitution.md missing"));
     console.log(existsSync(join(root, "docs", "taste.md")) ? ok("docs/taste.md") : warn("docs/taste.md missing (run the aisdlc-taste skill)"));
     console.log(existsSync(join(root, "docs", "glossary.md")) ? ok("docs/glossary.md") : c.dim("  docs/glossary.md missing (aisdlc-discover / aisdlc-taste seed it)"));
-    const pol = loadConfig(root).test?.gate || "configured";
-    console.log(`${pol === "configured" ? ok : warn}test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (aisdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`);
+    const cfg = loadConfig(root);
+    const pol = cfg.test?.gate || cfg.testGate || "configured";
+    console.log((pol === "configured" ? ok : warn)(`test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (aisdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`));
     const comp = detectCompanions(root);
     for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(comp.includes(id) ? ok(`companion ${id.padEnd(10)} installed (${cpn.bridge} uses it)`) : c.dim(`  companion ${id.padEnd(10)} not installed (${cpn.bridge} uses its embedded fallback; aisdlc addon ${id})`));
   },
@@ -543,12 +603,17 @@ Docs: https://github.com/AnshRoshan/aisdlc`);
 };
 
 export async function main(argv = process.argv.slice(2)) {
-  const args = parseArgs(argv);
-  const cmd = args._.shift() || "help";
-  if (args.flags.version || args.flags.v) return commands.version();
-  if (args.flags.help) return commands.help();
-  const fn = commands[cmd];
-  if (!fn) { console.error(bad(`Unknown command "${cmd}"`)); await commands.help(); process.exit(1); }
-  const root = args.flags.cwd ? args.flags.cwd : projectRoot();
-  try { await fn(args, root); } catch (e) { fail(e.message || String(e)); }
+  try {
+    const args = parseArgs(argv);
+    for (const [key, value] of Object.entries(args.flags)) {
+      if (!BOOLEAN_FLAGS.has(key) && !VALUE_FLAGS.has(key)) throw new Error(`Unknown flag --${key}`);
+      if (VALUE_FLAGS.has(key) && (typeof value !== "string" || !value.trim())) throw new Error(`--${key} requires a non-empty value`);
+    }
+    const cmd = args._.shift() || "help";
+    if (args.flags.version || args.flags.v) return commands.version();
+    if (args.flags.help) return commands.help();
+    if (!Object.hasOwn(commands, cmd)) { console.error(bad(`Unknown command "${cmd}"`)); await commands.help(); process.exitCode = 1; return; }
+    const root = args.flags.cwd ? resolve(args.flags.cwd) : projectRoot();
+    await commands[cmd](args, root);
+  } catch (e) { fail(e.message || String(e)); }
 }

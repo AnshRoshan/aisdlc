@@ -5,7 +5,7 @@ Read alongside [`RESEARCH.md`](RESEARCH.md) §7 (v2), §8 (v3, the analysis that
 **Status:** every "Things aisdlc does not have" list below is a snapshot from research time — §9 says which have since been closed and which were deliberately not copied.
 All of it is read-only research on public repos/docs; nothing here is vendored.
 
-Sources are cited inline. Checked: Sept 2026.
+Sources are cited inline. Checked: Sept 2026; section 10 re-checked 20 Oct 2026.
 
 ---
 
@@ -183,3 +183,58 @@ Disposition: cost discipline, portability lint, cross-model review, value sourci
 policy, the authoring constitution and the ownership table were adopted; the dash lints, the duplicated
 house-voice block, "suggestions, never gates" and docs-folder-as-website were not. Details and the
 engine-side implementation in `docs/RESEARCH.md` §10.
+
+## 10. October 2026 re-check: enforcement stopped being unique (verified 2026-10-20)
+
+The September snapshot predates two shipped changes that invalidate the claim "Spec Kit/BMAD only advise, we enforce." Star counts and releases are GitHub API snapshots taken 2026-10-20; they are distribution signals, not quality scores.
+
+| Project | Stars | Latest | 2026 change that matters | Enforcement |
+|---|---:|---|---|---|
+| `awslabs/aidlc-workflows` | 5,421 | v2.11.1 (20 Oct) | One harness-neutral core, 7 harnesses, PreToolUse plan-approval guard, committed audit trail, guard policy, receipts. MIT-0 | **Yes** |
+| `spec-kitty/spec-kitty` | 1,691 | v3.2.7; 4.0 rc | Work-package lanes, worktrees, approval stamps, `LANE_MOVED_AFTER_APPROVAL`, fail-closed consolidate, JSONL trail | **Yes (rc)** |
+| `github/spec-kit` | 142,091 | v1.2.2 (19 Oct) | 1.0 in August: extensions, presets, bundles, catalogs, YAML workflows with gate steps | Partial: gate is a prompt |
+| `Fission-AI/OpenSpec` | 72,524 | v1.14.3 (17 Oct) | 1.0 replaced phase gates with an action-based artifact graph; `validate --strict`; explicitly markets "no rigid phase gates" | Structural validate only |
+| `bmad-code-org/BMAD-METHOD` | 54,369 | v6.12.4 (14 Oct) | v6 stable, Copilot installer, verification-gap review, BMad Loop; v7 slipped | No |
+| `obra/superpowers` | 302,486 | v7.0.0 (10 Oct) | Brainstorming rebuild, SDD progress ledger, Antigravity plugin, Windows hooks | No |
+| `mattpocock/skills` | 298,378 | v1.3.1 (4 Oct) | Triage state machine, before/after evidence, cited research | No |
+| `aisdlc` | 0 | tag v0.2.0, no release | Guard mod, gates, evidence, SoD | Yes, Claude Code only |
+
+What specifically closed the gap:
+
+- **AI-DLC's guard** blocks developer-agent dispatch and out-of-scope writes until a "matching approval fingerprint over those exact bytes" exists. Its state file carries a Guard Policy, per-intent guards, receipts and an audit folder. This is the same thesis as G1, shipped across 7 harnesses by AWS Labs.
+- **Spec Kitty** refuses to consolidate a lane whose content commit landed after review (`LANE_MOVED_AFTER_APPROVAL`), and writes a JSONL trail per dispatch. That is the missing half of our G3/G4 binding.
+- **Spec Kit 1.x** turned gates into first-class YAML workflow steps. The approval is still a prompt, but "they only advise" is no longer accurate as a category claim.
+- **Distribution** is now the differentiator we lack: every rival above ships tagged releases and marketplace installs. aisdlc has no npm package, no GitHub release, and a broken Pages deploy at the time of this check.
+
+Harness and ecosystem shifts that affect the installer:
+
+- Gemini CLI stopped serving requests on 2026-06-18 and was replaced by Antigravity CLI; `.gemini/skills` loads as an Antigravity plugin. The `gemini-cli` target is a legacy name.
+- Windsurf became Devin Desktop on 2026-06-02; `.devin/skills` is preferred and `.windsurf` is legacy.
+- Claude Code mods went live 2026-10-01 and can block tool calls in-process, unsandboxed. The guard's fail-open and no-write design is the right shape for that API.
+- Codex supports Agent Skills, plugins and marketplaces; Copilot has `.github/skills` and a CLI plugin marketplace. A Claude-only manifest is no longer enough.
+- AGENTS.md was donated to the Linux Foundation's Agentic AI Foundation and is read natively by Codex, Cursor, Copilot and OpenCode.
+- skills.sh (launched 2026-01-20) installs from Git refs with a lockfile and scans at install time. A kit that is not installable there is invisible to that channel.
+
+What remains ours alone, after the re-check:
+
+1. Segregation of duties enforced as a gate across vendors, not a single PR approval.
+2. Release and operate gates (G5/G6), where platforms stop at the PR.
+3. Lanes that ratchet up, so ceremony matches stakes.
+4. Local-first, air-gapped operation with no account or telemetry.
+5. A process kit that is itself diffable, forkable and testable as a corpus.
+
+Sources, all accessed 2026-10-20:
+
+1. `github.com/awslabs/aidlc-workflows` and `core/hooks/aidlc-plan-approval-guard.ts`
+2. `github.com/awslabs/aidlc-workflows/blob/main/docs/guide/10-state-and-audit.md`
+3. `github.com/spec-kitty/spec-kitty` and `docs/architecture/trail-model.md`
+4. `github.com/github/spec-kit/releases` and `github.github.io/spec-kit/reference/workflows.html`
+5. `github.com/Fission-AI/OpenSpec/releases`
+6. `github.com/bmad-code-org/BMAD-METHOD/releases`
+7. `github.com/obra/superpowers/releases`
+8. `developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/`
+9. `docs.devin.ai/desktop/cascade/skills`
+10. `code.claude.com/docs/en/plugins/mods/overview`
+11. `developers.openai.com/plugins/build/plugins`
+12. `agents.md` and the Linux Foundation Agentic AI Foundation announcement
+13. `skills.sh` and `github.com/vercel-labs/skills`

@@ -232,3 +232,22 @@ The mod narrows the gap between "the tool refuses" and "the tool never sees it";
 3. `code.claude.com/docs/en/plugins/mods/api` - the `$` namespaces (`ui`, `fs`, `process`, `session`, `clock`, `command`, `tool`, `model`, `store`, `env`, `settings`, `http`, `mcp`, `prompt`, `agent`), `next()` and `next.signal`, the 10 s handler cap with `$` calls excluded, 30 s `process.run` cap, no native globals, timers lost on hot reload.
 4. `claude.com/blog/claude-code-mods` - motivation (earlier integrations could not rewrite events, draw UI or replace features), `sec-default`, admin controls, distribution through the plugin directory.
 5. `github.com/anthropics/claude-code-playground` → `claude-code/mods/{blast-radius,token-weather,replay-theater}` - the real file layout (`hooks/hooks.json` with `modules`, `.claude-plugin/plugin.json` carrying no hooks field), the hold-and-poll loop, `$.ui.resolve(e)` returning `Box`/`Text`/`Button`, and the source-spelling rule quoted in this repo's checker.
+
+## 12. Market gap analysis v6 - October 2026
+
+Research run 2026-10-20: five parallel passes over the spec-driven kit market, the skills and plugin distribution ecosystem, assurance and provenance tooling, agentic SDLC platforms, and practitioner sentiment, followed by primary-source checks of the two strongest claims. Raw competitor notes are in [`COMPETITORS.md`](COMPETITORS.md) §10.
+
+**The finding that changes the product story:** §9's conclusion ("no remaining row where a competitor's practice is both better than ours and copyable") is superseded. AWS Labs AI-DLC and Spec Kitty now enforce plan approval and merge safety deterministically. The binary "we enforce, they advise" is dead. The defensible position is narrower and stronger: cross-vendor segregation of duties, local-first operation, lane-calibrated ceremony, and release/operate gates.
+
+Six gaps, in market order:
+
+1. **Distribution.** aisdlc has no npm package, no GitHub release, a broken Pages deploy and no audience, while every named competitor ships tagged releases and marketplace installs. This is the binding constraint; nothing else matters until it is fixed.
+2. **Commit binding.** Our approvals bind artifact text, not the commit or tree. AI-DLC fingerprints exact plan bytes; Spec Kitty refuses a merge after a post-approval commit. G3/G4 cannot see that movement today.
+3. **Enforcement parity.** The guard is Claude Code only. AI-DLC covers 7 harnesses; the harness map itself moved (Gemini CLI retired into Antigravity, Windsurf into Devin Desktop). `doctor` cannot currently tell the truth about enforcement.
+4. **Evidence interoperability.** The market now expects SARIF, in-toto/DSSE, OTel traces and, for regulated teams, a mapping to ISO 42001 and EU AI Act records. Our evidence is internal JSON that nothing else can consume.
+5. **Ceremony and credibility.** Practitioner sentiment punishes markdown piles and approval fatigue, and treats "released on vibes" as the insult of the year. Public evals and an honest, measured claim are the credibility bar.
+6. **Positioning debt.** README and PRODUCT still say competitors only advise. The claim is falsifiable in public and must be removed.
+
+Decision: one program feature, [`docs/features/market-readiness/`](features/market-readiness/spec.md), five phases and 21 tasks. Phase 0 is shipping; phase 1 is commit binding and enforcement parity; phases 2-4 are interop, export and evals. Decisions D-02 to D-08 in [`context/decisions.md`](../context/decisions.md) record the choices made in this pass.
+
+Sources are listed in `COMPETITORS.md` §10.

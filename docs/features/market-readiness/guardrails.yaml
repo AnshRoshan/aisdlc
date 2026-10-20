@@ -1,0 +1,15 @@
+# SLOs agreed for this program. Replace each with a measured baseline after the first release.
+# budgets:
+budgets:
+  latency_p95_ms: 300        # CLI startup ceiling on a cold npx run
+  error_rate_pct: 1          # failed published releases per 100 releases
+  monthly_cost: 0            # local-first: no server, no paid service
+# A CLI has no deployed config to flip. The release equivalent is the npm dist-tag:
+# moving `latest` back to the last good version, or deprecating the bad one.
+kill_switch: npm_dist_tag
+alerts:
+  - on: ci failure on main for more than 30 minutes
+    do: block the release, notify the maintainer
+  - on: published version fails the smoke path
+    do: deprecate the version, move latest back, open an issue
+review_after_days: 14

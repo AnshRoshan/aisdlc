@@ -1,0 +1,28 @@
+{
+  "label": "smoke",
+  "task": null,
+  "command": "claude plugin validate .",
+  "argv": [
+    "claude",
+    "plugin",
+    "validate",
+    "."
+  ],
+  "executedArgv": [
+    "claude",
+    "plugin",
+    "validate",
+    "."
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T06:53:14.894Z",
+  "durationMs": 892,
+  "outputSha256": "2afdbfcfe46ba4633bf9ed1881ffc84dc436d16172066f3da492ec2f760e310a",
+  "outputTail": "Validating marketplace manifest: D:\\SKILLS\\aisdlc\\.claude-plugin\\marketplace.json\n\nValidating plugin: D:\\SKILLS\\aisdlc\\CLAUDE.md\n\n⚠ Found 1 warning:\n\n  ❯ root: CLAUDE.md at the plugin root is not loaded as project context. To ship context with your plugin, use a skill (skills/<name>/SKILL.md) instead.\n\nValidating hooks: D:\\SKILLS\\aisdlc\\hooks\\hooks.json\n\n  ❯ ./aisdlc-guard.mjs hooks: prompt.submit, tool.call{tool=Bash}, tool.call{tool=Edit|Write|MultiEdit}, turn.complete, ui.render{component=AbovePrompt}\n  ❯ ./aisdlc-guard.mjs gating hook without .catch: prompt.submit\n  ❯ ./aisdlc-guard.mjs gating hook without .catch: tool.call{tool=Bash}\n  ❯ ./aisdlc-guard.mjs gating hook without .catch: tool.call{tool=Edit|Write|MultiEdit}\n  ❯ ./aisdlc-guard.mjs calls: $.fs.read (via currentAt), $.process.run (via runCli), $.ui.invalidate, $.ui.log, $.ui.resolve, $.ui.status, $.ui.toast\n\n✔ Validation passed with warnings\n",
+  "sourceSha256": "a470edf51df4cff554d24bf84e6a90ec5a774f785994d3c4386b8a47589dae78",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "9df6d9ec01f29dccc669ae73d88333db781b061d4098dd6af4b50d985d62c456"
+}

@@ -1,0 +1,28 @@
+{
+  "label": "full",
+  "task": null,
+  "command": "npm --prefix packages/cli test",
+  "argv": [
+    "npm",
+    "--prefix",
+    "packages/cli",
+    "test"
+  ],
+  "executedArgv": [
+    "npm",
+    "--prefix",
+    "packages/cli",
+    "test"
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T06:20:37.963Z",
+  "durationMs": 17697,
+  "outputSha256": "81f9b2511166e42480f7778d88c9280973d3c3a5b200e4192f2a5870e83968f2",
+  "outputTail": "✔ malformed approval chains fail without throwing (0.7444ms)\n✔ delta decision must contain a filled signature, not the seed line (1.6184ms)\n✔ security protocol includes every requested control exactly once in its matrix (1.2914ms)\n✔ verification, review, quality and release route to final security checks (1.9989ms)\n✔ security reporting preserves evidence, applicability and trust boundaries (0.3115ms)\n✔ provider comparison requires actual official evidence rather than certification claims (0.2646ms)\n✔ acceptance security notes start unverified and do not add scenario-table rows (0.7326ms)\n✔ security reference fits the existing sub-file budget (0.3044ms)\n✔ spec seed carries the value-sourcing table G2 requires (2.1179ms)\n✔ acceptance seed cannot pass G4 by leaving placeholders in (3.6127ms)\n✔ constitution seed is a governed document (2.0061ms)\n✔ spec seed: section 8 for UI kinds, n/a for others, blocks until filled (2.6063ms)\n✔ plan seed has every section the plan skill requires (0.5839ms)\n✔ acceptance seed carries finding triage and reviewer notes (0.532ms)\n✔ rollout seed carries rollback steps; guardrails require measured budgets and a real flag (1.9094ms)\n✔ instruction block always-loads steering; taste seed carries the sections taste skill reads (0.6287ms)\nℹ tests 78\nℹ suites 0\nℹ pass 78\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 17412.6643\n",
+  "sourceSha256": "4d22f0a0b45ac4abb7a3f6f5cebfeb9dec280f1a84cd6400ca15b413fc9fab90",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "5c1af2149aea4006014fc31bad0a6bb2c18984473e478745f8f9a4827e347064"
+}

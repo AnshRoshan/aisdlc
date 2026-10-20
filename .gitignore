@@ -5,9 +5,15 @@ dist/
 coverage/
 *.log
 .env
+.env.*
+!.env.example
 .DS_Store
 next-env.d.ts
 *.tsbuildinfo
+
+# project-context-system: personal and leak-prone files
+CLAUDE.local.md
+context/current-issues.md
 
 # aisdlc cli: skills and agents are synced from /skills and /agents at pack time
 packages/cli/skills/
@@ -18,16 +24,20 @@ packages/cli/node_modules/
 # build caches
 site/.astro/
 .freebuff/
+.tmp/
+.aisdlc/
 
 # aisdlc init artifacts (this repo installs into itself when tested)
-.claude/
+# Hand-authored project context is tracked: AGENTS.md, CLAUDE.md, .claude/settings.json,
+# .claude/rules/ and context/. Only the installed copies are ignored.
+.claude/skills/
+.claude/commands/
+.claude/agents/
 .agents/
 .cursor/
 .gemini/
 .windsurf/
 .opencode/
-CLAUDE.md
-AGENTS.md
 GEMINI.md
 .github/prompts/
 .github/skills/

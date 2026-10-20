@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm --prefix packages/cli test)",
+      "Bash(npm test:*)",
+      "Bash(node packages/cli/scripts/check-skills.mjs)",
+      "Bash(node packages/cli/scripts/sync-skills.mjs)",
+      "Bash(node packages/cli/bin/aisdlc.js:*)",
+      "Bash(claude plugin validate:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh api repos/AnshRoshan/aisdlc:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "Bash(npm install:*)",
+      "Bash(npm publish:*)",
+      "Bash(gh release:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(rm:*)",
+      "WebFetch"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env*)",
+      "Edit(**/evidence/**)",
+      "Edit(**/approvals.json)"
+    ]
+  }
+}

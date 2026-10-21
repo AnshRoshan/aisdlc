@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, symlinkSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, readlinkSync, symlinkSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -39,6 +39,35 @@ test("physical installer aliases cannot delete source, extra user files survive 
   copyOrLink(join(root, "real/skill"), join(root, "installed"), false);
   assert.equal(readFileSync(join(root, "installed/custom.md"), "utf8"), "keep this");
   assert.throws(() => copyOrLink(join(root, "real/skill"), join(root, "installed"), true));
+});
+
+test("link mode prefers real symlinks and falls back to junctions only when Windows refuses", (t) => {
+  const root = fixture(t);
+  put(root, "src/SKILL.md", "source");
+  const attempt = (name, refuseSymlink) => {
+    const target = join(root, name);
+    const calls = [];
+    const symlink = (from, to, kind) => {
+      calls.push(kind);
+      if (kind === "dir" && refuseSymlink) { const error = new Error("operation not permitted"); error.code = "EPERM"; throw error; }
+      symlinkSync(from, to, kind);
+    };
+    const mode = copyOrLink(join(root, "src"), target, true, { platform: "win32", symlink });
+    return { mode, calls, target };
+  };
+  const linked = attempt("with-symlink", false);
+  assert.equal(linked.mode, "symlink");
+  assert.deepEqual(linked.calls, ["dir"]);
+  assert.equal(readlinkSync(linked.target), join("src"));
+  assert.equal(readFileSync(join(linked.target, "SKILL.md"), "utf8"), "source");
+  const fallback = attempt("with-junction", true);
+  assert.equal(fallback.mode, "junction");
+  assert.deepEqual(fallback.calls, ["dir", "junction"]);
+  assert.equal(readFileSync(join(fallback.target, "SKILL.md"), "utf8"), "source");
+  const other = new Error("no space left on device");
+  other.code = "ENOSPC";
+  assert.throws(() => copyOrLink(join(root, "src"), join(root, "never"), true, { platform: "win32", symlink: () => { throw other; } }), /ENOSPC|no space/);
+  assert.equal(copyOrLink(join(root, "src"), join(root, "copied"), false, { platform: "win32" }), "copy");
 });
 
 test("invalid config is rejected before installer side effects", (t) => {

@@ -332,6 +332,8 @@ export function summarizeLog(ctx = {}, { codeChangedAt = null } = {}) {
 
   const approvals = ctx.approvals || [];
   const staleApprovals = approvals.filter((a) => a.hash !== artifactHashFor(a.gate, ctx));
+  const driftedApprovals = approvals.filter((a) => driftAfterSigning(a, ctx).length);
+  const boundApprovals = approvals.filter((a) => typeof a.head === "string" && a.head);
   const notAuthor = approvals.filter((a) => !ctx.author || String(a.by).toLowerCase() !== String(ctx.author).toLowerCase());
 
   const gates = runAllGates(ctx);
@@ -362,6 +364,9 @@ export function summarizeLog(ctx = {}, { codeChangedAt = null } = {}) {
     evidence: { lastRunAt: byTime[byTime.length - 1]?.startedAt || null, lastFullAt: lastFull?.startedAt || null, stale: fullIsStale },
     gates: { required, passed, missing: required.filter((g) => !passed.includes(g)) },
     approvals: { total: approvals.length, notAuthor: notAuthor.length, stale: staleApprovals.length,
+      drifted: driftedApprovals.length,
+      driftedFiles: [...new Set(driftedApprovals.flatMap((a) => driftAfterSigning(a, ctx)))].slice(0, 5),
+      binding: !approvals.length ? "none" : boundApprovals.length === approvals.length ? "tree" : boundApprovals.length ? "mixed" : "artifact-only",
       byGate: approvals.reduce((m, a) => ({ ...m, [a.gate]: (m[a.gate] || 0) + 1 }), {}) },
     tasks: { total: tasks.length, done: tasks.filter((t) => t.done).length, open: tasks.filter((t) => !t.done).map((t) => `T${t.num}`) },
     deltas: (ctx.deltas || []).length,
@@ -401,14 +406,31 @@ export function artifactHashFor(gate, ctx) {
   return sha256(map[gate]);
 }
 
+/**
+ * Paths that moved after an approval was signed. The CLI supplies `treeDrift` per signed commit,
+ * already excluding the feature's own evidence directory; an approval with no `head` predates tree
+ * binding and keeps artifact-hash behavior, which is honest rather than silently stricter.
+ */
+export function driftAfterSigning(a, ctx) {
+  if (!a || !a.head || !ctx || !ctx.treeDrift) return [];
+  const drift = ctx.treeDrift[a.head];
+  return Array.isArray(drift) ? drift : [];
+}
+
 function freshSodApprovals(ctx, gate) {
   const hash = artifactHashFor(gate, ctx);
   const all = (ctx.approvals || []).filter((a) => a.gate === gate);
   const sod = all.filter((a) => !isPlaceholder(a.by) && identity(a.by) !== identity(ctx.author));
   const distinct = new Map();
-  if (ctx.approvalsIntact !== false) for (const a of sod) if (a.hash === hash) distinct.set(identity(a.by), a);
+  const drifted = [];
+  if (ctx.approvalsIntact !== false) for (const a of sod) {
+    if (a.hash !== hash) continue;
+    const drift = driftAfterSigning(a, ctx);
+    if (drift.length) { drifted.push({ ...a, drift }); continue; }
+    distinct.set(identity(a.by), a);
+  }
   const fresh = [...distinct.values()];
-  return { all, sod, fresh, hash };
+  return { all, sod, fresh, hash, drifted, driftFiles: [...new Set(drifted.flatMap((a) => a.drift))] };
 }
 
 export function runGate(gate, ctx) {
@@ -423,14 +445,15 @@ export function runGate(gate, ctx) {
   switch (gate) {
     case "G1": {
       push("plan.md exists and is not a stub", nonEmpty(ctx.plan), ctx.plan ? `${ctx.plan.length} chars` : "missing");
-      const { all, sod, fresh } = freshSodApprovals(ctx, "G1");
-      const stale = sod.length - fresh.length;
+      const { all, sod, fresh, hash, drifted, driftFiles } = freshSodApprovals(ctx, "G1");
+      const hashStale = sod.filter((a) => a.hash !== hash).length;
       const selfSigned = all.length - sod.length;
       push(
         `G1 approval (SoD, ≥${need})`,
         fresh.length >= need,
         `${fresh.length}/${need} on current plan hash` +
-          (stale ? `, ${stale} stale (plan edited after approval)` : "") +
+          (hashStale ? `, ${hashStale} stale (artifact edited after approval)` : "") +
+          (drifted.length ? `, ${drifted.length} invalidated by commits after signing (${driftFiles.slice(0, 3).join(", ")})` : "") +
           (selfSigned ? `, ${selfSigned} rejected (approver = author)` : ""),
       );
       break;
@@ -530,16 +553,18 @@ export function runGate(gate, ctx) {
               : `${rn.author} wrote, ${rn.reviewer} reviewed`,
       );
       const signer = approvedBy(ctx.acceptance || "");
-      const { fresh } = freshSodApprovals(ctx, "G4");
-      const signedOk = (need === 1 && ctx.approvalsIntact !== false && !!signer && identity(signer) !== identity(ctx.author)) || fresh.length >= need;
-      push("human sign-off (SoD)", signedOk, signer ? `signed by ${signer}` : fresh.length ? `${fresh.length} approval(s)` : "unsigned");
+      const { fresh, drifted, driftFiles } = freshSodApprovals(ctx, "G4");
+      const signedOk = ((need === 1 && ctx.approvalsIntact !== false && !!signer && identity(signer) !== identity(ctx.author)) || fresh.length >= need) && !drifted.length;
+      push("human sign-off (SoD)", signedOk, drifted.length
+        ? `${drifted.length} sign-off(s) invalidated by commits after signing (${driftFiles.slice(0, 3).join(", ")}) - re-review and re-sign`
+        : signer ? `signed by ${signer}` : fresh.length ? `${fresh.length} approval(s)` : "unsigned");
       break;
     }
     case "G5": {
       push("rollout.md exists", nonEmpty(ctx.rollout), "");
       push("rollout has ## Rollback with steps", /^##\s+Rollback\b/m.test(ctx.rollout || "") && /^[ \t]*(1\.|-)[ \t]+\S/m.test(((ctx.rollout || "").split(/^##\s+Rollback\b[^\r\n]*/m)[1] || "").split(/^##\s+/m)[0]), "");
-      const { fresh, sod } = freshSodApprovals(ctx, "G5");
-      push(`G5 approval (SoD, ≥${need})`, fresh.length >= need, `${fresh.length}/${need} on current rollout hash${sod.length > fresh.length ? " (stale ignored)" : ""}`);
+      const { fresh, sod, drifted, driftFiles } = freshSodApprovals(ctx, "G5");
+      push(`G5 approval (SoD, ≥${need})`, fresh.length >= need, `${fresh.length}/${need} on current rollout hash${sod.length > fresh.length ? ` (stale ignored${drifted.length ? `: commits after signing ${driftFiles.slice(0, 3).join(", ")}` : ""})` : ""}`);
       break;
     }
     case "G6": {

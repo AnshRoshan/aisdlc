@@ -1,0 +1,57 @@
+name: aisdlc gate
+
+# The enforcement layer for harnesses that have no native hook, and the merge check for all of them.
+# `aisdlc ci` evaluates every gate the work has already crossed, plus any gate a human has signed,
+# and exits non-zero on a regression, a stale approval or a tree that moved after a signature.
+#
+# Callers add:
+#   uses: AnshRoshan/aisdlc/.github/workflows/gates.yml@v1
+# Branch protection then requires the "gates" check, so an agent cannot merge past a red gate by
+# describing it as green in the PR body.
+
+on:
+  workflow_call:
+    inputs:
+      feature:
+        description: "Limit to one feature slug; empty checks every feature"
+        required: false
+        type: string
+        default: ""
+      version:
+        description: "aisdlc-cli version to run"
+        required: false
+        type: string
+        default: "latest"
+  pull_request:
+    paths: ["docs/**", "aisdlc.json", ".github/workflows/gates.yml"]
+  workflow_dispatch:
+    inputs:
+      feature:
+        description: "Limit to one feature slug; empty checks every feature"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: evaluate every gate the work has crossed
+        env:
+          AISDLC_VERSION: ${{ inputs.version || 'latest' }}
+          AISDLC_FEATURE: ${{ inputs.feature || '' }}
+        run: |
+          if [ -f packages/cli/bin/aisdlc.js ]; then
+            node packages/cli/bin/aisdlc.js ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+          else
+            npx --yes "aisdlc-cli@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+          fi
+      # SARIF upload arrives with `aisdlc export --format sarif`; a findings file that does not exist
+      # yet must not become a step that silently uploads nothing.

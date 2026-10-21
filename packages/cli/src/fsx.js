@@ -2,7 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync, cpSync, symlinkSync, rmSync, lstatSync, realpathSync } from "node:fs";
 import { dirname, join, resolve, relative, isAbsolute, sep, delimiter, basename } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -59,12 +59,22 @@ export function ensureDir(path) { mkdirSync(path, { recursive: true }); }
 /** Include tracked and non-ignored source, uncommitted changes, Markdown output and deletions.
  * Exclude only per-feature process artifacts, the marker and installed harness instructions/skills.
  */
+const HARNESS_ARTIFACT = /^(?:\.agents|\.claude|\.cursor|\.gemini|\.windsurf|\.opencode|\.devin|\.antigravity)(?:\/|$)/;
+/**
+ * Files the process itself owns: per-feature artifacts, the marker, and installed harness copies.
+ * They move during normal work, so neither the source fingerprint nor tree drift may count them.
+ */
+export function isProcessArtifact(name, featurePrefix) {
+  return name.startsWith(featurePrefix) || name === "aisdlc.json" || HARNESS_ARTIFACT.test(name)
+    || name.startsWith(".github/skills/") || name.startsWith(".github/prompts/");
+}
+
 export function sourceFingerprint(root, featuresDir = "docs/features") {
   const hash = createHash("sha256");
   const featurePrefix = relative(root, resolve(root, featuresDir)).replace(/\\/g, "/") + "/";
   for (const file of [...new Set(repoFiles(root))].sort()) {
     const name = relative(root, file).replace(/\\/g, "/");
-    if (name.startsWith(featurePrefix) || name === "aisdlc.json" || /^(?:\.agents|\.claude|\.cursor|\.gemini|\.windsurf|\.opencode)\//.test(name)) continue;
+    if (isProcessArtifact(name, featurePrefix)) continue;
     let bytes;
     try { if (!statSync(file).isFile()) continue; bytes = readFileSync(file); }
     catch (error) { if (error.code === "ENOENT") bytes = Buffer.from("<deleted>"); else throw error; }
@@ -88,23 +98,41 @@ function contains(from, to) {
 }
 function linkExists(path) { try { lstatSync(path); return true; } catch { return false; } }
 
-/** Preserve extra user files; never delete a source through a physical alias. */
-export function copyOrLink(src, dest, link) {
+/**
+ * Preserve extra user files; never delete a source through a physical alias.
+ * Link mode: a real symlink when the platform allows it, a junction when Windows
+ * refuses the privilege. Returns the mode actually used, or null for a no-op.
+ */
+export function copyOrLink(src, dest, link, { platform = process.platform, symlink = symlinkSync } = {}) {
   const source = resolve(src), target = resolve(dest);
-  if (identityPath(source) === identityPath(target)) return;
+  if (identityPath(source) === identityPath(target)) return null;
   const realSource = physicalPath(source), realTarget = physicalPath(target);
-  if (identityPath(realSource) === identityPath(realTarget)) return;
+  if (identityPath(realSource) === identityPath(realTarget)) return null;
   if (contains(source, target) || contains(target, source) || contains(realSource, realTarget) || contains(realTarget, realSource)) throw new Error("Skill source and destination must not contain each other.");
   mkdirSync(dirname(target), { recursive: true });
   const present = linkExists(target);
   if (link) {
     if (present && !lstatSync(target).isSymbolicLink()) throw new Error(`Refusing to replace existing directory ${target} with a symlink; use copy mode`);
     if (present) rmSync(target, { force: true }); // Target checked: remove a symlink, not its source.
-    symlinkSync(process.platform === "win32" ? source : relative(dirname(target), source), target, process.platform === "win32" ? "junction" : "dir");
-  } else {
-    if (present && lstatSync(target).isSymbolicLink()) rmSync(target, { force: true });
-    cpSync(source, target, { recursive: true });
+    const linked = relative(dirname(target), source);
+    if (platform !== "win32") {
+      symlink(linked, target, "dir");
+      return "symlink";
+    }
+    // Junctions need no privilege but are invisible to git as links; symlinks are the honest shape.
+    try {
+      symlink(linked, target, "dir");
+      return "symlink";
+    } catch (error) {
+      if (error.code !== "EPERM" && error.code !== "EINVAL") throw error;
+      if (linkExists(target)) rmSync(target, { force: true });
+      symlink(source, target, "junction");
+      return "junction";
+    }
   }
+  if (present && lstatSync(target).isSymbolicLink()) rmSync(target, { force: true });
+  cpSync(source, target, { recursive: true });
+  return "copy";
 }
 
 /** Insert or replace a marked block in a file (idempotent). */
@@ -139,6 +167,31 @@ export function commandInvocation(argv, { platform = process.platform, pathDirs 
   }
   if (scripts || /\.(?:cmd|bat)$/i.test(command)) throw new Error(`Cannot resolve ${command} without a shell; invoke its JS entry point with node explicitly`);
   return argv;
+}
+const gitRun = (root, args) => {
+  try { return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 32 * 1024 * 1024 }); }
+  catch { return null; }
+};
+
+/** Current commit and tree, or null when the project has no usable git repository. */
+export function gitState(root) {
+  const head = gitRun(root, ["rev-parse", "HEAD"])?.trim();
+  const tree = gitRun(root, ["rev-parse", "HEAD^{tree}"])?.trim();
+  if (!/^[0-9a-f]{7,40}$/i.test(head || "") || !/^[0-9a-f]{40,64}$/i.test(tree || "")) return null;
+  return { head, tree };
+}
+
+/**
+ * Repo-relative paths that moved between a signed commit and the working tree, or null when the
+ * commit is unknown. `--relative` keeps the paths aligned with the project root, which may sit
+ * below the repository root.
+ */
+export function treeDriftSince(root, head) {
+  if (!/^[0-9a-f]{7,40}$/i.test(head)) return null;
+  const diff = gitRun(root, ["diff", "--name-only", "--relative", head]);
+  if (diff === null) return null;
+  const untracked = gitRun(root, ["ls-files", "--others", "--exclude-standard"]) || "";
+  return [...new Set([...diff.split(/\r?\n/), ...untracked.split(/\r?\n/)].filter(Boolean))];
 }
 export function gitUser(root) {
   try { return execSync("git config user.name", { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || null; }

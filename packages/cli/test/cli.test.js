@@ -249,3 +249,86 @@ test("source fingerprints include code and Markdown, not process artifacts or ge
   put(root, "src.js", "after");
   assert.notEqual(sourceFingerprint(root), before);
 });
+
+test("approvals bind to the signed commit and a code change after signing invalidates them", (t) => {
+  const root = project(t);
+  const git = (...args) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
+  const spec = "# Spec: Export\n\n## 3. Requirements (EARS)\n### Requirement: Primary Flow\nWHEN a client runs the command THE SYSTEM SHALL write a file.\n#### Scenario: happy\n- GIVEN a project\n- WHEN the command runs\n- THEN the file exists\n## 5. Acceptance bar\nApproved-by: ______  Date: ______\n## 9. Value sourcing\n| Value | Source | How obtained |\n|---|---|---|\n| file path | Primary Flow | returned by the writer |\n";
+  good(run(root, ["init", "--harness", "universal"]));
+  newFeature(root, "standard");
+  put(root, dir + "spec.md", spec);
+  put(root, dir + "plan.md", "# Plan: Export\n\n## Architecture\nGateway -> Service -> Store, described here at a length that clears the stub floor.\n\n## Traceability\n| Requirement | Tasks |\n|---|---|\n| Primary Flow | T1 |\n");
+  git("add", "-A");
+  git("commit", "-qm", "fixture: plan ready for approval");
+  const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+
+  good(run(root, ["approve", "G1", "export", "--by", "Priya"]));
+  const entry = JSON.parse(get(root, dir + "approvals.json"))[0];
+  assert.equal(entry.head, head, "the approval records the commit it was signed on");
+  assert.equal(entry.git, "bound");
+  assert.match(entry.tree, /^[0-9a-f]{40,64}$/);
+  assert.equal(run(root, ["gate", "G1", "export"]).code, 0);
+  good(run(root, ["ci", "export"]));
+
+  put(root, "src/export.js", "export const x = 1;\n");
+  const moved = run(root, ["gate", "G1", "export"]);
+  assert.notEqual(moved.code, 0, "code that moved after the signature must fail the gate");
+  assert.match(moved.out + moved.err, /commits after signing/);
+  assert.match(moved.out + moved.err, /src\/export\.js/);
+  const ciMoved = run(root, ["ci", "export"]);
+  assert.notEqual(ciMoved.code, 0, "CI must not merge behind a signature the diff invalidated");
+  assert.match(ciMoved.out, /G1 approval/);
+
+  rmSync(join(root, "src/export.js"), { force: true });
+  rmSync(join(root, "src"), { recursive: true, force: true });
+  put(root, dir + "tasks.md", "# Tasks: Export\n\n- [ ] T1 [R:Primary Flow] cut the thinnest slice through the seam\n");
+  assert.equal(run(root, ["gate", "G1", "export"]).code, 0, "feature artifacts are expected to move; the hash check owns those");
+  good(run(root, ["ci", "export"]));
+
+  // Drift is judged by content against the signed tree, not by commit count: what matters is that
+  // source differs from what the human signed.
+  put(root, "src/util.js", "export const y = 2;\n");
+  git("add", "-A");
+  git("commit", "-qm", "fixture: source change lands after signing");
+  const committed = run(root, ["gate", "G1", "export"]);
+  assert.notEqual(committed.code, 0, "a committed source change after signing is stale, not just a dirty tree");
+  assert.match(committed.out + committed.err, /src\/util\.js/);
+});
+
+test("a no-git project records an unavailable binding instead of inventing one", (t) => {
+  const root = project(t, { git: false });
+  good(run(root, ["init", "--harness", "universal"]));
+  newFeature(root, "standard");
+  put(root, dir + "plan.md", "# Plan: Export\n\n## Architecture\nGateway -> Service -> Store, described here at a length that clears the stub floor.\n\n## Traceability\n| Requirement | Tasks |\n|---|---|\n| Primary Flow | T1 |\n");
+  good(run(root, ["approve", "G1", "export", "--by", "Priya"]));
+  const entry = JSON.parse(get(root, dir + "approvals.json"))[0];
+  assert.equal(entry.git, "unavailable");
+  assert.equal(entry.head, null);
+  assert.equal(entry.tree, null);
+  const gate = run(root, ["gate", "G1", "export"]);
+  assert.equal(gate.code, 0, gate.out + gate.err);
+  assert.match(gate.out + gate.err, /on current plan hash/);
+});
+
+test("doctor reports the enforcement level it can point at, never a capability", (t) => {
+  const root = project(t, { git: false });
+  good(run(root, ["init", "--harness", "claude-code"]));
+  const bare = json(run(root, ["doctor", "--json"]));
+  const levels = Object.fromEntries(bare.enforcement.map((e) => [e.id, e.enforcement]));
+  assert.equal(levels["claude-code"], "none", "a skills install alone is not enforcement");
+  assert.equal(levels["codex"], "none");
+  assert.ok(bare.enforcement.every((e) => e.reason && e.install), "every level carries a reason and a command");
+
+  put(root, ".github/workflows/gates.yml", "name: aisdlc gate\n");
+  const withCi = json(run(root, ["doctor", "--json"]));
+  assert.equal(Object.fromEntries(withCi.enforcement.map((e) => [e.id, e.enforcement]))["codex"], "ci");
+
+  put(root, "hooks/aisdlc-guard.mjs", "export default {};\n");
+  put(root, "hooks/hooks.json", '{"modules":[]}\n');
+  const withGuard = json(run(root, ["doctor", "--json"]));
+  const guardLevels = Object.fromEntries(withGuard.enforcement.map((e) => [e.id, e.enforcement]));
+  assert.equal(guardLevels["claude-code"], "native", "a guard module in the project is what native means");
+  assert.equal(guardLevels["cursor"], "ci", "other harnesses stay ci until an adapter is verified");
+  const human = run(root, ["doctor"]);
+  assert.match(human.out, /enforcement: native = a guard module/);
+});

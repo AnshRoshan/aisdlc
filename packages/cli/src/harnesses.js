@@ -4,7 +4,7 @@
  * The canonical copy always goes to .agents/skills/ (read natively by Codex and others);
  * per-harness directories get a copy (or symlink with --link) so discovery is zero-config.
  */
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const HARNESSES = {
@@ -30,13 +30,28 @@ export const HARNESSES = {
     instructionsHeader: "---\ndescription: aisdlc process rules (spec → gates → evidence)\nalwaysApply: true\n---\n",
     detect: [".cursor"],
   },
+  antigravity: {
+    label: "Google Antigravity CLI",
+    skillsDir: ".agents/skills",
+    instructions: "AGENTS.md",
+    detect: [".antigravity"],
+    note: "Antigravity replaced Gemini CLI on 2026-06-18 and reads the .agents/skills layout; a .gemini/skills install still loads as an Antigravity plugin.",
+  },
+  devin: {
+    label: "Devin Desktop",
+    skillsDir: ".devin/skills",
+    instructions: ".devin/rules/aisdlc.md",
+    detect: [".devin"],
+    note: "Devin Desktop replaced Windsurf on 2026-06-02; .windsurf/ remains the legacy layout.",
+  },
   "gemini-cli": {
-    label: "Gemini CLI",
+    label: "Gemini CLI (legacy)",
     skillsDir: ".gemini/skills",
     instructions: "GEMINI.md",
     commandsDir: ".gemini/commands",
     commandExt: ".toml",
     detect: [".gemini", "GEMINI.md"],
+    retired: "Gemini CLI stopped serving requests on 2026-06-18 and became Antigravity CLI. The .gemini layout still loads as an Antigravity plugin; prefer --harness antigravity.",
   },
   copilot: {
     label: "GitHub Copilot",
@@ -47,10 +62,11 @@ export const HARNESSES = {
     detect: [".github/copilot-instructions.md", ".github/prompts"],
   },
   windsurf: {
-    label: "Windsurf",
+    label: "Windsurf (legacy)",
     skillsDir: ".windsurf/skills",
     instructions: ".windsurf/rules/aisdlc.md",
     detect: [".windsurf"],
+    retired: "Windsurf became Devin Desktop on 2026-06-02. .windsurf/ still resolves; prefer --harness devin for new installs.",
   },
   opencode: {
     label: "OpenCode",
@@ -138,7 +154,7 @@ export const COMPANIONS = {
   },
 };
 
-const SKILL_ROOTS = [".agents/skills", ".claude/skills", ".cursor/skills", ".gemini/skills", ".github/skills", ".windsurf/skills", ".opencode/skills", ".codex/skills"];
+const SKILL_ROOTS = [".agents/skills", ".claude/skills", ".cursor/skills", ".gemini/skills", ".github/skills", ".windsurf/skills", ".opencode/skills", ".codex/skills", ".devin/skills"];
 
 /** A companion counts as installed when its SKILL.md is in any harness skills dir or a plugin marker exists. */
 export function detectCompanions(root) {
@@ -149,4 +165,27 @@ export function detectCompanions(root) {
     if (hit) found.push(id);
   }
   return found;
+}
+
+/**
+ * What actually enforces the gates on this project, per harness, judged only by files that exist.
+ * `native` needs a guard module this project can point at; `ci` needs the gate workflow; anything
+ * else is `none`. Reporting a capability as an enforcement level is how a kit starts claiming
+ * protection it does not provide.
+ */
+export function enforcement(root, { exists = (p) => existsSync(join(root, p)), text = (p) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } } } = {}) {
+  const gateWorkflow = exists(".github/workflows/gates.yml") || exists(".github/workflows/gates.yaml");
+  const repoGuard = exists("hooks/aisdlc-guard.mjs") && exists("hooks/hooks.json");
+  const installedGuard = text(".claude/settings.json").includes("aisdlc-guard") || text(".claude/settings.local.json").includes("aisdlc-guard");
+  return HARNESS_IDS.map((id) => {
+    const h = HARNESSES[id];
+    const native = id === "claude-code" && (repoGuard || installedGuard);
+    const level = native ? "native" : gateWorkflow ? "ci" : "none";
+    const reason = native
+      ? repoGuard ? "aisdlc-guard.mjs is in this project and registers on tool.call" : "a project hook registers aisdlc-guard"
+      : id === "claude-code"
+        ? "the guard ships with the aisdlc plugin, but nothing in this project proves it is loaded"
+        : `no verified hook adapter for ${h.label}; hooks are tracked as an open assumption`;
+    return { id, label: h.label, enforcement: level, reason, install: `npx aisdlc-cli init --harness ${id}`, retired: h.retired || null };
+  });
 }

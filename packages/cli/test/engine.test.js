@@ -78,6 +78,42 @@ test("gates: SoD, stale approvals, evidence and flow", () => {
   assert.equal(deriveFlow(good).state, "BUILD");
 });
 
+test("tree binding: a commit after signing invalidates the approval, evidence-only drift does not", () => {
+  const head = "a".repeat(40);
+  const tree = "b".repeat(64);
+  const base = { spec: SPEC, plan: "# Plan\n\n## Architecture\nA -> B\n\n## Traceability\n| Login | T1 |\n", tasks: "- [ ] T1 [R:Login] a\n- [ ] T2 [R:Lockout] b\n", author: "Ansh", approvals: [], evidence: [], secretFindings: [] };
+  const bound = { ...base, approvals: [{ gate: "G1", by: "Priya", hash: artifactHashFor("G1", base), head, tree, git: "bound" }] };
+
+  // Nothing moved since signing.
+  assert.equal(runGate("G1", { ...bound, git: { head, tree }, treeDrift: {} }).passed, true);
+  // Only the feature's own evidence moved: still valid, and evidence is required anyway.
+  assert.equal(runGate("G1", { ...bound, git: { head, tree }, treeDrift: { [head]: [] } }).passed, true);
+  // A content commit landed after the signature: the approval no longer proves the tree it signed.
+  const moved = runGate("G1", { ...bound, git: { head, tree: "c".repeat(64) }, treeDrift: { [head]: ["src/auth.js", "docs/taste.md"] } });
+  assert.equal(moved.passed, false);
+  const detail = moved.checks.find((ch) => ch.name.startsWith("G1 approval")).detail;
+  assert.match(detail, /commits after signing/);
+  assert.match(detail, /src\/auth\.js/);
+  // An approval from before tree binding keeps today's behavior; the gate must not invent a claim.
+  const legacy = { ...base, approvals: [{ gate: "G1", by: "Priya", hash: artifactHashFor("G1", base) }] };
+  assert.equal(runGate("G1", { ...legacy, git: { head, tree }, treeDrift: { [head]: ["src/auth.js"] } }).passed, true);
+});
+
+test("tree binding: acceptance signed in prose still fails when the tree moved", () => {
+  const head = "d".repeat(40);
+  const ctx = {
+    spec: SPEC, plan: "# Plan\n\n## Architecture\nA -> B and enough words to clear the stub floor\n\n## Traceability\nx\n",
+    tasks: "- [x] T1 [R:Login] a\n- [x] T2 [R:Lockout] b\n", author: "Ansh", approvals: [], secretFindings: [],
+    evidence: [{ file: "2026-01-02-full.json", label: "full", exitCode: 0, command: "npm test" }],
+    acceptance: "| ID | Req | Scenario | Evidence | Result |\n|---|---|---|---|---|\n| A1 | Login | happy | evidence/2026-01-02-full.json | pass |\n| A2 | Lockout | lock | evidence/2026-01-02-full.json | pass |\n\nAuthor model: gpt-5.2 · Reviewer model: claude-opus-4.1 · Cross-model: independent\n\nApproved-by: Priya  Date: 2026-01-02\n",
+  };
+  ctx.approvals.push({ gate: "G4", by: "Priya", hash: artifactHashFor("G4", ctx), head, tree: "e".repeat(64), git: "bound" });
+  assert.equal(runGate("G4", { ...ctx, git: { head, tree: "e".repeat(64) }, treeDrift: {} }).passed, true);
+  const drifted = runGate("G4", { ...ctx, git: { head, tree: "f".repeat(64) }, treeDrift: { [head]: ["src/auth.js"] } });
+  assert.equal(drifted.passed, false, "a post-approval commit must not merge behind a signed acceptance");
+  assert.match(drifted.checks.find((ch) => ch.name === "human sign-off (SoD)").detail, /commits after signing/);
+});
+
 test("flow walks forward with evidence", () => {
   const ctx = { spec: SPEC, plan: "# Plan\n\n## Architecture\nA -> B and more words here to exceed stub\n\n## Traceability\nx\n", tasks: "- [x] T1 [R:Login] a\n- [x] T2 [R:Lockout] b\n", author: "Ansh", approvals: [], evidence: [], secretFindings: [] };
   ctx.approvals.push({ gate: "G1", by: "Priya", hash: artifactHashFor("G1", ctx) });

@@ -3,14 +3,14 @@
  * aisdlc CLI: install the process into any harness, scaffold features, and run the deterministic checks.
  * Zero dependencies. Node 18+.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, basename, resolve, isAbsolute } from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, validateSpec, validateDelta, parseTasks, traceMatrix, scanSecrets, runGate, deriveFlow, chainApproval, verifyChain, artifactHashFor, summarizeLog, formatDuration, sha256, short } from "./engine.js";
-import { HARNESSES, resolveHarnessList, detectHarnesses, COMPANIONS, detectCompanions } from "./harnesses.js";
+import { GATES, GATE_TITLES, KINDS, KIND_HINTS, LANES, LANE_HINTS, LANE_GATES, normalizeLane, laneRequires, validateSpec, validateDelta, parseTasks, parseAcceptance, traceMatrix, scanSecrets, runGate, runAllGates, deriveFlow, chainApproval, verifyChain, artifactHashFor, summarizeLog, formatDuration, sha256, short } from "./engine.js";
+import { HARNESSES, resolveHarnessList, detectHarnesses, enforcement, COMPANIONS, detectCompanions } from "./harnesses.js";
 import * as T from "./templates.js";
-import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange, sourceFingerprint, commandInvocation } from "./fsx.js";
+import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange, sourceFingerprint, isProcessArtifact, commandInvocation, gitState, treeDriftSince } from "./fsx.js";
 
 const VERSION = "0.2.0";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
@@ -29,8 +29,8 @@ const warn = (s) => `${c.yellow("!")} ${s}`;
 const relp = (from, p) => relative(from, p).replace(/\\/g, "/");
 
 /* ───────────── args ───────────── */
-const BOOLEAN_FLAGS = new Set(["link", "force", "print", "json", "no-scan", "version", "help", "v"]);
-const VALUE_FLAGS = new Set(["harness", "h", "name", "kind", "lane", "slug", "author", "note", "cwd", "label", "task", "by"]);
+const BOOLEAN_FLAGS = new Set(["link", "force", "print", "json", "no-scan", "version", "help", "v", "stdio"]);
+const VALUE_FLAGS = new Set(["harness", "h", "name", "kind", "lane", "slug", "author", "note", "cwd", "label", "task", "by", "out", "format", "verify", "sign"]);
 const safeName = (value, label) => {
   if (typeof value !== "string" || !/^[a-z0-9][a-z0-9-]{0,63}$/i.test(value)) throw new Error(`${label} must be a single alphanumeric/hyphen name (1–64 characters)`);
   return value;
@@ -119,6 +119,23 @@ function loadEvidence(dir) {
   });
 }
 
+/**
+ * Paths that moved after each signed commit. Feature artifacts are excluded because editing them is
+ * the process working as designed and the artifact hash already covers it; tree drift exists to see
+ * what a hash cannot: the code changed after the human signed.
+ */
+function treeDriftForApprovals(root, cfg, approvals) {
+  const heads = [...new Set((approvals || []).map((a) => a && a.head).filter((h) => typeof h === "string"))];
+  if (!heads.length) return {};
+  const featurePrefix = relative(root, resolve(root, cfg.featuresDir)).replace(/\\/g, "/") + "/";
+  const out = {};
+  for (const head of heads) {
+    const changed = treeDriftSince(root, head);
+    out[head] = changed === null ? [] : changed.filter((p) => !isProcessArtifact(p.replace(/\\/g, "/"), featurePrefix));
+  }
+  return out;
+}
+
 function loadCtx(root, cfg, slug, { scan = true } = {}) {
   const dir = featureDir(root, cfg, slug);
   const meta = readJson(join(dir, "feature.json"), {});
@@ -153,6 +170,8 @@ function loadCtx(root, cfg, slug, { scan = true } = {}) {
     evidence: evidence.map((rec) => ({ ...rec, legacy: !rec.recordSha256 })),
     evidenceErrors,
     sourceSha256: sourceFingerprint(root, cfg.featuresDir),
+    git: gitState(root),
+    treeDrift: treeDriftForApprovals(root, cfg, approvals),
     deltas: loadDeltas(dir),
     secretFindings: scan ? scanRepo(root).slice(0, 50) : [],
     policy: cfg.policy,
@@ -176,8 +195,14 @@ function scanRepo(root) {
   return out;
 }
 
-function fail(msg, code = 1) {
-  console.error(bad(msg));
+const sha256File = (path) => sha256(readFileSync(path).toString("utf8"));
+/** `{envelope}` is replaced with the bundle path; quoting is honoured so a path with spaces survives. */
+function tokenizeSigner(template, target) {
+  const safe = /\s/.test(target) ? `"${target}"` : target;
+  return (template.replace(/\{envelope\}/g, safe).match(/"[^"]*"|[^"\s]+/g) || []).map((t) => t.replace(/^"(.*)"$/, "$1"));
+}
+
+function fail(msg, code = 1) {  console.error(bad(msg));
   process.exit(code);
 }
 
@@ -189,6 +214,18 @@ function printGate(res) {
 }
 
 /* ───────────── commands ───────────── */
+
+/** The one state shape, shared by `next --json` and the MCP surface so they cannot drift apart. */
+function nextJson(root, cfg, slug) {
+  const ctx = loadCtx(root, cfg, slug, { scan: false });
+  const f = deriveFlow(ctx);
+  const { gates, ...rest } = f;
+  return {
+    feature: slug, kind: ctx.kind, ...rest,
+    gates: Object.fromEntries(GATES.map((g) => [g, { passed: gates[g].passed, required: gates[g].required, skipped: gates[g].skipped, failing: gates[g].checks.filter((x) => !x.ok).map((x) => x.name) }])),
+  };
+}
+
 const commands = {
   async init(args, root) {
     const link = !!args.flags.link;
@@ -201,13 +238,16 @@ const commands = {
     console.log(c.dim(`harnesses: ${harnesses.join(", ")}  ·  skills: ${skills.length}  ·  mode: ${link ? "symlink" : "copy"}`));
 
     const done = new Set();
+    const modes = new Set();
     for (const id of harnesses) {
       const h = HARNESSES[id];
       const dest = join(root, h.skillsDir);
       if (!done.has(dest)) {
-        for (const s of skills) copyOrLink(s.path, join(dest, s.dir), link);
+        for (const s of skills) { const mode = copyOrLink(s.path, join(dest, s.dir), link); if (mode) modes.add(mode); }
         done.add(dest);
         console.log(ok(`${h.label.padEnd(36)} ${h.skillsDir}/  (${skills.length} skills)`));
+        if (h.retired) console.log(`  ${c.yellow(h.retired)}`);
+        if (h.note) console.log(`  ${c.dim(h.note)}`);
       }
       const instrFile = join(root, h.instructions);
       const r = upsertBlock(instrFile, T.INSTRUCTIONS_BLOCK(skills.map((s) => s.name)), T.MARK_START, T.MARK_END, h.instructionsHeader || "");
@@ -226,6 +266,8 @@ const commands = {
         if (agents.length) console.log(`  ${c.dim(`${h.agentsDir}/ ${agents.length} read-only subagents (${agents.map((a) => a.file.replace(".md", "")).join(", ")})`)}`);
       }
     }
+    if (link && modes.has("junction")) console.log(c.dim("  linked with junctions: real symlinks need Windows Developer Mode or admin rights"));
+    else if (link && modes.has("symlink")) console.log(c.dim("  linked with real symlinks"));
 
     const created = [];
     if (writeIfMissing(join(root, "aisdlc.json"), JSON.stringify({ version: 1, project, docsDir: cfg.docsDir, featuresDir: cfg.featuresDir, harnesses, policy: { minApprovals: { G1: 1, G5: 1 } } }, null, 2) + "\n")) created.push("aisdlc.json");
@@ -347,10 +389,7 @@ const commands = {
     const slug = resolveSlug(root, cfg, args._[0]);
     const ctx = loadCtx(root, cfg, slug);
     const f = deriveFlow(ctx);
-    if (args.flags.json) {
-      const { gates, ...rest } = f;
-      return console.log(JSON.stringify({ feature: slug, kind: ctx.kind, ...rest, gates: Object.fromEntries(GATES.map((g) => [g, { passed: gates[g].passed, required: gates[g].required, skipped: gates[g].skipped, failing: gates[g].checks.filter((x) => !x.ok).map((x) => x.name) }])) }, null, 2));
-    }
+    if (args.flags.json) return console.log(JSON.stringify(nextJson(root, cfg, slug), null, 2));
     console.log(`${c.bold(slug)} ${c.dim(`(${ctx.kind} · lane ${ctx.lane})`)}  state ${c.cyan(f.state)}  owner ${f.owner === "human" ? c.yellow("human") : "agent"}`);
     console.log(GATES.map((g) => `${f.gates[g].passed ? c.green("●") : f.gates[g].skipped ? c.dim("·") : c.dim("○")} ${g}`).join("  "));
     if (f.blocking.length) { console.log(c.bold("\nblocking:")); for (const b of f.blocking) console.log(`  ${bad(b)}`); }
@@ -484,11 +523,17 @@ const commands = {
     const list = ctx.approvals;
     const chain = verifyChain(list);
     if (!chain.ok) fail(`approvals.json chain is broken at #${chain.at} (${chain.reason}). Refusing to append.`);
-    const entry = chainApproval(list, { gate: g, by, note: args.flags.note || "", hash, at: new Date().toISOString() });
+    const binding = ctx.git || gitState(root);
+    const entry = chainApproval(list, {
+      gate: g, by, note: args.flags.note || "", hash, at: new Date().toISOString(),
+      head: binding ? binding.head : null, tree: binding ? binding.tree : null, git: binding ? "bound" : "unavailable",
+    });
     list.push(entry);
     write(join(ctx.dir, "approvals.json"), JSON.stringify(list, null, 2) + "\n");
     console.log(ok(`${g} approved by ${by} on ${short(hash)}  ${c.dim(`entry ${short(entry.id)} ← ${short(entry.prev)}`)}`));
-    console.log(c.dim("Editing the underlying artifact changes its hash and makes this approval stale on purpose."));
+    console.log(c.dim(binding
+      ? `bound to artifact hash and commit ${short(binding.head)}; editing the artifact or moving the tree makes this stale on purpose`
+      : "bound to the artifact hash only (no git repository): editing the artifact makes this stale on purpose"));
   },
 
   async audit(args, root) {
@@ -513,12 +558,12 @@ const commands = {
       const ctx = loadCtx(root, cfg, slug);
       return { slug, flow: deriveFlow(ctx), s: summarizeLog(ctx, { codeChangedAt: lastCodeChange(root) }) };
     });
-    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale)) process.exitCode = 3;
+    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale || r.s.approvals.drifted)) process.exitCode = 3;
     if (args.flags.json) return console.log(JSON.stringify(rows.map((r) => ({ feature: r.slug, state: r.flow.state, ...r.s })), null, 2));
 
     for (const { slug, flow, s } of rows) {
       if (wanted.length > 1) {
-        console.log(`${c.bold(slug.padEnd(26))} ${flow.state.padEnd(9)} ${c.dim(`gates ${s.gates.passed.length}/${s.gates.required.length}`)} ${c.dim(`runs ${s.runs.total}`)} ${c.dim(`approvals ${s.approvals.total}`)}${s.evidence.stale ? c.yellow("  evidence stale") : ""}${s.approvals.stale ? c.red(`  ${s.approvals.stale} stale approval(s)`) : ""}`);
+        console.log(`${c.bold(slug.padEnd(26))} ${flow.state.padEnd(9)} ${c.dim(`gates ${s.gates.passed.length}/${s.gates.required.length}`)} ${c.dim(`runs ${s.runs.total}`)} ${c.dim(`approvals ${s.approvals.total}`)}${s.evidence.stale ? c.yellow("  evidence stale") : ""}${s.approvals.stale ? c.red(`  ${s.approvals.stale} stale approval(s)`) : ""}${s.approvals.drifted ? c.red(`  ${s.approvals.drifted} tree-stale approval(s)`) : ""}`);
         continue;
       }
       console.log(`${c.bold(slug)} ${c.dim(`lane ${s.lane}`)}`);
@@ -526,14 +571,14 @@ const commands = {
       console.log(`  runs        ${s.runs.total} recorded · ${s.runs.green} green${s.runs.passRate !== null ? ` (${s.runs.passRate}%)` : ""} · ${s.runs.red} red${s.runs.wallClockMs !== null ? c.dim(` · ${formatDuration(s.runs.wallClockMs)} of work on disk`) : ""}`);
       console.log(`  labels      ${Object.entries(s.runs.labels).map(([k, v]) => `${k} ${v}`).join(" · ") || c.dim("none")}`);
       console.log(`  freshness   ${s.evidence.lastFullAt ? `last full run ${s.evidence.lastFullAt}` : c.dim("no full run recorded")}${s.evidence.stale ? c.yellow("  ← code changed after it; re-run before you claim G3") : ""}`);
-      console.log(`  approvals   ${s.approvals.total} · ${s.approvals.notAuthor} not by the author · ${s.approvals.stale} ${s.approvals.stale === 1 ? "stale" : "stale"} (artifact edited after signing)${s.approvals.total ? c.dim(` · ${Object.entries(s.approvals.byGate).map(([g, n]) => `${g}×${n}`).join(" ")}`) : ""}`);
+      console.log(`  approvals   ${s.approvals.total} · ${s.approvals.notAuthor} not by the author · ${s.approvals.stale} stale (artifact edited after signing)${s.approvals.drifted ? c.red(` · ${s.approvals.drifted} invalidated by commits after signing (${s.approvals.driftedFiles.slice(0, 2).join(", ")})`) : ""}${c.dim(` · bound ${s.approvals.binding}`)}${s.approvals.total ? c.dim(` · ${Object.entries(s.approvals.byGate).map(([g, n]) => `${g}×${n}`).join(" ")}`) : ""}`);
       console.log(`  review      ${s.review === "independent" ? c.green("independent") : s.review === "degraded" ? c.yellow("declared degraded") : s.review === "same-family" ? c.red("same model family") : c.dim("unrecorded")}${s.review === "unrecorded" ? c.dim(" · acceptance.md has no Author model / Reviewer model") : ""}`);
       console.log(`  tasks       ${s.tasks.done}/${s.tasks.total} done${s.tasks.open.length ? c.dim(` · open: ${s.tasks.open.join(", ")}`) : ""}`);
       console.log(`  deltas      ${s.deltas ? `${s.deltas} raised · ${s.deltasDecided} decided` : c.dim("none")}`);
       if (s.slowestGap) console.log(`  slowest     ${c.dim(`${s.slowestGap.from} → ${s.slowestGap.to} took ${formatDuration(s.slowestGap.ms)}`)}`);
       console.log(`  next        ${c.cyan(flow.skill)} ${c.dim(flow.blocking[0] || "")}`);
     }
-    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale)) process.exitCode = 3;
+    if (rows.some((r) => r.s.evidence.stale || r.s.approvals.stale || r.s.approvals.drifted)) process.exitCode = 3;
   },
 
   async skills() {
@@ -542,7 +587,22 @@ const commands = {
 
   async doctor(args, root) {
     const detected = detectHarnesses(root);
+    const forced = enforcement(root);
+    const byId = Object.fromEntries(forced.map((f) => [f.id, f]));
+    const cfg0 = loadConfig(root);
+    const pol0 = cfg0.test?.gate || cfg0.testGate || "configured";
+    if (args.flags.json) {
+      console.log(JSON.stringify({
+        detected,
+        enforcement: forced,
+        testPolicy: pol0,
+        companions: detectCompanions(root),
+        skills: listSkills().length,
+      }, null, 2));
+      return;
+    }
     console.log(c.bold("harnesses detected: ") + (detected.length ? detected.join(", ") : c.dim("none (universal only)")));
+    console.log(c.dim("enforcement: native = a guard module in this project · ci = the aisdlc gate workflow · none = gates run only when someone runs them"));
     const skills = listSkills();
     for (const [id, h] of Object.entries(HARNESSES)) {
       const dir = join(root, h.skillsDir);
@@ -550,9 +610,11 @@ const commands = {
       const instr = read(join(root, h.instructions)).includes(T.MARK_START);
       const want = listAgents();
       const have = h.agentsDir ? want.filter((a) => existsSync(join(root, h.agentsDir, a.file))).length : 0;
-      const line = `${h.label.padEnd(36)} skills ${present}/${skills.length}  instructions ${instr ? "yes" : "no"}${h.agentsDir ? `  agents ${have}/${want.length}` : ""}`;
-      const agentsOk = !h.agentsDir || have === want.length;
-      console.log(present === skills.length && instr && agentsOk ? ok(line) : present || instr || !agentsOk ? warn(line) : c.dim(`  ${line}`));
+      const level = byId[id].enforcement;
+      const painted = level === "native" ? c.green(level) : level === "ci" ? c.yellow(level) : c.dim("none");
+      const line = `${h.label.padEnd(36)} skills ${present}/${skills.length}  instructions ${instr ? "yes" : "no"}${h.agentsDir ? `  agents ${have}/${want.length}` : ""}  enforcement ${painted}`;
+      console.log(present === skills.length && instr && have === want.length ? ok(line) : present || instr || h.agentsDir ? warn(line) : c.dim(`  ${line}`));
+      if (h.retired) console.log(`  ${c.yellow(h.retired)}`);
     }
     console.log(existsSync(join(root, "aisdlc.json")) ? ok("aisdlc.json") : warn("aisdlc.json missing (run aisdlc init)"));
     console.log(existsSync(join(root, "docs", "constitution.md")) ? ok("docs/constitution.md") : warn("docs/constitution.md missing"));
@@ -563,6 +625,177 @@ const commands = {
     console.log((pol === "configured" ? ok : warn)(`test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (aisdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`));
     const comp = detectCompanions(root);
     for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(comp.includes(id) ? ok(`companion ${id.padEnd(10)} installed (${cpn.bridge} uses it)`) : c.dim(`  companion ${id.padEnd(10)} not installed (${cpn.bridge} uses its embedded fallback; aisdlc addon ${id})`));
+  },
+
+  async ci(args, root) {
+    const cfg = loadConfig(root);
+    const all = listFeatures(root, cfg);
+    const slugs = args._[0] ? [resolveSlug(root, cfg, args._[0])] : all;
+    const STAGE = { DISCOVER: 0, SPECIFY: 1, PLAN: 2, TASKS: 3, BUILD: 4, VERIFY: 5, ACCEPT: 6, RELEASE: 7, OPERATE: 8, DONE: 9 };
+    const GATE_STAGE = { G1: 2, G2: 3, G3: 5, G4: 6, G5: 7, G6: 8 };
+    const rows = slugs.map((slug) => {
+      const ctx = loadCtx(root, cfg, slug, { scan: false });
+      const flow = deriveFlow(ctx);
+      const problems = [];
+      if ((ctx.spec || "").trim()) {
+        for (const e of validateSpec(ctx.spec).errors) problems.push(`spec: ${e}`);
+      }
+      for (const g of ["G1", "G2", "G3", "G4", "G5", "G6"]) {
+        if (!laneRequires(ctx.lane, g)) continue;
+        // A gate counts as crossed once the flow has reached it, or the moment a human signed it:
+        // an approval that the diff invalidated must fail CI even when the state never advanced.
+        const crossed = (STAGE[flow.state] ?? 0) >= GATE_STAGE[g] || (ctx.approvals || []).some((a) => a.gate === g);
+        if (!crossed) continue;
+        const res = runGate(g, ctx);
+        if (!res.passed) for (const ch of res.checks.filter((x) => !x.ok)) problems.push(`${g}: ${ch.name}${ch.detail ? ` (${ch.detail})` : ""}`);
+      }
+      const s = summarizeLog(ctx, { codeChangedAt: lastCodeChange(root) });
+      if (s.evidence.stale) problems.push("evidence: the last full run predates the current source");
+      if (s.approvals.stale) problems.push(`approvals: ${s.approvals.stale} signed against a different artifact`);
+      if (s.approvals.drifted) problems.push(`approvals: ${s.approvals.drifted} invalidated by commits after signing (${s.approvals.driftedFiles.join(", ")})`);
+      return { slug, state: flow.state, lane: ctx.lane, ok: problems.length === 0, problems };
+    });
+    if (args.flags.json) console.log(JSON.stringify(rows, null, 2));
+    else {
+      if (!rows.length) console.log(c.dim("no features under the configured featuresDir; nothing to gate"));
+      for (const r of rows) {
+        console.log(`${r.ok ? ok(`${c.bold(r.slug.padEnd(26))} ${r.state.padEnd(9)} ${c.dim(`lane ${r.lane}`)}${r.ok ? c.dim(" · all crossed gates green") : ""}`) : bad(`${c.bold(r.slug.padEnd(26))} ${r.state.padEnd(9)} ${c.dim(`lane ${r.lane}`)}`)}`);
+        for (const p of r.problems) console.log(`  ${c.red("✗")} ${p}`);
+      }
+    }
+    if (rows.some((r) => !r.ok)) process.exit(1);
+  },
+
+  async export(args, root) {
+    const { statementOf, dsseEnvelope, sarifOf, verifyBundle, ARTIFACTS } = await import("./export.js");
+    const cfg = loadConfig(root);
+    const outDir = resolve(root, args.flags.out || join(".aisdlc", "export"));
+    if (args.flags.verify) {
+      const dir = resolve(root, String(args.flags.verify));
+      const statement = readJson(join(dir, "statement.json"), null);
+      const envelope = readJson(join(dir, "envelope.json"), null);
+      const digests = new Map();
+      const collect = (sub, pattern) => {
+        const base = join(dir, sub);
+        if (!existsSync(base)) return;
+        for (const f of readdirSync(base).filter(pattern).sort()) {
+          try { digests.set(`aisdlc:bundle/${sub}/${f}`, sha256File(join(base, f))); }
+          catch { digests.set(`aisdlc:bundle/${sub}/${f}`, null); }
+        }
+      };
+      collect("artifacts", () => true);
+      collect("evidence", (f) => f.endsWith(".json"));
+      const errors = verifyBundle({ statement, envelope, digests });
+      const unsigned = errors.filter((e) => e.startsWith("unsigned:"));
+      const hard = errors.filter((e) => !e.startsWith("unsigned:"));
+      for (const e of unsigned) console.log(c.yellow(`  ! ${e}`));
+      if (hard.length) { for (const e of hard) console.log(bad(e)); process.exit(1); }
+      console.log(ok(`bundle verified: ${dir}`));
+      console.log(c.dim(`  ${digests.size} files match the statement digests. This proves the bundle was not edited after export; it does not prove who wrote it.`));
+      if (envelope.signatures.length) console.log(c.dim(`  ${envelope.signatures.length} signature(s) recorded (keyid ${envelope.signatures.map((s) => s.keyid || "?").join(", ")}); check them with the signer's public key - this bundle carries none.`));
+      return;
+    }
+    const slug = resolveSlug(root, cfg, args._[0]);
+    const ctx = loadCtx(root, cfg, slug, { scan: false });
+    const format = args.flags.format || "all";
+    const gates = Object.values(runAllGates(ctx)).map((g) => ({
+      gate: g.gate, title: g.title, required: g.required, passed: g.passed, skipped: !!g.skipped,
+      failing: g.checks.filter((ch) => !ch.ok).map((ch) => ({ name: ch.name, detail: ch.detail || "" })),
+    }));
+    const subjects = [];
+    const files = { artifacts: {}, evidence: {} };
+    for (const name of ARTIFACTS) {
+      const path = join(ctx.dir, name);
+      if (!existsSync(path)) continue;
+      const bytes = readFileSync(path);
+      const id = `aisdlc:bundle/artifacts/${name}`;
+      subjects.push({ name: id, digest: { sha256: sha256(bytes.toString("utf8")) } });
+      files.artifacts[name] = bytes;
+    }
+    const evidenceDir = join(ctx.dir, "evidence");
+    for (const f of existsSync(evidenceDir) ? readdirSync(evidenceDir).filter((x) => x.endsWith(".json")).sort() : []) {
+      const bytes = readFileSync(join(evidenceDir, f));
+      subjects.push({ name: `aisdlc:bundle/evidence/${f}`, digest: { sha256: sha256(bytes.toString("utf8")) } });
+      files.evidence[f] = bytes;
+    }
+    const snapshot = {
+      subjects,
+      predicate: {
+        feature: { slug, title: readJson(join(ctx.dir, "feature.json"), {}).title || slug, kind: ctx.kind, lane: ctx.lane },
+        generated: { at: new Date().toISOString(), tool: "aisdlc-cli", version: VERSION },
+        git: ctx.git || null,
+        sourceSha256: ctx.sourceSha256 || null,
+        gates,
+        approvals: (ctx.approvals || []).map((a) => ({ gate: a.gate, by: a.by, at: a.at, hash: a.hash, head: a.head || null, tree: a.tree || null, git: a.git || "unavailable" })),
+        evidence: (ctx.evidence || []).map((e) => ({ file: e.file, label: e.label, exitCode: e.exitCode, command: e.command, startedAt: e.startedAt, head: e.head || null, tree: e.tree || null, recordSha256: e.recordSha256 || null })),
+        limits: [
+          "Digests prove the bundle was not edited after export. They do not prove authorship; that needs a signature.",
+          "Approval identities are names recorded by the CLI, not authenticated identities.",
+          "A gate verdict is only as good as the command it was given; aisdlc cannot judge whether a test suite is meaningful.",
+        ],
+      },
+    };
+    const statement = statementOf(snapshot);
+    const envelope = dsseEnvelope(statement);
+    const acceptanceRows = parseAcceptance(ctx.acceptance || "");
+    const sarif = sarifOf({ toolVersion: VERSION, gates, acceptanceRows, feature: slug });
+    const writeJson = (p, data) => { write(p, JSON.stringify(data, null, 2) + "\n"); };
+
+    ensureDir(join(outDir, "artifacts"));
+    ensureDir(join(outDir, "evidence"));
+    if (format === "all" || format === "statement") {
+      writeJson(join(outDir, "statement.json"), statement);
+      writeJson(join(outDir, "envelope.json"), envelope);
+      for (const [name, bytes] of Object.entries(files.artifacts)) writeFileSync(join(outDir, "artifacts", name), bytes);
+      for (const [name, bytes] of Object.entries(files.evidence)) writeFileSync(join(outDir, "evidence", name), bytes);
+      write(join(outDir, "verify.md"), [
+        `# Verification: ${slug}`,
+        "",
+        `Reproduce locally (offline, no registry, no service):`,
+        "",
+        "```",
+        `npx aisdlc-cli export --verify ${relp(process.cwd(), outDir) || "."}`,
+        "```",
+        "",
+        "That recomputes every digest in the bundle and compares it with `statement.json`.",
+        envelope.signatures.length
+          ? `The envelope carries ${envelope.signatures.length} signature(s). Verify them with the signer you used; this bundle contains no public key.`
+          : "The envelope is unsigned: verification proves integrity against later tampering, not authorship.",
+        "",
+      ].join("\n"));
+    }
+    if (format === "all" || format === "sarif") writeJson(join(outDir, "findings.sarif"), sarif);
+
+    if (args.flags.sign) {
+      const target = join(outDir, "envelope.json");
+      const argv = tokenizeSigner(String(args.flags.sign), target);
+      const [cmd, ...rest] = commandInvocation(argv);
+      const res = spawnSync(cmd, rest, { encoding: "utf8" });
+      if (res.error || res.status !== 0) console.warn(warn(`signing skipped: ${res.error ? res.error.message : `signer exited ${res.status}`}. The bundle stays unsigned and says so.`));
+      else console.log(ok(`signed by ${argv[0]}`));
+    }
+    console.log(ok(`exported ${slug}  ${c.dim(`${Object.keys(files.artifacts).length} artifacts · ${Object.keys(files.evidence).length} evidence records · ${sarif.runs[0].results.length} SARIF results`)}`));
+    console.log(c.dim(`  ${relp(process.cwd(), outDir) || "."} · verify with: aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`));
+  },
+
+  async mcp(args, root) {
+    const { readLoop } = await import("./mcp.js");
+    const cfg = loadConfig(root);
+    const api = {
+      name: "aisdlc-cli",
+      version: VERSION,
+      next: (feature) => nextJson(root, cfg, feature ? resolveSlug(root, cfg, String(feature)) : (listFeatures(root, cfg)[0] || (() => { throw new Error("no features under the configured featuresDir"); })())),
+      status: () => listFeatures(root, cfg).map((slug) => {
+        const j = nextJson(root, cfg, slug);
+        return { feature: slug, kind: j.kind, lane: j.lane, state: j.state, owner: j.owner, tasks: `${j.tasks.done}/${j.tasks.total}`, blocking: j.blocking, skill: j.skill };
+      }),
+    };
+    if (!args.flags.stdio) {
+      console.log(`${c.bold("aisdlc mcp")}: a read-only MCP server over stdio. Start it with ${c.cyan("aisdlc mcp --stdio")} and speak JSON-RPC 2.0, one object per line.`);
+      console.log(c.dim(`  tools: aisdlc_next, aisdlc_status · writes are absent on purpose: evidence and approvals stay CLI actions a human performs`));
+      return;
+    }
+    readLoop(process.stdin, process.stdout, api);
   },
 
   async version() { console.log(VERSION); },
@@ -589,12 +822,20 @@ ${c.bold("Checks (deterministic, from disk)")}
   aisdlc trace [feature]                 requirement → task matrix
   aisdlc gate <G1..G6> [feature]         one gate       ·  aisdlc gates [feature]  all six
   aisdlc scan                            secrets scan over tracked files
+  aisdlc ci [feature] [--json]           evaluate every crossed gate; non-zero on a regression or a stale approval
   aisdlc report [feature] [--json]       read the logs back: runs, staleness, approvals, review
 
 ${c.bold("Evidence & approvals")}
   aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>
   aisdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]     (humans only; SoD enforced)
   aisdlc audit [feature]                 approval chain + evidence log
+
+Evidence out
+  aisdlc export <feature> [--out dir] [--format all|statement|sarif] [--sign "<cmd {envelope}>"]
+  aisdlc export --verify <dir>           recompute every digest offline; non-zero on a mismatch
+
+State for other agents
+  aisdlc mcp [--stdio]                   read-only MCP over stdio: aisdlc_next, aisdlc_status (no writes)
 
 Gates: ${GATES.map((g) => `${g} ${GATE_TITLES[g]}`).join(" · ")}
 Lanes: ${LANES.map((l) => `${l} [${LANE_GATES[l].join(" ")}]`).join(" · ")}

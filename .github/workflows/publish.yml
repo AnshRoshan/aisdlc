@@ -1,20 +1,29 @@
 name: publish cli
 
-# Publishes the aisdlc CLI to npm. Preferred: npm trusted publishing (no secret) - add the GitHub
-# action as a trusted publisher on the npm package page. NPM_TOKEN remains a fallback: when the
-# secret is set it is used instead, and provenance is skipped because npm refuses it for tokens.
+# Publishes the aisdlc CLI to npm. Preferred path: npm trusted publishing (no secret at all) - add
+# this repo and workflow as a trusted publisher on the npm package page, and leave NPM_TOKEN unset.
+# If the account cannot use trusted publishing, set NPM_TOKEN and the second job takes over; npm
+# refuses --provenance for token auth, so that path publishes without provenance.
+#
+# The two paths are separate jobs, not two steps: GitHub does not expose the `secrets` context in a
+# step-level `if`, and a step condition that reads it fails the whole workflow file.
+#
 # Trigger: push a version tag (git tag vX.Y.Z && git push --tags) or run the workflow manually.
+
 on:
   workflow_dispatch:
   push:
     tags: ["v*"]
 
+permissions:
+  contents: write
+  id-token: write   # OIDC identity for npm trusted publishing; short-lived, never stored
+
 jobs:
-  publish:
+  publish-oidc:
+    name: publish (trusted publishing)
+    if: ${{ secrets.NPM_TOKEN == '' }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write   # npm trusted publishing needs a short-lived OIDC identity, not a token
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,13 +32,28 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm test
         working-directory: packages/cli
-      - name: publish with provenance (trusted publishing)
-        if: ${{ secrets.NPM_TOKEN == '' }}
-        run: npm publish --access public --provenance
+      - run: npm publish --access public --provenance
         working-directory: packages/cli
-      - name: publish with the automation token
-        if: ${{ secrets.NPM_TOKEN != '' }}
-        run: npm publish --access public
+      - name: create a GitHub release for version tags
+        if: startsWith(github.ref, 'refs/tags/')
+        run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+
+  publish-token:
+    name: publish (NPM_TOKEN fallback)
+    if: ${{ secrets.NPM_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm test
+        working-directory: packages/cli
+      - run: npm publish --access public
         working-directory: packages/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -30,7 +30,8 @@ Current phase: 3 - evidence is portable · Current goal: get G1 signed, then shi
 
 ## Session notes
 
-- 2026-10-21: 87/87 CLI tests, 12/12 guard tests, 6/6 site tests; corpus check PASS with 23 commands cross-checked; `aisdlc ci market-readiness` exits 0; seven evidence records on the feature (five full, one green, one smoke).
+- 2026-10-21: pushed as five signed commits (`b14ebf2..`), dated to the day the work was done. `ci` and `deploy site` both green on main; the live site now carries the October harness names and the rendered plan skill. `publish cli` failed instantly on that push because a step-level `if` read the `secrets` context, which GitHub does not allow - the two publish paths are now separate jobs.
+- 2026-10-21: 87/87 CLI tests, 12/12 guard tests, 6/6 site tests; corpus check PASS with 23 commands cross-checked; `aisdlc ci market-readiness` exits 0; eight evidence records on the feature, all green, and the acceptance rows cite the newest full run.
 - 2026-10-21: export, verifier, signer adapter and MCP were implemented before their tests, then tested in the same session. Recorded as finding F6; do not repeat it.
 - 2026-10-20: `main` = `origin/main` at `b14ebf2`; `claude plugin validate .` passes.
 - The last successful Pages deploy is from 2026-10-07; HEAD failed on Node 20 until the pin landed.

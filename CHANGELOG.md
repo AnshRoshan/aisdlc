@@ -18,7 +18,7 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 - New command `aisdlc ci [feature] [--json]`: validates every spec, then fails on any lane-required gate the flow has crossed or a human has already signed, on stale evidence, on artifact-hash staleness and on tree drift. `.github/workflows/gates.yml` runs it, reusable from any repo, so harnesses with no native hook still get a merge check.
 - `doctor` now prints an enforcement level per harness (`native`, `ci` or `none`) with the reason and the install command, and `doctor --json` emits it for tooling. `native` requires a guard module the project can point at; a harness's advertised capability is never reported as this project's protection.
 - Harness registry gained `antigravity` and `devin`; `gemini-cli` and `windsurf` still install into their compatible layouts and now print the retirement notice. `.devin/skills` joined the companion search roots.
-- `deploy site` pins Node 22 (Astro 7 refuses 20; the Pages deploy had been failing since 2026-10-15). `publish cli` prefers npm trusted publishing over OIDC with `--provenance`, keeping `NPM_TOKEN` as an explicit fallback.
+- `deploy site` pins Node 22 (Astro 7 refuses 20; the Pages deploy had been failing since 2026-10-15) and is green on this commit. `publish cli` prefers npm trusted publishing over OIDC with `--provenance`, keeping `NPM_TOKEN` as an explicit fallback. The two paths are separate jobs, because GitHub does not expose the `secrets` context in a step-level `if` and a step condition that reads it fails the whole workflow file.
 - Tests 72 to 78: engine drift cases, a real-repository integration case, the no-git binding, and the enforcement matrix.
 
 ### Installer link mode

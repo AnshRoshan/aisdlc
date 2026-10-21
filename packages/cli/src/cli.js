@@ -12,7 +12,7 @@ import { HARNESSES, resolveHarnessList, detectHarnesses, enforcement, COMPANIONS
 import * as T from "./templates.js";
 import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange, sourceFingerprint, isProcessArtifact, commandInvocation, gitState, treeDriftSince } from "./fsx.js";
 
-const VERSION = "0.2.1";
+const VERSION = "0.3.0";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = {
   dim: (s) => (tty ? `\x1b[2m${s}\x1b[0m` : s),
@@ -722,7 +722,7 @@ const commands = {
       subjects,
       predicate: {
         feature: { slug, title: readJson(join(ctx.dir, "feature.json"), {}).title || slug, kind: ctx.kind, lane: ctx.lane },
-        generated: { at: new Date().toISOString(), tool: "aisdlc-cli", version: VERSION },
+        generated: { at: new Date().toISOString(), tool: "aisdlc", version: VERSION },
         git: ctx.git || null,
         sourceSha256: ctx.sourceSha256 || null,
         gates,
@@ -754,7 +754,7 @@ const commands = {
         `Reproduce locally (offline, no registry, no service):`,
         "",
         "```",
-        `npx aisdlc-cli export --verify ${relp(process.cwd(), outDir) || "."}`,
+        `npx aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`,
         "```",
         "",
         "That recomputes every digest in the bundle and compares it with `statement.json`.",
@@ -782,7 +782,7 @@ const commands = {
     const { readLoop } = await import("./mcp.js");
     const cfg = loadConfig(root);
     const api = {
-      name: "aisdlc-cli",
+      name: "aisdlc",
       version: VERSION,
       next: (feature) => nextJson(root, cfg, feature ? resolveSlug(root, cfg, String(feature)) : (listFeatures(root, cfg)[0] || (() => { throw new Error("no features under the configured featuresDir"); })())),
       status: () => listFeatures(root, cfg).map((slug) => {

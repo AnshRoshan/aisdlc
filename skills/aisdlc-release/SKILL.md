@@ -14,7 +14,7 @@ Shipping is a reversible decision or it is a gamble. This skill makes it reversi
 
 ## Lane check first
 
-`npx aisdlc-cli next <slug> --json` → read `lane`. Lanes `spike` and `quick` skip G5/G6: spike finishes after G3, quick after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc-cli lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
+`npx aisdlc next <slug> --json` → read `lane`. Lanes `spike` and `quick` skip G5/G6: spike finishes after G3, quick after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx aisdlc lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
 
 ## G5: Release approval
 
@@ -43,7 +43,7 @@ Approved-by: ______  Date: ______
 ```
 
 G5 requires concrete `## Rollback` steps and a human approval bound to the current spec, acceptance and rollout:
-`npx aisdlc-cli approve G5 <slug> --by "<release owner>"` (never the author, never you).
+`npx aisdlc approve G5 <slug> --by "<release owner>"` (never the author, never you).
 
 ## G6: Runtime guardrails
 
@@ -92,9 +92,9 @@ Review `security-review.md` against the actual production configuration/build: p
 
 ## After release
 
-- Record the deploy as evidence: `npx aisdlc-cli evidence <slug> --label deploy -- <deploy or smoke command>`.
+- Record the deploy as evidence: `npx aisdlc evidence <slug> --label deploy -- <deploy or smoke command>`.
 - Schedule the guardrails review (`review_after_days`). Budget breaches are new deltas, not silent tuning.
-- Run `npx aisdlc-cli next <slug>`; when it says DONE, load `aisdlc-retro`.
+- Run `npx aisdlc next <slug>`; when it says DONE, load `aisdlc-retro`.
 
 ## Smells to refuse
 
@@ -103,5 +103,5 @@ Review `security-review.md` against the actual production configuration/build: p
 - **Guardrail numbers invented to satisfy the gate.** `error_rate_pct: 1.0` is worthless if the service normally sits at 0.9 or at 3. Derive every budget from a baseline measurement or a stated SLO, and say which.
 - **A kill switch nobody can reach.** Name the flag, say who can flip it, and confirm it exists in the deployed config — a `kill_switch:` key pointing at a flag that was never created is a false sense of safety.
 - **A runbook written from memory.** Symptoms come from the alerts and the failure modes you actually observed; "contact the team" is not an escalation path without a name or rotation.
-- **Deploying without recording it.** The deploy command run through `aisdlc-cli evidence` is the last piece of proof the whole feature has; skip it and the chain breaks at the finish line.
+- **Deploying without recording it.** The deploy command run through `aisdlc evidence` is the last piece of proof the whole feature has; skip it and the chain breaks at the finish line.
 - **Calling the feature DONE before `aisdlc next` says so.** G4 green is not shipped.

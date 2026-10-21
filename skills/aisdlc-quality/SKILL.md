@@ -16,7 +16,7 @@ The mechanical complement to `aisdlc-craft` (judgment) and `aisdlc-ponytail` (sc
 ## 0. Companion resolution (silent, every session)
 
 1. If a skill named `code-quality-tools` is available (Claude Code plugin `ansh-other-skills@ansh-other-skills`, a `.agents/skills/code-quality-tools/SKILL.md` copy, or any harness that reads SKILL.md), invoke it for the full tool matrix, the language-specific reference files, and the complete fix sequence. Then apply §2 of this file.
-2. If not installed, apply §1-§2 below. Say once per session: "official `code-quality-tools` not installed; using aisdlc's embedded distillation. Install with `npx aisdlc-cli addon quality-tools`."
+2. If not installed, apply §1-§2 below. Say once per session: "official `code-quality-tools` not installed; using aisdlc's embedded distillation. Install with `npx aisdlc addon quality-tools`."
 3. Never install anything without asking.
 
 ## 1. Embedded distillation
@@ -29,7 +29,7 @@ The mechanical complement to `aisdlc-craft` (judgment) and `aisdlc-ponytail` (sc
 
 ## 2. The aisdlc part: tools advise, the CLI gates
 
-1. **Evidence comes from `aisdlc-cli evidence`, nothing else.** A lint or typecheck run only counts for G3 when wrapped: `npx aisdlc-cli evidence <slug> --label quality -- <command>`. A green linter output pasted in chat is not evidence.
+1. **Evidence comes from `aisdlc evidence`, nothing else.** A lint or typecheck run only counts for G3 when wrapped: `npx aisdlc evidence <slug> --label quality -- <command>`. A green linter output pasted in chat is not evidence.
 2. **Findings route, they don't auto-apply.** A detect-only finding becomes (a) a fix task in `tasks.md`, (b) an `aisdlc-delta` if it reveals the spec was wrong, or (c) a review finding in `acceptance.md`. A mutating tool may only run on the task's blast radius - a repo-wide `--fix` inside a BUILD task is scope creep with a commit attached.
 3. **Deletion needs confirmation, then evidence.** knip/vulture candidates are candidates until a human-checked dynamic-reference pass says otherwise; the deletion still has to survive the full evidence run.
 4. **Secrets are the CLI's job.** G3's secrets scan runs inside `aisdlc gate G3`; bandit/semgrep findings complement it and route as findings.
@@ -41,7 +41,7 @@ A green lint/CVE scan does not verify authorization, CSRF, JWTs or runtime contr
 
 ## Smells to refuse
 
-- Pasting a linter's output in chat and calling it evidence. Wrap the run: `npx aisdlc-cli evidence <slug> --label quality -- <command>`.
+- Pasting a linter's output in chat and calling it evidence. Wrap the run: `npx aisdlc evidence <slug> --label quality -- <command>`.
 - Claiming a detect-only tool autofixed something, or a mutating tool "just reformatted one line" repo-wide inside a task.
 - Running a repo-wide `--fix` during a BUILD task. The blast radius is the task's requirement, nothing more; everything else is scope creep with a commit attached.
 - Auto-applying a finding without routing it. Detect-only output becomes a task, a delta, or a review finding — never a silent edit.

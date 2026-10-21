@@ -9,7 +9,7 @@ import { handleRequest, TOOLS } from "../src/mcp.js";
 
 const cli = fileURLToPath(new URL("../bin/aisdlc.js", import.meta.url));
 const api = {
-  name: "aisdlc-cli",
+  name: "aisdlc",
   version: "0.0.0-test",
   next: (feature) => ({ feature: feature || "demo", state: "BUILD", owner: "agent" }),
   status: () => [{ feature: "demo", state: "BUILD" }],
@@ -69,7 +69,7 @@ test("the stdio loop answers a real client line by line", (t) => {
   assert.equal(session.status, 0, session.stderr);
   const lines = session.stdout.trim().split("\n").map((l) => JSON.parse(l));
   assert.deepEqual(lines.map((l) => l.id), [1, 2, null, 3], "the notification produces no line; the parse error answers with id null");
-  assert.equal(lines[0].result.serverInfo.name, "aisdlc-cli");
+  assert.equal(lines[0].result.serverInfo.name, "aisdlc");
   assert.deepEqual(lines[1].result.tools.map((t) => t.name), ["aisdlc_next", "aisdlc_status"]);
   assert.equal(lines[2].error.code, -32700);
   assert.equal(lines[3].result.isError, false);

@@ -61,7 +61,8 @@ const COMPANIONS = companionIds();
 // `check` takes a noun; gates and lanes and kinds are positional args that follow a real verb.
 const CMD_NOUNS = new Set(["spec", "delta", "all", "json", "auto", "harness", "lane", "link", "label", "kind", "by", "note", "force", "cwd", "task", "skill"]);
 const NON_SKILL_TOKENS = new Map([
-  ["aisdlc-cli", "the npm package name, not a skill"],
+  ["aisdlc", "the npm package name, not a skill"],
+  ["aisdlc-cli", "the package name before 0.3.0; legal only in history documents"],
   ["aisdlc-site", "the Astro site package name"],
   ["aisdlc-json", "the project marker file (aisdlc.json)"],
   ["aisdlc-specific", "prose: the phrase 'not aisdlc-specific', not a skill name"],
@@ -286,7 +287,7 @@ for (const file of claimFiles) {
       ...[...text.matchAll(/`[^`\n]*`/g)].map((m) => m[0]),
     ].join("\n");
     const verbs = new Set();
-    for (const m of code.matchAll(/npx aisdlc-cli\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
+    for (const m of code.matchAll(/npx aisdlc\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
     for (const m of code.matchAll(/(?:^|[\s$>])aisdlc\s+([a-z][a-z-]*)/gm)) verbs.add(m[1]);
     for (const v of verbs) {
       if (v === "cli") continue;

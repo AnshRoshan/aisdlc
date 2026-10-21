@@ -8,7 +8,7 @@ const SKILL_COUNT = getSkills().length;
 const STEPS = [
   ["install", "Install into the repo you are already in", `cd /path/to/your/repo
 <span class="p">npx skills add AnshRoshan/aisdlc</span>        <span class="c"># the skills, into every harness it finds</span>
-<span class="c"># the CLI and the process tree, from a clone until aisdlc-cli is on npm:</span>
+<span class="c"># the CLI and the process tree, from a clone until aisdlc is on npm:</span>
 git clone https://github.com/AnshRoshan/aisdlc
 <span class="p">node aisdlc/packages/cli/bin/aisdlc.js init</span>`,
    "This writes the skills into your harness's skill directories, a `docs/` process tree and an `aisdlc.json` marker. Claude Code can take the plugin instead: `/plugin marketplace add AnshRoshan/aisdlc`, then `/plugin install aisdlc@aisdlc`, which also brings the guard mod and the `/aisdlc-next`, `/aisdlc-status` and `/aisdlc-report` commands. Every `aisdlc` command below is that same binary, whichever way you got it."],

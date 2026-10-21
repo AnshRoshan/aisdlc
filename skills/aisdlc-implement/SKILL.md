@@ -14,9 +14,9 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
 
 ## Before touching code
 
-1. `npx aisdlc-cli next <slug> --json` → confirm state is BUILD and read `nextTask`. If a `handoff.md` is newer than the last evidence, read it for gotchas.
+1. `npx aisdlc next <slug> --json` → confirm state is BUILD and read `nextTask`. If a `handoff.md` is newer than the last evidence, read it for gotchas.
 2. **Isolated workspace.** Start the feature on its own branch — `git switch -c feat/<slug>`, or a worktree when the harness supports it (`git worktree add ../<slug> -b feat/<slug>`). One feature, one branch, and never the tree where something else was half-finished; the diff a reviewer reads must contain only this feature.
-3. **First task only — prove the baseline and record where you started.** Record `git rev-parse HEAD` as `--label baseline-commit`, then run `npx aisdlc-cli evidence <slug> --label baseline -- <full test command>`. Keep the tree unchanged between runs; both records identify the starting baseline. Green baseline: proceed. Red baseline: **stop and report it as a pre-existing defect** — it is not your regression and it is not yours to fix inside this task. Ask whether to file it as its own `quick` feature first. Building on a red baseline makes every later failure ambiguous.
+3. **First task only — prove the baseline and record where you started.** Record `git rev-parse HEAD` as `--label baseline-commit`, then run `npx aisdlc evidence <slug> --label baseline -- <full test command>`. Keep the tree unchanged between runs; both records identify the starting baseline. Green baseline: proceed. Red baseline: **stop and report it as a pre-existing defect** — it is not your regression and it is not yours to fix inside this task. Ask whether to file it as its own `quick` feature first. Building on a red baseline makes every later failure ambiguous.
 4. Read `docs/taste.md` (laziness level, style, DoD), `docs/glossary.md`, and the requirement(s) referenced by the task. **Quote the SHALL line and the scenario you are implementing.**
 5. Identify the seam from the task's `{seam:}` or the plan. The test attaches there and only there.
 6. **Trace the flow end to end** through the code the change touches (callers, callees, tests, migrations). Understanding is never lazy.
@@ -38,15 +38,15 @@ You are a careful engineer with a stranger reviewing your work. Every claim you 
    `file:line`, symbols worth reusing, gotchas. The map is the deliverable; the writing stays on the
    main thread.
 1. **Red:** write the smallest test that fails for the right reason, at the seam, named after the scenario (`Scenario: ...`). Expected values come from the spec or a worked example, never from re-running the code under test (no tautologies). Run it and record:
-   `npx aisdlc-cli evidence <slug> --task T<n> --label red -- <test command>`
+   `npx aisdlc evidence <slug> --task T<n> --label red -- <test command>`
    (a non-zero exit is expected and is recorded honestly). Read the failure message; it must be the assertion you meant, not a syntax error.
 2. **Ladder:** load `aisdlc-ponytail` (or the official `ponytail`). Does the repo already have it? stdlib? platform? installed dependency? one line? Pick the highest rung that turns the test green while respecting the never-lazy list (trust boundaries, data loss, security, a11y, anything the spec says).
 3. **Craft pass:** load `aisdlc-craft` (or the official `code-craft`) and run the smell→fix table over the touched lines only - honest types, no dead code, no swallowed errors. Out-of-scope mess gets flagged for review, not fixed in passing.
 4. **Green:** write the minimum code to pass. Run:
-   `npx aisdlc-cli evidence <slug> --task T<n> --label green -- <test command>`
+   `npx aisdlc evidence <slug> --task T<n> --label green -- <test command>`
 5. **Refactor:** only with the suite green, only inside the files this task touched, only to remove duplication or clarify names from the glossary; re-run evidence if you touched behaviour. Broader refactors are review findings or new tasks.
 6. **Check off:** change `- [ ] T<n>` to `- [x] T<n>` in `tasks.md`. Do not reorder or delete tasks.
-7. **Secrets:** `npx aisdlc-cli scan` before you finish. Any finding blocks the task.
+7. **Secrets:** `npx aisdlc scan` before you finish. Any finding blocks the task.
 8. **Verify before you claim** (the gate function):
    - IDENTIFY the command that proves the claim → RUN it fresh, in full → READ the whole output and the exit code → only THEN state the claim, with the evidence file name.
    - Any of "should pass", "probably works", "looks good" in your draft = go back to RUN.
@@ -95,15 +95,15 @@ next → BUILD, nextTask "T3 [R:Export CSV] stream rows without buffering the wh
 
 baseline (first task of feature)  evidence/...-baseline.json      exit 0
 quote: "WHEN /export is called with >10k rows THE SYSTEM SHALL stream ..." + Scenario: large export
-red    npx aisdlc-cli evidence demo --task T3 --label red -- npm test -- export   exit 1 (asserted row cap)
+red    npx aisdlc evidence demo --task T3 --label red -- npm test -- export   exit 1 (asserted row cap)
 ladder rung 2: the repo already has a rowIterator util → reuse it, no new dependency
 craft: touched lines only — one generator, honest types, no swallowed errors
-green  npx aisdlc-cli evidence demo --task T3 --label green -- npm test -- export  exit 0
-refactor → re-run evidence → - [x] T3 in tasks.md → npx aisdlc-cli scan → clean
+green  npx aisdlc evidence demo --task T3 --label green -- npm test -- export  exit 0
+refactor → re-run evidence → - [x] T3 in tasks.md → npx aisdlc scan → clean
 report: T3 done · SHALL quoted · files: src/export.ts, test/export.test.ts ·
         evidence: ...-red.json, ...-green.json · re-run: npm test -- export
 ```
 
 ## When all tasks are checked
 
-Run `npx aisdlc-cli next <slug>`. State should be VERIFY. Hand off to `aisdlc-verify`.
+Run `npx aisdlc next <slug>`. State should be VERIFY. Hand off to `aisdlc-verify`.

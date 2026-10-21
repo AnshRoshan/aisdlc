@@ -12,7 +12,7 @@ green G3/G4 alone does not establish security readiness.
 2. Use authorized local/staging fixtures. Ask before production/external scans, destructive operations,
    real-user data, new tools or major upgrades. No secret values in commands/reports/logs/provider calls.
 3. Review every ID; scope fixes and record pre-existing weaknesses separately. Record checks with
-   `npx aisdlc-cli evidence <slug> --label security -- <command>` and suites with `--label full`.
+   `npx aisdlc evidence <slug> --label security -- <command>` and suites with `--label full`.
    Read errors/skips; retain red evidence. Negative tests reach real boundaries, not UI/permissive mocks.
 
 ## Control matrix
@@ -84,5 +84,5 @@ Write `docs/features/<slug>/security-review.md` (verifier prepares; reviewer aud
   Human risk decisions never relabel unverified checks VERIFIED. Lint alone is not "zero vulnerabilities".
 
 Link this report with bullets in `acceptance.md` Reviewer notes; keep its matrix outside scenario rows
-(G4 parses tables as scenario evidence). Reopen blocking tasks and run `npx aisdlc-cli next <slug>`.
+(G4 parses tables as scenario evidence). Reopen blocking tasks and run `npx aisdlc next <slug>`.
 Report CLI state separately; it does not automatically assess this report.

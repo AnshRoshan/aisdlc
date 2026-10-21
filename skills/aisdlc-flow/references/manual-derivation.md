@@ -1,6 +1,6 @@
 # Deriving the state by hand
 
-Read this only when `npx aisdlc-cli` cannot run: no network, no Node, a restricted sandbox. Do not
+Read this only when `npx aisdlc` cannot run: no network, no Node, a restricted sandbox. Do not
 stall and do not guess. Say "derived manually; CLI unavailable", then use this order.
 
 1. No `docs/brief.md` and empty `spec.md` → `DISCOVER`.

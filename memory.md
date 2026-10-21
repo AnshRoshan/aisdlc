@@ -16,7 +16,9 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-Watch the `v0.2.1` publish run: if npm rejects the OIDC identity, add this repo and workflow as a trusted publisher on the npm package page and re-run; the `NPM_TOKEN` path exists but publishes unsigned. Then confirm `npm view aisdlc-cli version` answers 0.2.1 and the GitHub release points at the same commit.
+Publish as `aisdlc@0.3.0` from `packages/cli` with `npm publish --access public` - no `--provenance`: a local publish has no OIDC identity provider and npm refuses with `Automatic provenance generation not supported for provider: null`. Provenance belongs to the CI path; register this repo and `publish.yml` as a trusted publisher on the npm package page afterwards so 0.3.1 onward carries it automatically.
+
+Then I cut `v0.3.0`, create the GitHub release, confirm the registry and Pages, and close T2, T3 and T4.
 
 T20 needs a runner and real model runs before any number is published. T13 needs a Codex or Copilot client that actually accepts a catalog file.
 

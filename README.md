@@ -10,7 +10,7 @@
 
 [![CI](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml)
 [![skills](https://img.shields.io/badge/agent_skills-20-b1e57c)](#the-20-skills)
-[![Node](https://img.shields.io/node/v/aisdlc-cli)](packages/cli/package.json)
+[![Node](https://img.shields.io/node/v/aisdlc)](packages/cli/package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A process kit for AI-assisted engineering that installs into any coding agent.
@@ -57,8 +57,8 @@ git clone https://github.com/AnshRoshan/aisdlc
 node aisdlc/packages/cli/bin/aisdlc.js init --harness all
 ```
 
-Not published to the registry yet; `aisdlc-cli` is cut on the next release, then this cell becomes
-`npx aisdlc-cli init`. The two paths beside it install the skills today, and the CLI above installs
+Not published to the registry yet; `aisdlc` is cut on the next release, then this cell becomes
+`npx aisdlc init`. The two paths beside it install the skills today, and the CLI above installs
 skills, instructions, slash commands **and** the read-only subagents, detected for your harness.
 
 </td>
@@ -71,7 +71,7 @@ skills, instructions, slash commands **and** the read-only subagents, detected f
 use aisdlc-brainstorm, I want to build payment retries
 ```
 
-> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx aisdlc-cli next`, and the agent obeys the disk, not the chat.
+> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx aisdlc next`, and the agent obeys the disk, not the chat.
 
 ## Where to start
 
@@ -101,7 +101,7 @@ use aisdlc-brainstorm, I want to build payment retries
   <img src="assets/flow-dark.svg" alt="Nine states (discover, spec, plan, tasks, build, verify, accept, release, operate) with gates G1-G6 hanging over their transitions." width="100%">
 </picture>
 
-The agent runs `npx aisdlc-cli next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
+The agent runs `npx aisdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
 
 ### Hard mode: the Claude Code mod
 
@@ -241,7 +241,7 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 </tr>
 </table>
 
-Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx aisdlc-cli addon all` installs them; works without them.
+Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx aisdlc addon all` installs them; works without them.
 
 ## Repo layout
 

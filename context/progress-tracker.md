@@ -38,5 +38,5 @@ Current phase: release - v0.2.1 to npm · Current goal: publish with provenance,
 - 2026-10-21: export, verifier, signer adapter and MCP were implemented before their tests, then tested in the same session. Recorded as finding F6; do not repeat it.
 - 2026-10-20: `main` = `origin/main` at `b14ebf2`; `claude plugin validate .` passes.
 - Pages: `deploy site` is green on main as of 2026-10-21; it had been failing since 2026-10-15 on Node 20.
-- `aisdlc-cli` is not on npm; the publish run failed with `ENEEDAUTH`.
+- `aisdlc` is not on npm; the publish run failed with `ENEEDAUTH`.
 - The `v0.2.0` tag points at `25a6ff9`, one commit behind HEAD, and has no GitHub release.

@@ -22,7 +22,7 @@ Users: the maintainer shipping the kit; contributors changing the corpus; develo
 
 ### Requirement: Publish a release
 
-WHEN a `v*` tag is pushed and the CLI suite passes THE SYSTEM SHALL publish `aisdlc-cli` to the npm registry with provenance and create a GitHub release pointing at the tagged commit.
+WHEN a `v*` tag is pushed and the CLI suite passes THE SYSTEM SHALL publish `aisdlc` to the npm registry with provenance and create a GitHub release pointing at the tagged commit.
 
 #### Scenario: Publish succeeds
 - GIVEN trusted publishing is configured and the test suite passes

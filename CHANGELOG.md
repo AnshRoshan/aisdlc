@@ -4,6 +4,14 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-21
+
+### Package name
+- The npm package is `aisdlc`, not `aisdlc-cli`. The suffix bought nothing and appeared 234 times across 39 files, almost all of it skill text telling an agent to run `npx aisdlc-cli next`; every install string is now shorter and matches the repo, the bin and the plugin id. History keeps the old name on purpose: `docs/RESEARCH.md`, `docs/AUDIT.md` and the entries below describe what was true when they were written.
+- The corpus checker moved with the name. Its rule for verifying documented commands reads `npx aisdlc <verb>`, and that regex is the reason the rename is a checked change rather than a search and replace: a stale pattern there would silently stop checking that every documented command exists.
+- Local `npm publish --provenance` fails with `Automatic provenance generation not supported for provider: null`. That is not a defect in this package: provenance needs the CI identity, which `publish cli` already requests via `id-token: write`. First publish is unsigned; versions after it can carry provenance from the workflow.
+- `v0.2.1` was tagged and never published. It stays where it is, superseded by `v0.3.0`, because a tag is history and moving one is worse than an untidy sequence.
+
 ## [0.2.1] - 2026-10-21
 
 First published release. The CLI ships to npm as `aisdlc-cli` with provenance, and the process it

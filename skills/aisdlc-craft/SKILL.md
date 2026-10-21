@@ -16,7 +16,7 @@ Ponytail decides **whether** the code needs to exist. Craft decides how the code
 ## 0. Companion resolution (silent, every session)
 
 1. If a skill named `code-craft` is available (Claude Code plugin `ansh-other-skills@ansh-other-skills`, a `.agents/skills/code-craft/SKILL.md` copy, or any harness that reads SKILL.md), invoke it for the full ladder, smell→fix tables, and reference files (types, control-flow, naming, organization, refactoring catalog, tests). Then apply §3 of this file.
-2. If not installed, apply §1-§3 below. Say once per session: "official `code-craft` not installed; using aisdlc's embedded distillation. Install with `npx aisdlc-cli addon code-craft`."
+2. If not installed, apply §1-§3 below. Say once per session: "official `code-craft` not installed; using aisdlc's embedded distillation. Install with `npx aisdlc addon code-craft`."
 3. Never install anything without asking.
 
 ## 1. The ladder (climb before writing)

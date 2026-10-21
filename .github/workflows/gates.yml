@@ -20,7 +20,7 @@ on:
         type: string
         default: ""
       version:
-        description: "aisdlc-cli version to run"
+        description: "aisdlc version to run"
         required: false
         type: string
         default: "latest"
@@ -51,7 +51,7 @@ jobs:
           if [ -f packages/cli/bin/aisdlc.js ]; then
             node packages/cli/bin/aisdlc.js ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           else
-            npx --yes "aisdlc-cli@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+            npx --yes "aisdlc@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           fi
       # SARIF upload arrives with `aisdlc export --format sarif`; a findings file that does not exist
       # yet must not become a step that silently uploads nothing.

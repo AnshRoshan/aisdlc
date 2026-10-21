@@ -12,6 +12,7 @@ _Last updated: 2026-10-21_
 - Enforcement is tested and live: commit-bound approvals, `arsdlc ci`, per-harness enforcement levels in `doctor`, the reusable gate workflow, `antigravity` and `devin` targets. Evidence exports as in-toto/DSSE plus SARIF and verifies offline. `arsdlc mcp --stdio` serves read-only state.
 - 87/87 CLI tests, 12/12 guard tests, 6/6 site tests, corpus check green on 23 commands, secrets scan clean, site builds 23 pages, plugin validation passes.
 - Still open externally: there is no GitHub release for any tag, npm trusted publishing is not registered (so CI publish would still need `NPM_TOKEN`), and `aisdlc-cli`/`aisdlc`/`@anshroshan/aisdlc` are 404 - the CHANGELOG claimed 0.2.1 shipped to npm and that claim is now corrected.
+- npm's Insights score the package 77 on Supply Chain Security (Vulnerability/Quality/Maintenance/License 100/88/100/100). It is a trust-maturity reading, not a finding: no build attestation, human laptop publish, minutes-old single-maintainer package with zero downloads and zero dependents. `0.0.0-stage` scoring 51 is npm's own stub, not us. The two levers are provenance from CI and a GitHub release; the README now carries the reproducible check that covers the gap meanwhile (all 38 tarball files blob-match `v0.3.0`).
 
 ## Next step
 

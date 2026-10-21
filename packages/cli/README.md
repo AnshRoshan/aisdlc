@@ -99,6 +99,33 @@ nothing for `arsdlc`, that tarball came from a laptop and not from CI, so compar
 against the [CHANGELOG](https://github.com/AnshRoshan/arsdlc/blob/main/CHANGELOG.md) and the matching git
 tag; the CI trusted-publisher path is one npm-side setting away from being the default.
 
+## Verifying what you installed
+
+`arsdlc` has **zero runtime dependencies** and **no install-time hooks** - nothing runs when you `npm i`
+it. `prepack` fires when the maintainer packs, not when you install; a clean consumer install has no
+`preinstall`, `install` or `postinstall` entry.
+
+npm's registry signature proves the bytes came from the registry, not which build made them, and 0.3.0 was
+packed on a laptop so it carries no build attestation. `gitHead` names the commit it was packed from, and
+that commit is public, so the tarball is checkable without trusting anyone's signature. From a clone:
+
+```bash
+C=$(git rev-parse "v0.3.0^{commit}")      # == the gitHead npm recorded for 0.3.0
+npm pack arsdlc@0.3.0 && tar -xzf arsdlc-0.3.0.tgz
+for f in $(cd package && find . -type f | sed 's|^\./||'); do
+  case "$f" in
+    src/*|bin/*|README.md|package.json) p="packages/cli/$f" ;;
+    *) p="$f" ;;                     # skills/, agents/, LICENSE live at the repo root
+  esac
+  [ "$(git hash-object "package/$f")" = "$(git rev-parse "$C:$p")" ] || echo "differs: $f"
+done
+```
+
+`packages/cli/skills/` is a generated copy (`node scripts/sync-skills.mjs`) and is not tracked in git,
+which is why the tarball's skills map to the root. Run against the live 0.3.0 tarball on 2026-10-21 this
+compared 38 files and printed nothing. From the first CI publish with `--provenance`,
+`npm audit signatures` reports an attestation and this section gets shorter.
+
 ## Layout it creates
 
 ```

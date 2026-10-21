@@ -66,7 +66,11 @@ setting is the last thing standing between this name and provenance.
 </tr>
 </table>
 
-`arsdlc init` detects **Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop and OpenCode** (plus the legacy `gemini-cli` and `windsurf` layouts, which still install and print a retirement notice), writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `arsdlc.json` marker. Then talk to your agent:
+`arsdlc init` detects **Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop and OpenCode** (plus the legacy `gemini-cli` and `windsurf` layouts, which still install and print a retirement notice), writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `arsdlc.json` marker.
+
+The package has **zero runtime dependencies and no install-time hooks**; `gitHead` pins the tarball to a
+public commit and [packages/cli/README.md](packages/cli/README.md#verifying-what-you-installed) gives the
+loop that compares all 38 files against the tag. Then talk to your agent:
 
 ```bash
 use arsdlc-brainstorm, I want to build payment retries

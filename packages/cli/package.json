@@ -1,7 +1,7 @@
 {
   "name": "arsdlc",
-  "version": "0.3.0",
-  "description": "Agents write code, arsdlc runs the process. Command: arsdlc (npx arsdlc). Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
+  "version": "0.3.1",
+  "description": "Agents write code, arsdlc runs the process. 20 harness-agnostic Agent Skills + a zero-dependency CLI: EARS specs, evidence gates G1-G6, hash-chained approvals.",
   "type": "module",
   "bin": {
     "arsdlc": "bin/arsdlc.js"
@@ -24,22 +24,41 @@
   },
   "keywords": [
     "agent-skills",
+    "ai-coding",
     "claude-code",
     "codex",
     "cursor",
     "gemini-cli",
     "copilot",
+    "opencode",
     "sdlc",
-    "ears",
     "spec-driven",
+    "ears",
+    "requirements",
+    "plan",
     "gates",
-    "evidence"
+    "evidence",
+    "approval",
+    "segregation-of-duties",
+    "attestation",
+    "in-toto",
+    "sarif",
+    "audit"
   ],
+  "author": {
+    "name": "Ansh Roshan",
+    "email": "ianshroshan@gmail.com",
+    "url": "https://github.com/AnshRoshan"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AnshRoshan/arsdlc.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/AnshRoshan/arsdlc#readme"
+  "bugs": {
+    "url": "https://github.com/AnshRoshan/arsdlc/issues"
+  },
+  "homepage": "https://anshroshan.github.io/arsdlc/",
+  "changelog": "https://github.com/AnshRoshan/arsdlc/blob/main/CHANGELOG.md"
 }

@@ -23,7 +23,7 @@ If you have not run the command in this session and recorded it, you cannot say 
 ## The gate function (before any status claim, every time)
 
 1. **IDENTIFY** the command that would prove the claim.
-2. **RUN** it, fresh and complete, through `npx @anshroshan/arsdlc evidence` so the run is recorded.
+2. **RUN** it, fresh and complete, through `npx arsdlc evidence` so the run is recorded.
 3. **READ** the entire output: exit code, failure count, skipped count, warnings that are really errors.
 4. **VERIFY** the output supports the claim. If not, state the actual status with the evidence file. If yes, state the claim *with* the evidence file.
 5. Only then make the claim.
@@ -37,7 +37,7 @@ If you have not run the command in this session and recorded it, you cannot say 
 | migration safe | applied to a copy and rolled back, recorded | "it's just an add column" |
 | subagent finished | diff on disk + its evidence files | the subagent said "done" |
 
-## What G3 checks (`npx @anshroshan/arsdlc gate G3 <slug>`)
+## What G3 checks (`npx arsdlc gate G3 <slug>`)
 
 1. **Secrets scan clean** across tracked and non-ignored files (9 detector families; placeholders ignored).
 2. **A run was recorded**: at least one `evidence/*.json` with a real command and an exit code.
@@ -57,14 +57,14 @@ one of them is a choice:
 | `none-by-design` | latest full run green, or latest recorded run green if no full run exists; waiver printed | docs site, IaC glue, a spike - a repo that deliberately ships no runner, with the reason in `docs/taste.md` |
 | `none-yet` | the recorded `full` run, same as configured | the honest state when tests simply were not written. It is not an escape hatch; write them |
 
-Set it in `arsdlc.json`; `none-by-design` also requires a non-placeholder `test.reason`. Check with `npx @anshroshan/arsdlc doctor`. Never reach for `none-by-design` to
+Set it in `arsdlc.json`; `none-by-design` also requires a non-placeholder `test.reason`. Check with `npx arsdlc doctor`. Never reach for `none-by-design` to
 make a gate go green: G4's human sign-off is what carries the risk, so say out loud that you are
 handing the trade-off to a person.
 
 ## Procedure
 
 1. Run the **whole** suite, not just the tests you wrote:
-   `npx @anshroshan/arsdlc evidence <slug> --label full -- <full test command from plan.md Verification strategy>`
+   `npx arsdlc evidence <slug> --label full -- <full test command from plan.md Verification strategy>`
 2. Run the plan's **smoke path** end to end — the exact commands a stranger would run — and record it as `--label smoke`. Unit tests green with a broken entrypoint is the classic fake-green, and the smoke path is what catches it.
 3. Run kind-specific verification and record each as evidence with a descriptive label:
 
@@ -80,8 +80,8 @@ handing the trade-off to a person.
    | lib | API contract tests, semver check, back-compat test against the previous version |
 
 4. Static checks the repo already has (typecheck, lint, build): run and record them too; a green suite on code that does not compile is not green.
-5. `npx @anshroshan/arsdlc scan`. Findings block; fix and re-run.
-6. `npx @anshroshan/arsdlc gate G3 <slug>`. Paste the output verbatim.
+5. `npx arsdlc scan`. Findings block; fix and re-run.
+6. `npx arsdlc gate G3 <slug>`. Paste the output verbatim.
 7. Scenario sweep: for every `#### Scenario:` in the spec, name the evidence file that exercises it. Missing one? That is a missing test: go back to BUILD via a new task, do not proceed.
 8. Write `acceptance.md` rows for each spec scenario, linking the evidence file names (see `arsdlc-review`).
 
@@ -91,7 +91,7 @@ handing the trade-off to a person.
 claim:  "the export flow works"
 wrong:  "I ran the tests earlier and they were green."
 right:  IDENTIFY → npm test -- export
-        RUN      → npx @anshroshan/arsdlc evidence demo --label full -- npm test
+        RUN      → npx arsdlc evidence demo --label full -- npm test
         READ     → exit 0, 84 passed, 0 failed, 0 skipped
         CLAIM    → "Full suite green: 84 passed (evidence/2026-09-27T10-12-03-full.json).
                     Smoke path ran: curl -s localhost:3000/export returns 200 CSV
@@ -116,4 +116,4 @@ Write `docs/features/<slug>/security-review.md`; report VERIFIED, FAILED, NOT_AP
 
 ## Hand off
 
-When G3 is green, run `npx @anshroshan/arsdlc next <slug>`; the state moves to ACCEPT. Load `arsdlc-review`. Prefer a fresh session for the review (segregation of duties); if you must continue, say so.
+When G3 is green, run `npx arsdlc next <slug>`; the state moves to ACCEPT. Load `arsdlc-review`. Prefer a fresh session for the review (segregation of duties); if you must continue, say so.

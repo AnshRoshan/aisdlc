@@ -14,7 +14,7 @@ Shipping is a reversible decision or it is a gamble. This skill makes it reversi
 
 ## Lane check first
 
-`npx @anshroshan/arsdlc next <slug> --json` → read `lane`. Lanes `spike` and `quick` skip G5/G6: spike finishes after G3, quick after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx @anshroshan/arsdlc lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
+`npx arsdlc next <slug> --json` → read `lane`. Lanes `spike` and `quick` skip G5/G6: spike finishes after G3, quick after G4. If a quick-lane change turns out to need a flag, a migration contract step, or a runbook entry, the lane was wrong: `npx arsdlc lane <slug> standard` and continue here. Regulated lane: two approvers on G5 and a **rollback rehearsal** recorded as evidence (`--label rollback-drill`) before approval is requested.
 
 ## G5: Release approval
 
@@ -43,7 +43,7 @@ Approved-by: ______  Date: ______
 ```
 
 G5 requires concrete `## Rollback` steps and a human approval bound to the current spec, acceptance and rollout:
-`npx @anshroshan/arsdlc approve G5 <slug> --by "<release owner>"` (never the author, never you).
+`npx arsdlc approve G5 <slug> --by "<release owner>"` (never the author, never you).
 
 ## G6: Runtime guardrails
 
@@ -92,9 +92,9 @@ Review `security-review.md` against the actual production configuration/build: p
 
 ## After release
 
-- Record the deploy as evidence: `npx @anshroshan/arsdlc evidence <slug> --label deploy -- <deploy or smoke command>`.
+- Record the deploy as evidence: `npx arsdlc evidence <slug> --label deploy -- <deploy or smoke command>`.
 - Schedule the guardrails review (`review_after_days`). Budget breaches are new deltas, not silent tuning.
-- Run `npx @anshroshan/arsdlc next <slug>`; when it says DONE, load `arsdlc-retro`.
+- Run `npx arsdlc next <slug>`; when it says DONE, load `arsdlc-retro`.
 
 ## Smells to refuse
 

@@ -19,7 +19,7 @@ Do not write code, scaffold files, run migrations, or invoke `arsdlc-implement` 
 ## Step 1: Look before you ask (2 minutes, silent)
 
 - Read `docs/constitution.md`, `docs/taste.md`, `docs/glossary.md`, `docs/brief.md` if they exist.
-- Run `npx @anshroshan/arsdlc status` (if the CLI is unavailable, list `docs/features/*/feature.json`). An existing feature may already own this request; if so, hand to `arsdlc-flow` and stop.
+- Run `npx arsdlc status` (if the CLI is unavailable, list `docs/features/*/feature.json`). An existing feature may already own this request; if so, hand to `arsdlc-flow` and stop.
 - Skim the code the request touches: entrypoints, existing flow, tests, recent `git log -20 --oneline`.
 - Note facts you found so you never ask the human for them.
 
@@ -35,7 +35,7 @@ Do not write code, scaffold files, run migrations, or invoke `arsdlc-implement` 
 Rules:
 - **Bounded measures the repo, not your familiarity.** If there is no existing flow to change, it is not `quick`.
 - **When in doubt, take the heavier lane.** Reaching for a lighter label to skip work *is* the doubt.
-- **The ratchet is one-way.** Hidden complexity discovered mid-task upgrades the lane: stop, say so, run `npx @anshroshan/arsdlc lane <slug> <lane>`. Nothing downgrades mid-task.
+- **The ratchet is one-way.** Hidden complexity discovered mid-task upgrades the lane: stop, say so, run `npx arsdlc lane <slug> <lane>`. Nothing downgrades mid-task.
 - A bug report is `quick` if it reproduces in one existing flow; otherwise it is `standard` with `arsdlc-debug` in the loop.
 
 Announce: "This looks **quick**: it changes the existing `/export` route only. I'll write a 2-requirement spec and skip plan approval. Override?"
@@ -72,9 +72,9 @@ Presenting the intent and starting work in the same message is skipping the gate
 ## Step 6: Route
 
 On yes:
-- `spike` → `npx @anshroshan/arsdlc new "<question>" --kind <kind> --lane spike`; write the question as the single requirement (`THE SYSTEM SHALL answer: <question>` with a scenario naming the measurement); run the probe with `npx @anshroshan/arsdlc evidence <slug> --label spike -- <command>`; write the answer and recommendation into `spec.md` §1. State becomes DONE once evidence exists.
-- `quick` → `npx @anshroshan/arsdlc new "<title>" --kind <kind> --lane quick`; load `arsdlc-spec` (compact mode).
-- `standard` / `regulated` → if `docs/brief.md` for this idea is missing load `arsdlc-discover`, else `npx @anshroshan/arsdlc new ... --lane <lane>` then `arsdlc-spec`. Brownfield repo? Load `arsdlc-brownfield` first.
+- `spike` → `npx arsdlc new "<question>" --kind <kind> --lane spike`; write the question as the single requirement (`THE SYSTEM SHALL answer: <question>` with a scenario naming the measurement); run the probe with `npx arsdlc evidence <slug> --label spike -- <command>`; write the answer and recommendation into `spec.md` §1. State becomes DONE once evidence exists.
+- `quick` → `npx arsdlc new "<title>" --kind <kind> --lane quick`; load `arsdlc-spec` (compact mode).
+- `standard` / `regulated` → if `docs/brief.md` for this idea is missing load `arsdlc-discover`, else `npx arsdlc new ... --lane <lane>` then `arsdlc-spec`. Brownfield repo? Load `arsdlc-brownfield` first.
 - Existing repo without `docs/taste.md`? Run `arsdlc-taste` once (≤6 questions) before the spec.
 - **Discovery may come back with a verdict you did not expect** — `spike first`, `defer`, or `do not build`. All four are legitimate exits. Report it, and do not open a feature folder to avoid an uncomfortable answer; the cheapest outcome of discovery is the one that stops the work.
 

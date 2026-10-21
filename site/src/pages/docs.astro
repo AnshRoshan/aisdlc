@@ -7,10 +7,9 @@ const SKILL_COUNT = getSkills().length;
 
 const STEPS = [
   ["install", "Install into the repo you are already in", `cd /path/to/your/repo
-<span class="p">npx skills add AnshRoshan/arsdlc</span>        <span class="c"># the skills, into every harness it finds</span>
-<span class="c"># the CLI and the process tree, from a clone until arsdlc is on npm:</span>
-git clone https://github.com/AnshRoshan/arsdlc
-<span class="p">node arsdlc/packages/cli/bin/arsdlc.js init</span>`,
+<span class="p">npx arsdlc init</span>                          <span class="c"># skills + instructions + commands, detected for your harness</span>
+<span class="c"># skills only, through the open skills CLI:</span>
+<span class="p">npx skills add AnshRoshan/arsdlc</span>`,
    "This writes the skills into your harness's skill directories, a `docs/` process tree and an `arsdlc.json` marker. Claude Code can take the plugin instead: `/plugin marketplace add AnshRoshan/arsdlc`, then `/plugin install arsdlc@arsdlc`, which also brings the guard mod and the `/arsdlc-next`, `/arsdlc-status` and `/arsdlc-report` commands. Every `arsdlc` command below is that same binary, whichever way you got it."],
   ["new", "Open a feature with a lane", `<span class="p">arsdlc new</span> "Payment retries" --kind backend --lane standard`,
    "Pick a lane: **spike** (a question), **quick** (bounded change), **standard** (new capability), **regulated** (money, PII, auth). The lane decides which gates apply, and it only moves up. `arsdlc kinds` prints what each kind has to verify."],

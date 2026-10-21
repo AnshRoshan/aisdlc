@@ -16,8 +16,8 @@ A retro that ends in feelings changes nothing. This one ends in diffs to the fil
 
 - `spec.md`, `plan.md`, `tasks.md`, `acceptance.md`, `deltas/*.md`, `evidence/*.json`, `approvals.json`, `handoff.md` if present.
 - `git log --stat` for the feature's commits; count files touched, lines added vs. deleted, dependencies added (`package.json`, lockfiles, `requirements*.txt`, `go.mod`...).
-- `npx @anshroshan/arsdlc audit <slug>` for the approval chain and stale approvals.
-- `npx @anshroshan/arsdlc report <slug>` (and `report` with no argument, for every feature at once) for the numbers: run count and pass rate, time on disk, whether the last full run predates the last code change, approvals that went stale, how the review scored, and the slowest gate-to-gap. Compute these; do not eyeball a directory listing.
+- `npx arsdlc audit <slug>` for the approval chain and stale approvals.
+- `npx arsdlc report <slug>` (and `report` with no argument, for every feature at once) for the numbers: run count and pass rate, time on disk, whether the last full run predates the last code change, approvals that went stale, how the review scored, and the slowest gate-to-gap. Compute these; do not eyeball a directory listing.
 - For incidents: the runbook, alerts, and the timeline the human gives you.
 
 ## Procedure (20 minutes, one pass)

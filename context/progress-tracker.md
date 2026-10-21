@@ -2,7 +2,7 @@
 
 The only file that updates constantly. States are mutually exclusive.
 
-Current phase: release - v0.2.1 to npm · Current goal: publish with provenance, create the release, then close the manifest and eval gaps that need a real client or a real run.
+Current phase: release - `arsdlc@0.3.0` is live on npm · Current goal: ship 0.3.1 with the corrected package metadata, create the GitHub release, register the npm trusted publisher for provenance, then close the manifest and eval gaps that need a real client or a real run.
 
 ## In progress
 
@@ -35,10 +35,12 @@ Current phase: release - v0.2.1 to npm · Current goal: publish with provenance,
 - 2026-10-21: 87/87 CLI tests, 12/12 guard tests, 6/6 site tests; corpus check PASS with 23 commands cross-checked; `arsdlc ci market-readiness` exits 0; eight evidence records on the feature, all green, and the acceptance rows cite the newest full run.
 - 2026-10-21: `arsdlc ci` with no argument fails on `docs/features/demo`, which is deliberately unfinished scaffolding. So this repo dogfoods the command in `ci.yml` scoped to `market-readiness`, and the reusable gate workflow keeps `workflow_call` plus `workflow_dispatch` instead of a `pull_request` trigger - a check that is red on its own fixture teaches people to ignore it.
 - 2026-10-21: renamed to `arsdlc` at identifier level (873 occurrences, 102 files, 20 skill folders, bin, guard module, `arsdlc.json`, both manifests). History docs keep `aisdlc` in prose; only their link targets were fixed after the checker found 30 dead ones. Unscoped `arsdlc` is free on npm, PyPI and GitHub.
-- 2026-10-21: the unscoped publish was refused - npm `403 Package name too similar to existing package ai-sdlc` (live, 138 versions, same category). Package is now `@anshroshan/arsdlc`; the bin, repo, plugin id and marker stay `arsdlc`. A registry 404 means unclaimed, not claimable.
+- 2026-10-21: the unscoped publish was refused - npm `403 Package name too similar to existing package ai-sdlc` (live, 138 versions, same category). Package was moved to `@anshroshan/arsdlc` for that one attempt; the scoped name was **never published** and the rename to `arsdlc` took the unscoped slug anyway. The bin, repo, plugin id and marker always stayed `arsdlc`. A registry 404 means unclaimed, not claimable.
+- 2026-10-21: `arsdlc@0.3.0` published from a laptop and is live (`latest` → 0.3.0). npm first parked the name at `0.0.0-stage` in a staged-release review, which cleared the same day; that hold is an anti-typosquat mechanism, not a rejection. No `--provenance`: a laptop has no OIDC identity, so `npm audit signatures` shows nothing for it.
+- 2026-10-21: package-UI pass for 0.3.1 - 205 scoped `npx @anshroshan/arsdlc` strings became `npx arsdlc`, `packages/cli/package.json` gained `author`, `bugs`, `changelog`, a Pages `homepage` and attestation-flavoured keywords, the CLI description was cut to one readable line, and the package README got badges plus an honest no-provenance note. The CHANGELOG entry that claimed 0.2.1 was the "first published release" as `aisdlc-cli` was false (404 on the registry) and is corrected rather than footnoted.
 - 2026-10-21: `v0.2.1` was tagged at `5bcbab6` and never published. `ci` was green on the tag, `deploy site` green on main, and `publish cli` failed with `E404` because the trusted publisher is not registered on npm yet (F-01, answered). Nothing is half-published: no version on the registry and no GitHub release, since that step follows a successful publish.
 - 2026-10-21: export, verifier, signer adapter and MCP were implemented before their tests, then tested in the same session. Recorded as finding F6; do not repeat it.
 - 2026-10-20: `main` = `origin/main` at `b14ebf2`; `claude plugin validate .` passes.
 - Pages: `deploy site` is green on main as of 2026-10-21; it had been failing since 2026-10-15 on Node 20.
-- `arsdlc` is not on npm; the publish run failed with `ENEEDAUTH`.
-- The `v0.2.0` tag points at `25a6ff9`, one commit behind HEAD, and has no GitHub release.
+- `arsdlc` is on npm: 0.3.0 live, no provenance. `aisdlc`, `aisdlc-cli` and `@anshroshan/aisdlc` are 404 and stay that way.
+- `v0.2.0` points at `25a6ff9` and `v0.2.1` at `5bcbab6`; both are superseded tags with no GitHub release, and no release exists for `v0.3.0` either.

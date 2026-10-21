@@ -69,7 +69,7 @@ Discovery ends in one of four outcomes, and you must say which one you are retur
 | verdict | when | what you do next |
 |---|---|---|
 | **build** | the problem is real, the riskiest assumption is cheap to test or already tested | write the brief, seed requirements, hand to `arsdlc-spec` |
-| **spike first** | the riskiest assumption is *not* tested and a probe would settle it | open a `spike` lane feature for the probe (`npx @anshroshan/arsdlc new ... --lane spike`); the main feature waits for the answer |
+| **spike first** | the riskiest assumption is *not* tested and a probe would settle it | open a `spike` lane feature for the probe (`npx arsdlc new ... --lane spike`); the main feature waits for the answer |
 | **defer** | real, but blocked by a date, a dependency, or something more important | write the brief anyway, mark it `status: deferred` in the brief, stop |
 | **do not build** | the workaround is fine, the rejection criteria are already met today, the assumption fails, or nobody will use it | write one short paragraph — what was believed, what was learned, what evidence killed it — into `docs/brief.md` under `## Verdict`, and stop. No feature folder. |
 
@@ -138,7 +138,7 @@ auth: ... · privacy: ... · performance: <number> · scale: <number> · durabil
 
 Then:
 1. Append new terms to `docs/glossary.md` (create it if missing: `# Glossary` then `- **term**: meaning`).
-2. For the **build** verdict only: run `npx @anshroshan/arsdlc new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet, paste the seed requirements into `spec.md` §3 and the non-functional needs into §4 Constraints, then hand off to `arsdlc-spec`.
+2. For the **build** verdict only: run `npx arsdlc new "<title>" --kind <kind> --lane <lane>` if the feature folder does not exist yet, paste the seed requirements into `spec.md` §3 and the non-functional needs into §4 Constraints, then hand off to `arsdlc-spec`.
 3. For **spike first**: open the spike feature and hand off to `arsdlc-brainstorm`'s spike path (or `arsdlc-spec` in spike mode). The main feature does not start until the probe reports.
 4. For **defer** / **do not build**: stop after the brief. Nothing downstream runs.
 5. Load `arsdlc-taste` once per project if `docs/taste.md` is missing (six questions max) — only on the `build` path.

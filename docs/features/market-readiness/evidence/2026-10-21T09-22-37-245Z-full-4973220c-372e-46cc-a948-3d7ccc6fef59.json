@@ -1,0 +1,24 @@
+{
+  "label": "full",
+  "task": null,
+  "command": "npm test",
+  "argv": [
+    "npm",
+    "test"
+  ],
+  "executedArgv": [
+    "npm",
+    "test"
+  ],
+  "cwd": ".",
+  "exitCode": 38,
+  "startedAt": "2026-10-21T09:22:37.245Z",
+  "durationMs": 290,
+  "outputSha256": "8d03c8de6bcebe2614f215ec42172efb5898cdf0475437f17b8f572bf4c4c934",
+  "outputTail": "npm error code ENOENT\nnpm error syscall open\nnpm error path D:\\SKILLS\\aisdlc\\package.json\nnpm error errno -4058\nnpm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open 'D:\\SKILLS\\aisdlc\\package.json'\nnpm error enoent This is related to npm not being able to find a file.\nnpm error enoent\nnpm error A complete log of this run can be found in: C:\\Users\\anshr\\AppData\\Local\\npm-cache\\_logs\\2026-10-21T09_22_37_411Z-debug-0.log\n",
+  "sourceSha256": "c588949e4d817b99c8de0b3bcb82c75d3fac74e8ea23019058d0b5ca01f12330",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "ab9e326c7762dc1e103dd19399eb988b5f09ea1234d31bb5ea57ec10bc93911a"
+}

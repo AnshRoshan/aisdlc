@@ -1,11 +1,16 @@
 # arsdlc
 
+[![npm](https://img.shields.io/npm/v/arsdlc.svg)](https://www.npmjs.com/package/arsdlc)
+[![downloads](https://img.shields.io/npm/dm/arsdlc.svg)](https://www.npmjs.com/package/arsdlc)
+[![Node](https://img.shields.io/node/v/arsdlc)](https://github.com/AnshRoshan/arsdlc/blob/main/packages/cli/package.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 **Agents write code. arsdlc runs the process.**
 
 A harness-agnostic process kit for AI-assisted engineering: twenty [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop, OpenCode and any agent that reads `AGENTS.md`; the retired `gemini-cli` and `windsurf` layouts still install and say so. Approvals bind to the artifact hash and to the commit you signed. Evidence exports as in-toto/DSSE and SARIF and verifies offline. Bring your own model and your own subscription; nothing leaves your machine.
 
 ```bash
-npx @anshroshan/arsdlc init            # installs skills + instructions into every harness it detects
+npx arsdlc init            # installs skills + instructions into every harness it detects
 ```
 
 or, skills only, via the open skills CLI:
@@ -30,15 +35,15 @@ npx skills add AnshRoshan/arsdlc
 ## Ten-minute tour
 
 ```bash
-npx @anshroshan/arsdlc init
-npx @anshroshan/arsdlc new "Magic link login" --kind backend
-npx @anshroshan/arsdlc next                              # → SPECIFY, load arsdlc-spec
+npx arsdlc init
+npx arsdlc new "Magic link login" --kind backend
+npx arsdlc next                              # → SPECIFY, load arsdlc-spec
 # ... agent writes spec.md; you sign §5 ...
-npx @anshroshan/arsdlc next                              # → PLAN (owner: human)
-npx @anshroshan/arsdlc approve G1 magic-link-login --by "Priya"
-npx @anshroshan/arsdlc next                              # → BUILD, next task T1, load arsdlc-implement
-npx @anshroshan/arsdlc evidence magic-link-login --label full -- npm test
-npx @anshroshan/arsdlc gates magic-link-login
+npx arsdlc next                              # → PLAN (owner: human)
+npx arsdlc approve G1 magic-link-login --by "Priya"
+npx arsdlc next                              # → BUILD, next task T1, load arsdlc-implement
+npx arsdlc evidence magic-link-login --label full -- npm test
+npx arsdlc gates magic-link-login
 ```
 
 ## The eight invariants
@@ -89,7 +94,9 @@ does not, printing the shape it used.
 
 Checksums and names are not cryptographic identity. Local writers can recompute hashes; the guard is
 heuristic/fail-open, and detector patterns cannot find every secret. Human review and repository access
-controls remain necessary. Until registry publication is verified, use the clone's Node entry point.
+controls remain necessary. This tarball is published without provenance: `npm audit signatures` shows
+nothing for it, so compare `arsdlc --version` against the [CHANGELOG](https://github.com/AnshRoshan/arsdlc/blob/main/CHANGELOG.md)
+and the matching git tag until the CI trusted-publisher path lands.
 
 ## Layout it creates
 
@@ -103,4 +110,6 @@ later   docs/brief.md, docs/glossary.md, docs/decisions/ and, inside a feature f
         handoff.md, retro.md, evals.md - each written by the skill that owns it, never seeded empty
 ```
 
-MIT. Part of the [arsdlc monorepo](https://github.com/AnshRoshan/arsdlc).
+MIT. Part of the [arsdlc monorepo](https://github.com/AnshRoshan/arsdlc) - the site is at
+[anshroshan.github.io/arsdlc](https://anshroshan.github.io/arsdlc/), issues at
+[AnshRoshan/arsdlc/issues](https://github.com/AnshRoshan/arsdlc/issues).

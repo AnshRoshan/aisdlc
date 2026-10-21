@@ -51,7 +51,7 @@ jobs:
           if [ -f packages/cli/bin/arsdlc.js ]; then
             node packages/cli/bin/arsdlc.js ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           else
-            npx --yes "@anshroshan/arsdlc@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+            npx --yes "arsdlc@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           fi
       # SARIF upload arrives with `arsdlc export --format sarif`; a findings file that does not exist
       # yet must not become a step that silently uploads nothing.

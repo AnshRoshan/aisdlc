@@ -1,8 +1,20 @@
 # Changelog
 
-All notable changes to aisdlc are documented here. Format follows [Keep a Changelog](https://keepachangelog.com); versioning follows [SemVer](https://semver.org).
+All notable changes to arsdlc are documented here. Format follows [Keep a Changelog](https://keepachangelog.com); versioning follows [SemVer](https://semver.org).
 
 ## [Unreleased]
+
+## [0.3.1] - 2026-10-21
+
+### Package presentation
+- Every install string in the repo is now `npx arsdlc …` (205 occurrences across skills, the three slash commands, the CI gates workflow, the CLI's own help and templates, both READMEs). The scoped fallback is gone: the unscoped name is live and `@anshroshan/arsdlc` was never published.
+- `packages/cli/package.json` gained the metadata npm renders and we were missing: `author`, `bugs.url`, a `changelog` link, a `homepage` that points at the GitHub Pages site instead of the repo README anchor, and keywords covering attestation, in-toto, SARIF, segregation-of-duties and OpenCode. The description is one line a person can read in a search result rather than a paragraph that gets truncated mid-sentence.
+- The package README opens with npm version, download, Node and licence badges and closes with the site and issue links; it is what a stranger sees on the registry page.
+- **Provenance, stated plainly instead of implied:** this tarball publishes unsigned. `npm audit signatures` shows nothing for it. The README says so and points at the tag to compare against until the CI trusted-publisher path lands.
+
+### Corrections to this file
+- 0.2.1 claimed to be the "first published release", shipping to npm as `aisdlc-cli` with provenance. It never went out: `aisdlc-cli`, `aisdlc` and `@anshroshan/aisdlc` are all 404 on the registry as of today, and the publish attempts failed on `ENEEDAUTH` and then on the name-similarity rule. `arsdlc@0.3.0` is the first live package. A changelog that claims a publication which did not happen is exactly the fake green this project exists to catch, so the entry is fixed rather than footnoted.
+- The `@anshroshan/arsdlc` fallback note under 0.3.0 is marked superseded - the thing it hedged against did not happen.
 
 ## [0.3.0] - 2026-10-21
 
@@ -10,13 +22,15 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 - The project is **`arsdlc`**: AR (Ansh Roshan) + SDLC, free on npm, PyPI and GitHub, and owned by nobody in search. It replaces `aisdlc`, which npm refused at publish time with `403 Package name too similar to existing package ai-sdlc` - a live package, 138 versions, same category. Two lessons recorded where they will be read: **a registry 404 means unclaimed, not claimable**, and a name one hyphen from a neighbour in your own category is a discovery problem even when the registry lets you take it.
 - This rename is at identifier level, not prose: 873 occurrences across 102 files, 20 skill folders, two agent definitions, three slash commands, the guard module, the CLI bin, the project marker `arsdlc.json`, the `arsdlc:allow-secret` marker the engine parses, the `npx arsdlc <verb>` pattern that rule 5 uses to prove documented commands exist, and the plugin and marketplace manifests.
 - History keeps the old name where it is true. `docs/RESEARCH.md`, `docs/AUDIT.md` and `docs/COMPETITORS.md` still say `aisdlc` in prose because they record what the project was called when written. Their markdown **link targets** were rewritten: a link to a file that no longer exists is a defect, not a historical record, and the corpus checker found 30 of them and was right to fail.
-- If npm refuses `arsdlc` the way it refused `aisdlc` - normalised, it is one edit from `ai-sdlc` - the fallback is `@anshroshan/arsdlc`. The bin and every in-repo string stay `arsdlc` either way, so the fallback costs one install line.
+- ~~If npm refuses `arsdlc` the way it refused `aisdlc` the fallback is `@anshroshan/arsdlc`.~~ Superseded by 0.3.1: the unscoped name took. npm did put the first publish in a staged-release review (`0.0.0-stage` sitting under `latest`), which cleared the same day; the scoped fallback was never published and every string in the repo went back to `arsdlc`.
 - Provenance cannot come from a laptop: `npm publish --provenance` fails with `Automatic provenance generation not supported for provider: null`. It needs the CI identity `publish cli` already requests via `id-token: write`, so the first publish is unsigned and provenance follows from the next version.
 - `v0.2.1` and the first `v0.3.0` were tagged and never published. They are left as superseded history rather than quietly rewritten, because an unpublishable name is a fact worth keeping.
 
 ## [0.2.1] - 2026-10-21
 
-First published release. The CLI ships to npm as `aisdlc-cli` with provenance, and the process it
+Not the first published release after all - corrected in 0.3.1. This was written while the publish was
+still expected to land; `aisdlc-cli` never reached the registry and `arsdlc@0.3.0` is the first live
+package. What 0.2.1 is: the release where the process it
 enforces now holds at the action rather than the artifact: approvals bind the commit and tree a human
 signed, `aisdlc ci` plus a reusable workflow gate the pull request, and `aisdlc export` produces an
 in-toto/DSSE bundle with SARIF that verifies offline. Honest limits, stated in the docs and not in

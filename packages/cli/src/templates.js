@@ -8,7 +8,7 @@ export const INSTRUCTIONS_BLOCK = (skillNames) => `${MARK_START}
 
 This repository uses the arsdlc process. Before starting any engineering task:
 
-1. Run \`npx @anshroshan/arsdlc next <feature>\` (or \`npx @anshroshan/arsdlc status\`) and trust its output over chat history. If the CLI is unavailable, \`arsdlc-flow\` explains how to derive the state from the files by hand.
+1. Run \`npx arsdlc next <feature>\` (or \`npx arsdlc status\`) and trust its output over chat history. If the CLI is unavailable, \`arsdlc-flow\` explains how to derive the state from the files by hand.
 1b. Before writing any code, read \`docs/taste.md\`, \`docs/glossary.md\` and \`docs/constitution.md\`. They are always-on steering: how to build here, what the words mean, what is non-negotiable. They are short by design - read them in full.
 2. Load the skill it names (\`${skillNames.join("`, `")}\`). Start with \`arsdlc-flow\` when unsure, \`arsdlc-brainstorm\` for a new idea, \`arsdlc-debug\` for a bug.
 2b. Match process to stakes with lanes: spike (answer a question) · quick (bounded change, G2-G4) · standard (all gates) · regulated (two approvers). Lanes only ratchet up.
@@ -16,7 +16,7 @@ This repository uses the arsdlc process. Before starting any engineering task:
    spec is truth · gates are transitions · approver ≠ author · humans sign the acceptance bar ·
    done = recorded evidence · disk is state · no secrets in files · fail loud, never fake green.
 4. Never write a name into an \`Approved-by:\` line and never run \`arsdlc approve\`. Those are human actions.
-5. Record every test run with \`npx @anshroshan/arsdlc evidence <feature> -- <command>\`. A claim without an evidence file is not a claim.
+5. Record every test run with \`npx arsdlc evidence <feature> -- <command>\`. A claim without an evidence file is not a claim.
 6. Any change of intent after the spec is signed goes through \`arsdlc-delta\`.
 7. Write the least code that passes the spec (\`arsdlc-ponytail\`; uses the official \`ponytail\` skill if installed). Ask decisions with recommended answers, find facts yourself (\`arsdlc-grill\`; uses the official \`grilling\` skill if installed).
 8. Before a session ends mid-feature, write \`handoff.md\` (\`arsdlc-handoff\`). After DONE, run \`arsdlc-retro\`.
@@ -261,17 +261,17 @@ anti-patterns: generic gradients, unlabeled icons, placeholder copy
 export const CLAUDE_COMMAND = (skill, desc) => `---
 description: ${desc}
 ---
-Load and follow the \`${skill}\` skill in this repository (.claude/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next $ARGUMENTS\` and obey its output.
+Load and follow the \`${skill}\` skill in this repository (.claude/skills/${skill}/SKILL.md). Start by running \`npx arsdlc next $ARGUMENTS\` and obey its output.
 `;
 
 export const GEMINI_COMMAND = (skill, desc) => `description = "${desc.replace(/"/g, '\\"')}"
 prompt = """
-Load and follow the ${skill} skill in this repository (.gemini/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next {{args}}\` and obey its output.
+Load and follow the ${skill} skill in this repository (.gemini/skills/${skill}/SKILL.md). Start by running \`npx arsdlc next {{args}}\` and obey its output.
 """
 `;
 
 export const COPILOT_PROMPT = (skill, desc) => `---
 description: ${desc}
 ---
-Load and follow the \`${skill}\` skill in this repository (.github/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next\` and obey its output.
+Load and follow the \`${skill}\` skill in this repository (.github/skills/${skill}/SKILL.md). Start by running \`npx arsdlc next\` and obey its output.
 `;

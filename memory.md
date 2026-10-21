@@ -6,20 +6,21 @@ _Last updated: 2026-10-21_
 
 ## Current state
 
-- Renamed throughout to **`arsdlc`**: 873 occurrences, 102 files, 20 skill folders, the bin, the guard module, the `arsdlc.json` marker and both plugin manifests. Registry, PyPI and GitHub all say the name is unclaimed.
-- `main` is pushed through `09e1b4e` (that commit still carried `@anshroshan/aisdlc`); the rename is the working tree at the time of writing and is about to be committed and pushed.
+- Renamed throughout to **`arsdlc`**: 873 occurrences, 102 files, 20 skill folders, the bin, the guard module, the `arsdlc.json` marker and both plugin manifests. Pushed as `763ccd9`, tagged `v0.3.0`.
+- **`arsdlc@0.3.0` is live on npm** (`latest` → 0.3.0; `0.0.0-stage` is the anti-typosquat hold npm parked the first publish under for a few hours before the staged release cleared). Published from a laptop, so it carries **no provenance**. The scoped `@anshroshan/arsdlc` was never published; every install string is `npx arsdlc …` again.
+- `main` is pushed through `763ccd9`; the 0.3.1 packaging pass is the working tree at the time of writing.
 - Enforcement is tested and live: commit-bound approvals, `arsdlc ci`, per-harness enforcement levels in `doctor`, the reusable gate workflow, `antigravity` and `devin` targets. Evidence exports as in-toto/DSSE plus SARIF and verifies offline. `arsdlc mcp --stdio` serves read-only state.
 - 87/87 CLI tests, 12/12 guard tests, 6/6 site tests, corpus check green on 23 commands, secrets scan clean, site builds 23 pages, plugin validation passes.
-- Still open externally: nothing is on npm, there is no GitHub release, and the GitHub repo is still named `aisdlc` until it is renamed.
+- Still open externally: there is no GitHub release for any tag, npm trusted publishing is not registered (so CI publish would still need `NPM_TOKEN`), and `aisdlc-cli`/`aisdlc`/`@anshroshan/aisdlc` are 404 - the CHANGELOG claimed 0.2.1 shipped to npm and that claim is now corrected.
 
 ## Next step
 
 Two commands, in this order, from you:
 
-1. `gh repo rename arsdlc` in the repo root - GitHub redirects the old URL.
-2. Publish `arsdlc@0.3.0` with `npm publish --access public`, no `--provenance`. If npm again answers `403 too similar to ai-sdlc`, publish `@anshroshan/arsdlc` instead; the bin and every string in the repo stay `arsdlc` either way.
+1. Publish `arsdlc@0.3.1` from `packages/cli`: `npm publish --access public`, no `--provenance`. The version bump is required - a published tarball's contents are frozen, so the metadata and README fixes can only ship as a new version.
+2. Create the release: `gh release create v0.3.1 --generate-notes` (0.3.0 has been on npm with no release next to it).
 
-Then I create the release, flip the README install cell to the live command, and close T2, T3 and T4 with recorded evidence. T20 needs a runner and real model runs before any number exists; T13 needs a Codex or Copilot client that accepts a catalog file.
+Then close T2, T3 and T4 with recorded evidence. Provenance needs the npm trusted publisher registered for this repo + workflow on the npm package page; until then CI publish uses `NPM_TOKEN` and publishes unsigned. T20 needs a runner and real model runs before any number exists; T13 needs a Codex or Copilot client that accepts a catalog file.
 
 ## Open questions
 
@@ -29,4 +30,3 @@ Then I create the release, flip the README install cell to the live command, and
 - Does npm trusted publishing work for this account, or is a scoped automation token still required (F-01)?
 - No harness except Claude Code has a confirmed hook that can block a tool call (F-02, updated). T11 and T13 stay open until a real install proves the schema.
 - Tree binding is content-based (D-11). Watch for re-approval churn in real use (F-03).
-- The rename was declined. The collision with AWS AI-DLC stays a discoverability cost; no action without a new decision.

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "arsdlc",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Agents write code, arsdlc runs the process. EARS specs, six evidence gates (G1-G6), approvals bound to the artifact hash and the signed commit, recorded evidence and segregation of duties - enforced from disk, in any harness.",
   "author": { "name": "Ansh Roshan" },
   "homepage": "https://anshroshan.github.io/arsdlc/",

@@ -8,6 +8,7 @@
 
 <br>
 
+[![npm](https://img.shields.io/npm/v/arsdlc.svg)](https://www.npmjs.com/package/arsdlc)
 [![CI](https://github.com/AnshRoshan/arsdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/arsdlc/actions/workflows/ci.yml)
 [![skills](https://img.shields.io/badge/agent_skills-20-b1e57c)](#the-20-skills)
 [![Node](https://img.shields.io/node/v/arsdlc)](packages/cli/package.json)
@@ -53,14 +54,13 @@ The skills only, symlinked into every harness it finds. One skill: `--skill arsd
 <td valign="top">
 
 ```bash
-git clone https://github.com/AnshRoshan/arsdlc
-node arsdlc/packages/cli/bin/arsdlc.js init --harness all
+npx arsdlc init
 ```
 
-Not published to the registry yet; this cell becomes `npx @anshroshan/arsdlc init` the moment 0.3.0
-lands. The bare name `arsdlc` is refused by npm as too similar to the existing `ai-sdlc`, so the
-package carries the scope. The two paths beside it install the skills today, and the CLI above installs
-skills, instructions, slash commands **and** the read-only subagents, detected for your harness.
+The live package on npm (0.3.x, zero runtime dependencies, Node 18+). Installs skills, instructions,
+slash commands **and** the read-only subagents, detected for your harness. Published without provenance
+so far - the CI trusted-publisher path is still being wired, so verify the tarball against the tag
+until it is.
 
 </td>
 </tr>
@@ -72,7 +72,7 @@ skills, instructions, slash commands **and** the read-only subagents, detected f
 use arsdlc-brainstorm, I want to build payment retries
 ```
 
-> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx @anshroshan/arsdlc next`, and the agent obeys the disk, not the chat.
+> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx arsdlc next`, and the agent obeys the disk, not the chat.
 
 ## Where to start
 
@@ -102,7 +102,7 @@ use arsdlc-brainstorm, I want to build payment retries
   <img src="assets/flow-dark.svg" alt="Nine states (discover, spec, plan, tasks, build, verify, accept, release, operate) with gates G1-G6 hanging over their transitions." width="100%">
 </picture>
 
-The agent runs `npx @anshroshan/arsdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
+The agent runs `npx arsdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
 
 ### Hard mode: the Claude Code mod
 
@@ -242,7 +242,7 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 </tr>
 </table>
 
-Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx @anshroshan/arsdlc addon all` installs them; works without them.
+Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx arsdlc addon all` installs them; works without them.
 
 ## Repo layout
 

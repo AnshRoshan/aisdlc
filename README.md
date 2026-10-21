@@ -65,7 +65,7 @@ skills, instructions, slash commands **and** the read-only subagents, detected f
 </tr>
 </table>
 
-`aisdlc init` detects **Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, Windsurf and OpenCode**, writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `aisdlc.json` marker. Then talk to your agent:
+`aisdlc init` detects **Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop and OpenCode** (plus the legacy `gemini-cli` and `windsurf` layouts, which still install and print a retirement notice), writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `aisdlc.json` marker. Then talk to your agent:
 
 ```bash
 use aisdlc-brainstorm, I want to build payment retries
@@ -276,9 +276,12 @@ aisdlc trace     requirement → task matrix
 aisdlc gate      one of G1-G6  ·  aisdlc gates runs all six
 aisdlc scan      secrets over tracked files
 aisdlc report    read the logs back: runs, pass rate, staleness, stale approvals, review state
+aisdlc ci        every gate the work has crossed, plus staleness and tree drift; non-zero on a regression
 aisdlc evidence  run a command and record the run as evidence
 aisdlc approve   human gate approval (G1, G4, G5); refuses agents and refuses the author
 aisdlc audit     approval chain + evidence log
+aisdlc export    in-toto Statement v1 + DSSE envelope + SARIF, and `--verify` recomputes it offline
+aisdlc mcp       read-only state over stdio (aisdlc_next, aisdlc_status); writes are not exposed
 ```
 
 </details>

@@ -2,7 +2,7 @@
 
 **Agents write code. aisdlc runs the process.**
 
-A harness-agnostic process kit for AI-assisted engineering: twenty [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, Windsurf, OpenCode and any agent that reads `AGENTS.md`. Bring your own model and your own subscription; nothing leaves your machine.
+A harness-agnostic process kit for AI-assisted engineering: twenty [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop, OpenCode and any agent that reads `AGENTS.md`; the retired `gemini-cli` and `windsurf` layouts still install and say so. Approvals bind to the artifact hash and to the commit you signed. Evidence exports as in-toto/DSSE and SARIF and verifies offline. Bring your own model and your own subscription; nothing leaves your machine.
 
 ```bash
 npx aisdlc-cli init            # installs skills + instructions into every harness it detects
@@ -83,7 +83,9 @@ two-approver policy. `test.gate: none-by-design` requires a non-placeholder `tes
 
 Windows package-manager shims are invoked through their Node entry points without shell interpolation;
 unsupported wrappers fail loudly. Specify an explicit shell executable only when shell semantics are
-intended. Extra files in copied skill directories are preserved; Windows link mode uses junctions.
+intended. Extra files in copied skill directories are preserved; `--link` creates real symlinks on
+Windows when the system allows it (Developer Mode or admin rights) and falls back to junctions when it
+does not, printing the shape it used.
 
 Checksums and names are not cryptographic identity. Local writers can recompute hashes; the guard is
 heuristic/fail-open, and detector patterns cannot find every secret. Human review and repository access

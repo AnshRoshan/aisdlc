@@ -65,7 +65,7 @@ A prune must not change behavior. If a cut might, say so and prove it by running
 
 ## Portability
 
-The same file must be honest on Claude Code, Codex, Cursor, Gemini CLI, Copilot, Windsurf and
+The same file must be honest on Claude Code, Codex, Cursor, Antigravity, Copilot, Devin Desktop and
 OpenCode. So in `skills/` and `commands/`:
 
 - No hardcoded model alias in a spawn instruction (`model: "haiku"`). Say *a fast, low-cost tier*

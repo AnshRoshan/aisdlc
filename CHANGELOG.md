@@ -4,6 +4,33 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+### Exportable evidence and a read-only MCP surface
+- New command `aisdlc export <feature> [--out dir] [--format all|statement|sarif] [--sign "<cmd {envelope}>"]`: writes a self-contained bundle - in-toto Statement v1, DSSE envelope, copies of every artifact and evidence record, SARIF 2.1.0 and a `verify.md`. The statement's subjects carry sha256 digests of the shipped files; the predicate carries gate verdicts, approvals with their tree bindings, evidence runs, the source fingerprint and the limits the bundle cannot cross.
+- `aisdlc export --verify <dir>` recomputes every digest offline and exits 1 naming the mismatched file. It catches an edited artifact or record, a file dropped from the bundle, a file added to it, and a statement rewritten without the envelope. Nothing contacts a registry or a service.
+- Signing is an external adapter, not a dependency: `--sign "ssh-keygen -Y sign -n aisdlc -f key.pem {envelope}"` runs without a shell, and a failing signer degrades to an unsigned bundle that says so. The verifier reports signature counts and states that the bundle carries no public key.
+- SARIF maps failing gate checks to `aisdlc/<gate>` rules and unsatisfied acceptance rows to `aisdlc/acceptance`, so code scanning can ingest the verdicts.
+- New command `aisdlc mcp --stdio`: JSON-RPC 2.0 over stdio exposing `aisdlc_next` and `aisdlc_status` only. A tool name shaped like a write (`approve`, `evidence`, `gate`) is refused with the CLI command the human should run; the server never writes. `next --json` and the MCP response now share one builder, so they cannot drift.
+- Docs updated: README lists `ci`, `export` and `mcp` and the current harness names (Antigravity CLI, Devin Desktop, with the retired layouts flagged); the npm README describes the tree binding and export; PRODUCT states the narrower, true position instead of "enforcement, not templates".
+
+### Commit-bound approvals, CI enforcement, honest harness reporting
+- Approvals now record `head`, `tree` and `git` at signing time. G1, G4 and G5 fail when content moved after the signature - the gap Spec Kitty's `LANE_MOVED_AFTER_APPROVAL` and AI-DLC's plan fingerprint both close - naming the files and the re-approval action. A project with no git records `git: unavailable` and keeps artifact-hash behavior; nothing is claimed that cannot be checked.
+- Drift excludes what the process itself moves: the feature's artifacts and installed harness directories, filtered by the same predicate the source fingerprint uses (`isProcessArtifact`). What remains is exactly what a hash cannot see: the code changed after a human signed.
+- New command `aisdlc ci [feature] [--json]`: validates every spec, then fails on any lane-required gate the flow has crossed or a human has already signed, on stale evidence, on artifact-hash staleness and on tree drift. `.github/workflows/gates.yml` runs it, reusable from any repo, so harnesses with no native hook still get a merge check.
+- `doctor` now prints an enforcement level per harness (`native`, `ci` or `none`) with the reason and the install command, and `doctor --json` emits it for tooling. `native` requires a guard module the project can point at; a harness's advertised capability is never reported as this project's protection.
+- Harness registry gained `antigravity` and `devin`; `gemini-cli` and `windsurf` still install into their compatible layouts and now print the retirement notice. `.devin/skills` joined the companion search roots.
+- `deploy site` pins Node 22 (Astro 7 refuses 20; the Pages deploy had been failing since 2026-10-15). `publish cli` prefers npm trusted publishing over OIDC with `--provenance`, keeping `NPM_TOKEN` as an explicit fallback.
+- Tests 72 to 78: engine drift cases, a real-repository integration case, the no-git binding, and the enforcement matrix.
+
+### Installer link mode
+- `aisdlc init --link` now creates real symlinks on Windows and falls back to a junction only when the system refuses the privilege (`EPERM`/`EINVAL`). Developer Mode installs produce the same link shape as POSIX; machines without it keep working.
+- The install summary prints the shape it actually used, so a junction is never reported as a symlink. Git sees junctions as ordinary directories, which is why the real link matters.
+- `copyOrLink` returns the mode it used and takes an injected `platform`/`symlink`, so both branches are tested without changing account privileges. Test: `packages/cli/test/edgecases.test.js`.
+
+### System design coverage
+- Added 111 numbered system-design and operations checks as two plan branches: `skills/aisdlc-plan/references/system-design-checklist.md` (79 items: entry path, data access, concurrency and consistency, scaling, resilience, async, security, schema change, runtime resources, performance and cost) and `references/operations-checklist.md` (32 items: delivery, platform, operations). Each item states the answer the plan owes and the plan section that carries it; `n/a: <reason>` is legal, silence is not.
+- `aisdlc-plan` step 2 names the trigger for each branch, and `aisdlc-review` Axis 2 files an unanswered item on a touched surface as a blocking finding. The traps live with their items: scans versus seeks, pick two in CAP, poison messages, Bobby Tables, a stolen token that stays valid, it is always DNS, YAML indentation, test on 1%, bill shock, follow the request id, the 3:14 AM page, and velocity measured against change-failure rate.
+- Split into two files because all 111 in one is 9,711 B, over the 9 KB sub-file budget. Each branch now pays only its own half, recorded as new hot paths: `plan + design checklist` 17,898 B / 20 KB and `plan + operations checklist` 14,126 B / 16 KB.
+
 ### Final security verification
 - Added a 21-control security review protocol to verification, review, quality and release handoffs, covering injection/XSS/CSRF/SSRF, uploads, authorization/BOLA/RLS, tokens/secrets, passwords/MFA/cookies/storage, rate limits, webhooks, source maps, credentials/logging and dependency audits.
 - Require evidence-backed applicability, recorded negative tests, safe fixes/retests, current OWASP and relevant official provider/cloud guidance, and an explicit final security summary. Static-only surfaces can be NOT_APPLICABLE; missing proof is NOT_VERIFIED, never a pass. This is a skill workflow requirement, not a new automatic CLI gate.

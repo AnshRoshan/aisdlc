@@ -124,6 +124,10 @@ Correctness policy: what a signature proves is "this content, at this tree", not
 
 The maintainer said to work end to end, so tasks T1 onwards started while the spec's §5 is still unsigned. G1 is therefore **skipped, not passed**: the tree-binding and doctor work below has no human plan approval behind it yet. Nobody has decided that a pre-G1 implementation is the norm; it needs a real call, either a signature or a revert.
 
+## F-07: v0.2.1 published while G1 and G5 are unsigned - 2026-10-21 (attached to market-readiness)
+
+The maintainer said to push and release, so the tag and the npm publish go out with G1 never signed and G5 (release approval) empty. Nobody has decided that shipping past two gates is the norm. This differs from F-04 in one material way: a merge can be reverted, an npm version cannot be unpublished. If this becomes acceptable, the lane model should say so explicitly rather than leaving it to a chat instruction.
+
 ## F-05: Single-approver SoD deadlock - 2026-10-20
 
 `aisdlc new` seeds `author` from the git identity, and G1 refuses an approval whose name equals the author. With one maintainer, the standard lane cannot be signed by anyone. `market-readiness` records the agent as author so the human can sign, which is honest but is a workaround, not a design. Nobody has decided how solo projects should pass G1.

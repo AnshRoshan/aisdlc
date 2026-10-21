@@ -2,7 +2,7 @@
 
 The only file that updates constantly. States are mutually exclusive.
 
-Current phase: 3 - evidence is portable · Current goal: get G1 signed, then ship 0.2.1 so the kit is installable.
+Current phase: release - v0.2.1 to npm · Current goal: publish with provenance, create the release, then close the manifest and eval gaps that need a real client or a real run.
 
 ## In progress
 

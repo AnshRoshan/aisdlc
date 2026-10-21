@@ -4,6 +4,19 @@ All notable changes to aisdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-21
+
+First published release. The CLI ships to npm as `aisdlc-cli` with provenance, and the process it
+enforces now holds at the action rather than the artifact: approvals bind the commit and tree a human
+signed, `aisdlc ci` plus a reusable workflow gate the pull request, and `aisdlc export` produces an
+in-toto/DSSE bundle with SARIF that verifies offline. Honest limits, stated in the docs and not in
+footnote: the guard is Claude Code only, no other harness has a confirmed blocking hook, hash chains
+are not authenticated identity, and the eval numbers in T20 have not been run.
+
+G1 and G5 on the `market-readiness` program are unsigned. This release ships on the maintainer's
+explicit instruction; the override is recorded as F-07 in `context/decisions.md` rather than being
+filed under a gate that did not happen.
+
 ### Exportable evidence and a read-only MCP surface
 - New command `aisdlc export <feature> [--out dir] [--format all|statement|sarif] [--sign "<cmd {envelope}>"]`: writes a self-contained bundle - in-toto Statement v1, DSSE envelope, copies of every artifact and evidence record, SARIF 2.1.0 and a `verify.md`. The statement's subjects carry sha256 digests of the shipped files; the predicate carries gate verdicts, approvals with their tree bindings, evidence runs, the source fingerprint and the limits the bundle cannot cross.
 - `aisdlc export --verify <dir>` recomputes every digest offline and exits 1 naming the mismatched file. It catches an edited artifact or record, a file dropped from the bundle, a file added to it, and a statement rewritten without the envelope. Nothing contacts a registry or a service.

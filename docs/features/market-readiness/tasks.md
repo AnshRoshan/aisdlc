@@ -22,7 +22,7 @@ One task at a time. Each task names its requirement, the seam a test attaches to
 ## Phase 2 - Distribution and interop
 
 - [x] T12 [R:Support current harness names] Add `antigravity` and `devin` targets; keep `gemini-cli` and `windsurf` as warned aliases · seam: `harnesses.js` · after: none · done 2026-10-21: both targets install, both retired names still install into their compatible layout and print the retirement notice; `.devin/skills` joins the companion search roots
-- [ ] T13 [R:Package for every marketplace] Add the portable root manifest, Codex/Copilot marketplace files and the package `skills` entry · seam: manifests · after: none · done when: each manifest validates and the skills CLI installs all 20 · **paths confirmed (`.agents/plugins/marketplace.json`, `.github/plugin/marketplace.json`, package `skills` array), enum spellings only medium-confidence and `$schema` is required by Agent Plugins 1.0; not shipped until a real install validates them**
+- [ ] T13 [R:Package for every marketplace] Add the portable root manifest, Codex/Copilot marketplace files and the package `skills` entry · seam: manifests · after: none · done when: each manifest validates and the skills CLI installs all 20 · **partially done 2026-10-21: root `plugin.json` conforms to Agent Plugins 1.0 (`$schema` + `name` required, name pattern, closed key set) and rule 11 of the corpus checker fails the build if any manifest's version drifts. Still open: the Codex and Copilot catalog files and the `skills` array - their required keys came from docs, not from a client that accepted them, and inventing a manifest for a tool you cannot run is the kind of claim this kit exists to refuse**
 - [x] T14 [R:Expose read-only state over MCP] Implement `mcp --stdio` with `next` and `status`, no writes · seam: `mcp.js` · after: T9 · done 2026-10-21: JSON-RPC 2.0 over stdio, `initialize`/`tools/list`/`tools/call`, write-shaped tool names refused with the CLI command to run instead; 4 tests including a spawned stdio session
 - [ ] T15 [R:Package for every marketplace] Publish the skills listing and run an external security scan on the corpus · seam: listing + CI scan · after: T3, T13 · not started
 
@@ -35,7 +35,7 @@ One task at a time. Each task names its requirement, the seam a test attaches to
 
 ## Phase 4 - Credibility
 
-- [ ] T20 [R:Publish evals] Build the seeded fake-green eval suite and publish gated vs ungated results · seam: eval runner · after: T18 · not started
+- [ ] T20 [R:Publish evals] Build the seeded fake-green eval suite and publish gated vs ungated results · seam: eval runner · after: T18 · **protocol written 2026-10-21 in `evals.md`: eight cases, each run gated and ungated, with a discriminating threshold and raw per-run records published alongside any summary. Runner not built and zero numbers published, because a pass rate from a run that never happened is the failure this kit exists to catch**
 - [ ] T21 [R:Keep public claims checkable] Write the launch post and the positioning page around cross-vendor process evidence · seam: docs/site · after: T3, T5, T20 · not started
 
 ## Blocked or deferred

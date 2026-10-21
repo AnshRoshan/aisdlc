@@ -20,6 +20,8 @@
  *  9  every relative markdown link target in the corpus exists on disk
  * 10  the Claude Code mod in hooks/ matches the documented API (register(on), literal
  *     `$.noun.method(...)` calls, known event names, known $ namespaces, a byte budget)
+ * 11  one version everywhere: package.json, cli.js, both plugin manifests and the portable
+ *     root plugin.json must agree, and that manifest must satisfy Agent Plugins 1.0
  */
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, dirname, relative, resolve } from "node:path";
@@ -344,6 +346,40 @@ for (const hp of HOT_PATHS) {
 /* ───────────── rule 10: the Claude Code mod ───────────── */
 
 checkMod();
+
+/* ───────────── rule 11: one version, and the portable manifest matches its schema ───────────── */
+{
+  const pkg = JSON.parse(readFileSync(join(root, "packages/cli/package.json"), "utf8"));
+  const want = pkg.version;
+  const cliFile = join(root, "packages/cli/src/cli.js");
+  const declared = LF(readFileSync(cliFile, "utf8")).match(/const VERSION = "([^"]+)"/)?.[1];
+  if (declared !== want) err(rel(cliFile), `VERSION "${declared}" disagrees with package.json "${want}"`);
+
+  const sameVersion = (file, pick) => {
+    const p = join(root, file);
+    if (!existsSync(p)) return;
+    let got;
+    try { got = pick(JSON.parse(readFileSync(p, "utf8"))); }
+    catch (e) { err(file, `version check cannot parse it: ${e.message}`); return; }
+    if (got !== want) err(file, `version "${got}" disagrees with packages/cli/package.json "${want}"`);
+  };
+  sameVersion(".claude-plugin/plugin.json", (j) => j.version);
+  sameVersion(".claude-plugin/marketplace.json", (j) => j.plugins?.[0]?.version);
+
+  const portable = join(root, "plugin.json");
+  if (existsSync(portable)) {
+    let j;
+    try { j = JSON.parse(readFileSync(portable, "utf8")); }
+    catch (e) { err("plugin.json", `does not parse: ${e.message}`); j = null; }
+    if (j) {
+      for (const k of ["$schema", "name"]) if (!j[k]) err("plugin.json", `Agent Plugins 1.0 requires "${k}"`);
+      if (j.name && !/^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/.test(j.name)) err("plugin.json", `name "${j.name}" violates the schema pattern`);
+      const allowed = new Set(["$schema", "name", "version", "description", "author", "homepage", "repository", "license", "keywords", "extensions"]);
+      for (const k of Object.keys(j)) if (!allowed.has(k)) err("plugin.json", `top-level key "${k}" is not in the Agent Plugins 1.0 schema`);
+      if (j.version !== want) err("plugin.json", `version "${j.version}" disagrees with packages/cli/package.json "${want}"`);
+    }
+  }
+}
 
 /* ───────────── report ───────────── */
 

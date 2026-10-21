@@ -16,7 +16,9 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-Sign G1 on `docs/features/market-readiness/spec.md`, or reject the override and send the work back. Then T3 and T4: tag `v0.2.1`, publish through npm trusted publishing, create the release, and confirm the live Pages content matches HEAD. T20 is the biggest remaining credibility gap and must only ever publish numbers from a run that actually happened.
+Watch the `v0.2.1` publish run: if npm rejects the OIDC identity, add this repo and workflow as a trusted publisher on the npm package page and re-run; the `NPM_TOKEN` path exists but publishes unsigned. Then confirm `npm view aisdlc-cli version` answers 0.2.1 and the GitHub release points at the same commit.
+
+T20 needs a runner and real model runs before any number is published. T13 needs a Codex or Copilot client that actually accepts a catalog file.
 
 ## Open questions
 

@@ -15,12 +15,31 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-Two commands, in this order, from you:
+`0.3.1` is committed (`b7b6bba`), tagged `v0.3.1`, and `ci` + `deploy site` are green on both. Only the
+registry and the release page are left, and both are your credentials. One of these, in this order of preference:
 
-1. Publish `arsdlc@0.3.1` from `packages/cli`: `npm publish --access public`, no `--provenance`. The version bump is required - a published tarball's contents are frozen, so the metadata and README fixes can only ship as a new version.
-2. Create the release: `gh release create v0.3.1 --generate-notes` (0.3.0 has been on npm with no release next to it).
+```bash
+# A - provenance, the path CI already reaches for.
+#   npm package page -> Publishing -> Trusted publishing -> add publisher:
+#   owner AnshRoshan, repo arsdlc, branch main, workflow publish.yml, environment empty.
+#   Then:
+gh run rerun 39576682326 --failed
 
-Then close T2, T3 and T4 with recorded evidence. Provenance needs the npm trusted publisher registered for this repo + workflow on the npm package page; until then CI publish uses `NPM_TOKEN` and publishes unsigned. T20 needs a runner and real model runs before any number exists; T13 needs a Codex or Copilot client that accepts a catalog file.
+# B - the fast one, unsigned, from this laptop:
+cd packages/cli && npm publish --access public
+```
+
+Then, whichever way the version lands:
+
+```bash
+gh release create v0.3.1 --generate-notes --latest
+```
+
+A already proved one thing worth knowing: the CI job wrote a signed provenance statement for
+`arsdlc@0.3.1` to the Sigstore transparency log *before* npm refused the PUT, so a failed CI publish is
+not fully clean - an attestation for a version that does not exist is now public. Then close T2, T3 and
+T4 with recorded evidence. T20 needs a runner and real model runs before any number exists; T13 needs a
+Codex or Copilot client that accepts a catalog file.
 
 ## Open questions
 

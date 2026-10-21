@@ -57,10 +57,10 @@ The skills only, symlinked into every harness it finds. One skill: `--skill arsd
 npx arsdlc init
 ```
 
-The live package on npm (0.3.x, zero runtime dependencies, Node 18+). Installs skills, instructions,
-slash commands **and** the read-only subagents, detected for your harness. Published without provenance
-so far - the CI trusted-publisher path is still being wired, so verify the tarball against the tag
-until it is.
+The live package on npm (zero runtime dependencies, Node 18+). Installs skills, instructions,
+slash commands **and** the read-only subagents, detected for your harness. `npm audit signatures`
+tells you whether the version you pulled came from CI or from a laptop; the CI trusted-publisher
+setting is the last thing standing between this name and provenance.
 
 </td>
 </tr>

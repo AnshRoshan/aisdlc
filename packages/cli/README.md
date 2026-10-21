@@ -94,9 +94,10 @@ does not, printing the shape it used.
 
 Checksums and names are not cryptographic identity. Local writers can recompute hashes; the guard is
 heuristic/fail-open, and detector patterns cannot find every secret. Human review and repository access
-controls remain necessary. This tarball is published without provenance: `npm audit signatures` shows
-nothing for it, so compare `arsdlc --version` against the [CHANGELOG](https://github.com/AnshRoshan/arsdlc/blob/main/CHANGELOG.md)
-and the matching git tag until the CI trusted-publisher path lands.
+controls remain necessary. Signature check: run `npm audit signatures` on what you installed. If it shows
+nothing for `arsdlc`, that tarball came from a laptop and not from CI, so compare `arsdlc --version`
+against the [CHANGELOG](https://github.com/AnshRoshan/arsdlc/blob/main/CHANGELOG.md) and the matching git
+tag; the CI trusted-publisher path is one npm-side setting away from being the default.
 
 ## Layout it creates
 

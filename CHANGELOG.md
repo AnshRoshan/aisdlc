@@ -9,7 +9,9 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
   `.github/PULL_REQUEST_TEMPLATE.md` and `.github/dependabot.yml` (actions weekly, site deps monthly).
   Measured reason, not decoration: GitHub's own community profile for this repo reported **57%** and named
   issue templates, PR templates and a code of conduct as the missing files, and the npm Insights
-  maintenance component reads the same absences.
+  maintenance component reads the same absences. After this commit landed, the same endpoint reported
+  **100%** - which is the only part of the 88 that files could reach. Dependabot ran its first check within
+  seconds of the config landing; security alerts were off and are now on (`GET /vulnerability-alerts` → 204).
 - `SECURITY.md` states the threat model rather than the usual disclaimer: zero runtime dependencies, no
   network, no install-time scripts, and then the limits the README already admits - local writers can
   recompute hashes, `Approved-by` is not identity, `AISDLC_AGENT` is a tripwire, the guard is heuristic and

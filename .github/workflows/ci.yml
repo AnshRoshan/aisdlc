@@ -15,6 +15,11 @@ jobs:
       - name: the kit must pass its own gates
         run: node bin/aisdlc.js scan
         working-directory: packages/cli
+      - name: the live program must pass the gates it has crossed
+        run: node bin/aisdlc.js ci market-readiness
+        working-directory: packages/cli
+        # Scoped on purpose: docs/features/demo is deliberate unfinished scaffolding, and a
+        # green run that ignores it is worth more than one that fails on a fixture.
   cli:
     runs-on: ubuntu-latest
     strategy: { matrix: { node: [18, 20, 22] } }

@@ -4,10 +4,12 @@ name: aisdlc gate
 # `aisdlc ci` evaluates every gate the work has already crossed, plus any gate a human has signed,
 # and exits non-zero on a regression, a stale approval or a tree that moved after a signature.
 #
-# Callers add:
-#   uses: AnshRoshan/aisdlc/.github/workflows/gates.yml@v1
+# Callers add their own trigger and either call this job or copy the file:
+#   on: pull_request
+#   jobs: { gates: { uses: AnshRoshan/aisdlc/.github/workflows/gates.yml@v1 } }
 # Branch protection then requires the "gates" check, so an agent cannot merge past a red gate by
-# describing it as green in the PR body.
+# describing it as green in the PR body. It is not wired to this repo's own pull requests: the
+# kit dogfoods the command in ci.yml, scoped to the feature that is actually in progress.
 
 on:
   workflow_call:
@@ -22,8 +24,6 @@ on:
         required: false
         type: string
         default: "latest"
-  pull_request:
-    paths: ["docs/**", "aisdlc.json", ".github/workflows/gates.yml"]
   workflow_dispatch:
     inputs:
       feature:

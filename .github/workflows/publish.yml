@@ -2,11 +2,13 @@ name: publish cli
 
 # Publishes the aisdlc CLI to npm. Preferred path: npm trusted publishing (no secret at all) - add
 # this repo, workflow and environment as a trusted publisher on the npm package page, and leave
-# NPM_TOKEN unset. If the account cannot use trusted publishing, set NPM_TOKEN and the step below
-# switches to it; npm refuses --provenance for token auth, so that path publishes unsigned.
+# NPM_TOKEN unset. If the account cannot use trusted publishing, set NPM_TOKEN and the mode step
+# switches to the token path; npm refuses --provenance for token auth, so that path publishes unsigned.
 #
-# The branch lives in the shell, not in `if`: GitHub does not expose the `secrets` context in a
-# job-level or step-level `if`, and a workflow that reads it there fails to parse at all.
+# The switch is a step output, not an `if` that reads `secrets`: GitHub does not expose the
+# `secrets` context in a job-level or step-level `if`, and a workflow that tries fails to parse and
+# never runs at all. The token reaches npm through `env:` on its own step, because `aisdlc scan`
+# flags an inline `TOKEN=...` assignment and this repo has to pass its own gates.
 #
 # Trigger: push a version tag (git tag vX.Y.Z && git push --tags) or run the workflow manually.
 
@@ -30,18 +32,28 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm test
         working-directory: packages/cli
-      - name: publish to npm
-        working-directory: packages/cli
+      - name: choose the publish path
+        id: mode
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -n "${NPM_TOKEN:-}" ]; then
-            echo "::notice::publishing with NPM_TOKEN (no provenance: npm refuses it for token auth)"
-            NODE_AUTH_TOKEN="$NPM_TOKEN" npm publish --access public
+            echo "using=token" >> "$GITHUB_OUTPUT"
+            echo "::notice::publishing with NPM_TOKEN; npm refuses --provenance for token auth"
           else
+            echo "using=oidc" >> "$GITHUB_OUTPUT"
             echo "::notice::publishing through npm trusted publishing with provenance"
-            npm publish --access public --provenance
           fi
+      - name: publish through npm trusted publishing
+        if: steps.mode.outputs.using == 'oidc'
+        run: npm publish --access public --provenance
+        working-directory: packages/cli
+      - name: publish with the automation token
+        if: steps.mode.outputs.using == 'token'
+        run: npm publish --access public
+        working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: create a GitHub release for version tags
         if: startsWith(github.ref, 'refs/tags/')
         run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes

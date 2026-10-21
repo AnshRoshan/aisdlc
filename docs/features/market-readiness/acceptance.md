@@ -9,21 +9,21 @@ No scenario is accepted yet. A row may show `pass` only after a reviewer who did
 | A3 | Publish a release | Tests fail | none yet | pending |
 | A4 | Deploy the site | Deploy succeeds on HEAD | evidence/2026-10-21T07-07-29-988Z-deploy-f74b0652-2f97-4c36-887f-d6f4fe98fdb3.json | pending |
 | A5 | Deploy the site | Build fails | none yet | pending |
-| A6 | Bind approvals to the tree | Tree unchanged | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A7 | Bind approvals to the tree | Code changed after approval | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A8 | Bind approvals to the tree | Evidence added after approval | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A9 | Bind approvals to the tree | No git repository | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A10 | Report enforcement honestly | Claude Code with the guard | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A11 | Report enforcement honestly | A harness without a native guard | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A12 | Gate a pull request in CI | Gates pass | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A13 | Gate a pull request in CI | Gates fail | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A14 | Export portable evidence | Export succeeds | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A15 | Export portable evidence | Export is tampered with | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A16 | Export portable evidence | Export is unsigned | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A17 | Expose read-only state over MCP | List tools | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A18 | Expose read-only state over MCP | State request | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A19 | Expose read-only state over MCP | Write attempt | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
-| A20 | Support current harness names | Antigravity install | evidence/2026-10-21T07-11-39-811Z-full-6b643990-bb3c-456c-9d12-827431b54240.json | pending |
+| A6 | Bind approvals to the tree | Tree unchanged | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A7 | Bind approvals to the tree | Code changed after approval | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A8 | Bind approvals to the tree | Evidence added after approval | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A9 | Bind approvals to the tree | No git repository | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A10 | Report enforcement honestly | Claude Code with the guard | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A11 | Report enforcement honestly | A harness without a native guard | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A12 | Gate a pull request in CI | Gates pass | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A13 | Gate a pull request in CI | Gates fail | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A14 | Export portable evidence | Export succeeds | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A15 | Export portable evidence | Export is tampered with | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A16 | Export portable evidence | Export is unsigned | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A17 | Expose read-only state over MCP | List tools | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A18 | Expose read-only state over MCP | State request | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A19 | Expose read-only state over MCP | Write attempt | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
+| A20 | Support current harness names | Antigravity install | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
 | A21 | Support current harness names | Retired name | none yet (the notice is not asserted by a test) | pending |
 | A22 | Package for every marketplace | Skills CLI install | none yet (T13 not shipped) | pending |
 | A23 | Package for every marketplace | Plugin validation | evidence/2026-10-21T06-53-14-894Z-smoke-96d8689d-9dab-4146-a7b4-948b86a850ea.json | pending |

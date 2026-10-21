@@ -51,14 +51,22 @@ runs the sync hook. Generated copies are not the source of truth.
 
 ## Reporting bugs
 
-Include harness/runtime versions, `arsdlc doctor`, the failing command and the smallest sanitized artifact
-state. Do not attach private code, credentials or unredacted output. State what was actually executed.
+Use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md). Include harness/runtime versions,
+`arsdlc doctor`, the failing command and its exit code, the lane and gate involved, and the smallest
+sanitized artifact state. Do not attach private code, credentials or unredacted output. State what was
+actually executed. Anything exploitable goes to [SECURITY.md](SECURITY.md) as a private advisory, never a
+public issue - an issue describing a hole in an approval chain is a how-to.
 
 ## Release checklist
 
 1. Update CLI/plugin/marketplace versions consistently and add a changelog entry.
 2. Run every local check above; inspect the package with `npm pack --dry-run` in `packages/cli`.
-3. Confirm published tarball includes all20 skills, both agents, the CLI and MIT attribution.
-4. Push a `vX.Y.Z` tag matching the package version. The publish workflow tests, publishes using the
-   configured npm token and creates a release. Verify registry publication and Pages activation separately;
+3. Confirm the published tarball includes all 20 skills, both agents, the CLI and MIT attribution.
+4. Push a `vX.Y.Z` tag matching the package version. The publish workflow tests, publishes through npm
+   trusted publishing with provenance when the publisher is registered for the name, and falls back to
+   `NPM_TOKEN` (unsigned) when it is not. Verify registry publication and Pages activation separately;
    a workflow definition is not proof that either service is live.
+5. While the trusted publisher is unregistered, **a tag push is not a dry run**: the workflow reaches
+   Sigstore and writes a build attestation for the version before npm refuses the PUT, so a failed CI
+   publish leaves a public attestation pointing at a version that does not exist. Do not re-point a
+   release tag to fix prose.

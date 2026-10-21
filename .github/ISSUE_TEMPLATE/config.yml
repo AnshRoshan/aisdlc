@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the process first
+    url: https://anshroshan.github.io/arsdlc/docs/
+    about: The ten-minute tour, the six gates, and what each skill is responsible for.
+  - name: Install and verify the package
+    url: https://www.npmjs.com/package/arsdlc
+    about: npx arsdlc init, plus how to compare the tarball against the commit it was packed from.
+  - name: Report a security issue
+    url: https://github.com/AnshRoshan/arsdlc/blob/main/SECURITY.md
+    about: Privately, never through a public issue.

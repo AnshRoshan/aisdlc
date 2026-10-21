@@ -4,6 +4,20 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+### Repository hygiene
+- `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request,config}`,
+  `.github/PULL_REQUEST_TEMPLATE.md` and `.github/dependabot.yml` (actions weekly, site deps monthly).
+  Measured reason, not decoration: GitHub's own community profile for this repo reported **57%** and named
+  issue templates, PR templates and a code of conduct as the missing files, and the npm Insights
+  maintenance component reads the same absences.
+- `SECURITY.md` states the threat model rather than the usual disclaimer: zero runtime dependencies, no
+  network, no install-time scripts, and then the limits the README already admits - local writers can
+  recompute hashes, `Approved-by` is not identity, `AISDLC_AGENT` is a tripwire, the guard is heuristic and
+  Claude-only, the scanner is pattern-based. Tree-write access is explicitly out of scope.
+- The bug template asks for `--version`, `arsdlc doctor`, `next --json` and the evidence JSON, because a
+  report about a process kit is only useful if it can be reproduced from files instead of a chat log.
+- Repo description still read "aisdlc runs the process" after the rename; the About field is now `arsdlc`.
+
 ## [0.3.1] - 2026-10-21
 
 ### Package presentation

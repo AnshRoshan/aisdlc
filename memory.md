@@ -15,7 +15,7 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-`0.3.1` is committed (`b7b6bba`), tagged `v0.3.1`, and `ci` + `deploy site` are green on both. Only the
+`0.3.1` is tagged at `7119890` (`ci` and `deploy site` green on main and on the tag). Only the
 registry and the release page are left, and both are your credentials. One of these, in this order of preference:
 
 ```bash
@@ -23,7 +23,7 @@ registry and the release page are left, and both are your credentials. One of th
 #   npm package page -> Publishing -> Trusted publishing -> add publisher:
 #   owner AnshRoshan, repo arsdlc, branch main, workflow publish.yml, environment empty.
 #   Then:
-gh run rerun 39576682326 --failed
+gh run rerun 39577197571 --failed
 
 # B - the fast one, unsigned, from this laptop:
 cd packages/cli && npm publish --access public
@@ -37,9 +37,10 @@ gh release create v0.3.1 --generate-notes --latest
 
 A already proved one thing worth knowing: the CI job wrote a signed provenance statement for
 `arsdlc@0.3.1` to the Sigstore transparency log *before* npm refused the PUT, so a failed CI publish is
-not fully clean - an attestation for a version that does not exist is now public. Then close T2, T3 and
-T4 with recorded evidence. T20 needs a runner and real model runs before any number exists; T13 needs a
-Codex or Copilot client that accepts a catalog file.
+not fully clean - two attestations for a version that does not exist are now public (logIndex 3353477021
+and 3353537406, from the tag and from re-pointing it). Do not push another `v0.3.1` tag; publish the
+version, then close T2, T3 and T4 with recorded evidence. T20 needs a runner and real model runs before
+any number exists; T13 needs a Codex or Copilot client that accepts a catalog file.
 
 ## Open questions
 

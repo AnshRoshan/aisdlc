@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
-  <title id="title">aisdlc stages and gates</title>
+  <title id="title">arsdlc stages and gates</title>
   <desc id="desc">Discover, specify, plan, tasks, build, verify, accept, release and operate; DONE follows required gates. Lanes decide which of six gates apply.</desc>
   <rect x="16" y="16" width="1168" height="268" rx="22" fill="#ffffff" stroke="#dbe2ea"/>
 

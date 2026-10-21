@@ -1,4 +1,4 @@
-# Contributing to aisdlc
+# Contributing to arsdlc
 
 ## Layout and ownership
 
@@ -27,7 +27,7 @@ Run from the repository root, stopping on any failed command:
 ```text
 npm --prefix packages/cli test
 node packages/cli/scripts/check-skills.mjs
-node packages/cli/bin/aisdlc.js scan
+node packages/cli/bin/arsdlc.js scan
 node --test hooks/test/*.test.mjs
 npm --prefix site test
 npm --prefix site run build
@@ -51,7 +51,7 @@ runs the sync hook. Generated copies are not the source of truth.
 
 ## Reporting bugs
 
-Include harness/runtime versions, `aisdlc doctor`, the failing command and the smallest sanitized artifact
+Include harness/runtime versions, `arsdlc doctor`, the failing command and the smallest sanitized artifact
 state. Do not attach private code, credentials or unredacted output. State what was actually executed.
 
 ## Release checklist

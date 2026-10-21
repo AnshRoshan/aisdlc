@@ -20,7 +20,7 @@ export function skillsSourceDir() {
   for (const dir of [join(here, "..", "skills"), join(here, "..", "..", "..", "skills")]) {
     if (existsSync(dir) && readdirSync(dir).some((name) => existsSync(join(dir, name, "SKILL.md")))) return dir;
   }
-  throw new Error("aisdlc skills directory not found; reinstall the package.");
+  throw new Error("arsdlc skills directory not found; reinstall the package.");
 }
 export function agentsSourceDir() {
   for (const dir of [join(here, "..", "agents"), join(here, "..", "..", "..", "agents")]) {
@@ -65,7 +65,7 @@ const HARNESS_ARTIFACT = /^(?:\.agents|\.claude|\.cursor|\.gemini|\.windsurf|\.o
  * They move during normal work, so neither the source fingerprint nor tree drift may count them.
  */
 export function isProcessArtifact(name, featurePrefix) {
-  return name.startsWith(featurePrefix) || name === "aisdlc.json" || HARNESS_ARTIFACT.test(name)
+  return name.startsWith(featurePrefix) || name === "arsdlc.json" || HARNESS_ARTIFACT.test(name)
     || name.startsWith(".github/skills/") || name.startsWith(".github/prompts/");
 }
 
@@ -226,7 +226,7 @@ export function isTextFile(path) {
 export function projectRoot(start = process.cwd()) {
   let dir = resolve(start);
   for (;;) {
-    if (existsSync(join(dir, "aisdlc.json")) || existsSync(join(dir, ".git"))) return dir;
+    if (existsSync(join(dir, "arsdlc.json")) || existsSync(join(dir, ".git"))) return dir;
     const parent = dirname(dir);
     if (parent === dir) return resolve(start);
     dir = parent;

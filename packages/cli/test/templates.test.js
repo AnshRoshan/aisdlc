@@ -84,7 +84,7 @@ test("rollout seed carries rollback steps; guardrails require measured budgets a
 });
 
 test("instruction block always-loads steering; taste seed carries the sections taste skill reads", () => {
-  const b = INSTRUCTIONS_BLOCK(["aisdlc-flow"]);
+  const b = INSTRUCTIONS_BLOCK(["arsdlc-flow"]);
   assert.ok(b.includes("1b. Before writing any code, read `docs/taste.md`"), "always-on steering line");
   for (const h of ["## Code", "## Tests", "## Agent behaviour", "## Review", "## Definition of done", "## UI"]) {
     assert.ok(TASTE.includes(h), `taste seed missing ${h}`);

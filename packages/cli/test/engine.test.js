@@ -58,7 +58,7 @@ test("parseTasks + traceMatrix", () => {
 test("scanSecrets catches real keys, ignores placeholders", () => {
   assert.equal(scanSecrets("AWS_KEY=AKIA" + "ABCDEFGHIJKLMNOP").length, 1);
   assert.equal(scanSecrets("key = <your-aws-key> AKIA" + "ABCDEFGHIJKLMNOP").length, 1, "nearby placeholder must not hide a real key");
-  assert.equal(scanSecrets('password: "correct-horse-battery"').length, 1); // aisdlc:allow-secret
+  assert.equal(scanSecrets('password: "correct-horse-battery"').length, 1); // arsdlc:allow-secret
   assert.equal(scanSecrets('password: "${DB_PASSWORD}"').length, 0);
 });
 
@@ -173,7 +173,7 @@ test("lanes: gate requirements ratchet by lane", () => {
 test("lanes: spike is DONE once probe evidence exists; no signature needed", () => {
   const f = deriveFlow({ ...base, lane: "spike", spec: unsignedSpec, evidence: [{ label: "spike", exitCode: 0, command: "node bench.js" }] });
   assert.equal(f.state, "DONE");
-  assert.equal(f.skill, "aisdlc-retro");
+  assert.equal(f.skill, "arsdlc-retro");
   assert.equal(f.gates.G1.skipped, true);
   assert.equal(f.gates.G3.required, true);
 });

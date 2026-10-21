@@ -6,7 +6,7 @@ Rule: before using any external format, API or tool, read the current primary do
 
 | Library | Skill or MCP | When to load it |
 |---|---|---|
-| aisdlc | local skills in `skills/` | Every engineering task in this repo |
+| arsdlc | local skills in `skills/` | Every engineering task in this repo |
 | No third-party MCP is required | - | - |
 
 ## External specs and where to check them

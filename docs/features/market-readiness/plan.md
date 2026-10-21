@@ -5,7 +5,7 @@
 The CLI keeps its existing shape: `cli.js` parses commands and owns effects, `engine.js` stays pure over parsed state, `fsx.js` owns disk and platform behavior. Four new modules stay inside `packages/cli/src/` and use built-ins only: `provenance.js` resolves git `head`/`tree` and optional external signers, `export.js` builds the in-toto statement, DSSE envelope and SARIF, `mcp.js` serves a read-only stdio JSON-RPC loop, and `harness-probe.js` reports what is actually installed. Approvals gain three additive fields. Workflows gain a reusable gate job and move to Node 22. Packaging gains a portable root manifest and a `skills` entry. The guard stays where it is; harnesses without a native hook get the CI gate and an honest `doctor` level.
 
 ```
-aisdlc CLI
+arsdlc CLI
   cli.js  ──> engine.js (pure gates, hashes, flow, report)
      │            ▲
      ├──> fsx.js ─┘
@@ -14,7 +14,7 @@ aisdlc CLI
      ├──> harness-probe.js ─> enforcement matrix for doctor
      └──> mcp.js ─────────> stdio JSON-RPC: next, status (read-only)
 
-hooks/aisdlc-guard.mjs ──> cached `next --json` ──> blocks actions (Claude Code only)
+hooks/arsdlc-guard.mjs ──> cached `next --json` ──> blocks actions (Claude Code only)
 .github/workflows/{ci,deploy,publish,gate}.yml ──> npm, Pages, PR checks
 site/ ──> Astro 7 static build on Node 22
 ```
@@ -53,7 +53,7 @@ site/ ──> Astro 7 static build on Node 22
 | 1 | Does the npm account support trusted publishing? | Try OIDC first; fall back to a scoped automation token | Short-lived credentials are strictly better; the fallback is documented | Manual publish |
 | 2 | Which harnesses expose stable lifecycle hooks? | Claude native; probe Codex, Copilot and Antigravity; CI otherwise | Hook APIs are new and churn; a false `native` claim is worse than `ci` | Assume all hooks work |
 | 3 | Does a whole-tree hash cause approval churn? | Start with whole tree, exempt `evidence/`; narrow to the feature diff if churn is real | Stricter first; F-03 flags the risk | Artifact hash only |
-| 4 | What exact predicate shape should the attestation use? | `https://aisdlc.dev/attestation/gate-evidence/v1` with subject = feature artifacts | Mirrors SLSA statement shape so consumers can pattern-match | Custom schema |
+| 4 | What exact predicate shape should the attestation use? | `https://arsdlc.dev/attestation/gate-evidence/v1` with subject = feature artifacts | Mirrors SLSA statement shape so consumers can pattern-match | Custom schema |
 | 5 | Which MCP framing and version? | JSON-RPC 2.0 over stdio, initialize + tools/list + tools/call | The lowest common surface every client supports | HTTP server, MCP Apps |
 | 6 | Does SARIF 2.1.0 cover findings and gate failures? | Findings as results, gate failures as invocations with executionSuccessful=false | Standard scanners already ingest it | Custom JSON |
 
@@ -111,14 +111,14 @@ Retention: the life of the repository. No PII is required. Commands and paths ca
 
 ## Interface contracts
 
-- `aisdlc doctor [--json]`: `harnesses[]` entries `{ id, detected, enforcement: native|ci|none, install, guard, reason }`.
-- `aisdlc approve <gate> <feature> --by <human> [--note]`: writes `head`, `tree`, `git` when a repository exists.
-- `aisdlc gate <G1..G6>`: a changed tree outside `evidence/` fails with `STALE_APPROVAL` and names the re-approval command.
-- `aisdlc export <feature> [--format all|in-toto|sarif] [--out <dir>] [--sign <command>]`: writes the bundle; `--sign` receives the envelope path and must exit zero. No signer means unsigned output with an explicit note.
-- `aisdlc mcp --stdio`: JSON-RPC 2.0; methods `initialize`, `tools/list`, `tools/call`; tools `next`, `status`; any other tool name returns an error that points at the CLI.
+- `arsdlc doctor [--json]`: `harnesses[]` entries `{ id, detected, enforcement: native|ci|none, install, guard, reason }`.
+- `arsdlc approve <gate> <feature> --by <human> [--note]`: writes `head`, `tree`, `git` when a repository exists.
+- `arsdlc gate <G1..G6>`: a changed tree outside `evidence/` fails with `STALE_APPROVAL` and names the re-approval command.
+- `arsdlc export <feature> [--format all|in-toto|sarif] [--out <dir>] [--sign <command>]`: writes the bundle; `--sign` receives the envelope path and must exit zero. No signer means unsigned output with an explicit note.
+- `arsdlc mcp --stdio`: JSON-RPC 2.0; methods `initialize`, `tools/list`, `tools/call`; tools `next`, `status`; any other tool name returns an error that points at the CLI.
 - `package.json`: `"skills": ["skills"]` for the skills CLI; version is the single source for every manifest.
 - Portable manifests: root `plugin.json`, `.agents/plugins/marketplace.json` for Codex, `.github/plugin/marketplace.json` for Copilot, `.claude-plugin/` unchanged for Claude. **Deferred (T13): the portable schema is unverified, F-02.**
-- `aisdlc ci [feature] [--json]`: for every feature, validates the spec, then evaluates each lane-required gate the flow has crossed or a human has already signed, plus stale evidence, artifact-hash staleness and tree drift. Exits 1 on any problem. This is the verb `.github/workflows/gates.yml` runs, and it is the enforcement layer for harnesses with no native hook.
+- `arsdlc ci [feature] [--json]`: for every feature, validates the spec, then evaluates each lane-required gate the flow has crossed or a human has already signed, plus stale evidence, artifact-hash staleness and tree drift. Exits 1 on any problem. This is the verb `.github/workflows/gates.yml` runs, and it is the enforcement layer for harnesses with no native hook.
 - `doctor [--json]`: `{ detected, enforcement[], testPolicy, companions, skills }`; each `enforcement` entry is `{ id, label, enforcement: native|ci|none, reason, install, retired }`. `native` requires a guard module the project can point at, `ci` requires the gate workflow, and neither is inferred from a harness's advertised capabilities.
 - Harness registry now carries `antigravity` and `devin`; `gemini-cli` and `windsurf` remain installable, write into their compatible layouts and print a retirement notice. `.devin/skills` is a companion search root.
 - Exports: in-toto Statement v1, DSSE, SARIF 2.1.0. All JSON, UTF-8, stable key order where practical.
@@ -132,11 +132,11 @@ Retention: the life of the repository. No PII is required. Commands and paths ca
 - `harness-probe.js`: new, takes a filesystem probe function.
 - Workflows: `.github/workflows/gate.yml` reusable job.
 - Manifests: root `plugin.json`, package `skills` field.
-- Guard: `hooks/aisdlc-guard.mjs`, toggled by the existing manifest, unchanged contract.
+- Guard: `hooks/arsdlc-guard.mjs`, toggled by the existing manifest, unchanged contract.
 
 ## Design checklist answers
 
-The applicable clusters from the `aisdlc-plan` checklists, answered here rather than left for review.
+The applicable clusters from the `arsdlc-plan` checklists, answered here rather than left for review.
 
 Touched, delivery and operations:
 
@@ -147,7 +147,7 @@ Touched, delivery and operations:
 - **73 Rollbacks**: deprecate the version, publish a patch from the last good commit, redeploy that commit to Pages. Published tags never move.
 - **77/78 Versioning**: approval and evidence record fields are additive, so old files stay readable; the package follows semver, and the export format is versioned in the predicate type.
 - **100 Logging**: the evidence record is the log: argv, exit code, timestamps, source fingerprints, redacted output.
-- **101/105 Observability**: `aisdlc report` is the dashboard; an export answers "who signed what, on which tree, and did it pass".
+- **101/105 Observability**: `arsdlc report` is the dashboard; an export answers "who signed what, on which tree, and did it pass".
 - **104 Alerts**: the CI gate is the only page, and it blocks rather than notifies. There is no pager to wake at 3:14 AM.
 - **107/108 SLOs and budgets**: the numbers live in `guardrails.yaml`; the error budget is failed releases per 100.
 
@@ -227,9 +227,9 @@ The shortest end-to-end proof a stranger can run, in order:
 ```
 npm --prefix packages/cli test
 node packages/cli/scripts/check-skills.mjs
-node packages/cli/bin/aisdlc.js doctor --json
-node packages/cli/bin/aisdlc.js export demo --format all --out .tmp/export
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node packages/cli/bin/aisdlc.js mcp --stdio
+node packages/cli/bin/arsdlc.js doctor --json
+node packages/cli/bin/arsdlc.js export demo --format all --out .tmp/export
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node packages/cli/bin/arsdlc.js mcp --stdio
 cd site && npm ci && npm run build
 cd .. && claude plugin validate .
 ```
@@ -253,7 +253,7 @@ Expected observations: the suite passes; the corpus check passes; `doctor` print
 
 - Releases: npm versions are immutable. Roll back by deprecating the bad version and publishing a patch; never move a published tag.
 - Approval fields are additive. Old entries remain readable; no migration runs.
-- Tree binding can be relaxed per project with an `aisdlc.json` setting if churn proves unacceptable.
+- Tree binding can be relaxed per project with an `arsdlc.json` setting if churn proves unacceptable.
 - Workflows revert as files. The previous Pages deployment stays live on a failed build.
 - `export` and `mcp` are new commands; removing them touches no existing path.
 - No database, no migration, no stored user data.

@@ -1,13 +1,13 @@
 name: publish cli
 
-# Publishes the aisdlc CLI to npm. Preferred path: npm trusted publishing (no secret at all) - add
+# Publishes the arsdlc CLI to npm. Preferred path: npm trusted publishing (no secret at all) - add
 # this repo, workflow and environment as a trusted publisher on the npm package page, and leave
 # NPM_TOKEN unset. If the account cannot use trusted publishing, set NPM_TOKEN and the mode step
 # switches to the token path; npm refuses --provenance for token auth, so that path publishes unsigned.
 #
 # The switch is a step output, not an `if` that reads `secrets`: GitHub does not expose the
 # `secrets` context in a job-level or step-level `if`, and a workflow that tries fails to parse and
-# never runs at all. The token reaches npm through `env:` on its own step, because `aisdlc scan`
+# never runs at all. The token reaches npm through `env:` on its own step, because `arsdlc scan`
 # flags an inline `TOKEN=...` assignment and this repo has to pass its own gates.
 #
 # Trigger: push a version tag (git tag vX.Y.Z && git push --tags) or run the workflow manually.

@@ -8,12 +8,12 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { statementOf, dsseEnvelope, sarifOf, verifyBundle, STATEMENT_TYPE, PREDICATE_TYPE, PAYLOAD_TYPE } from "../src/export.js";
 
-const cli = fileURLToPath(new URL("../bin/aisdlc.js", import.meta.url));
+const cli = fileURLToPath(new URL("../bin/arsdlc.js", import.meta.url));
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 const hard = (errors) => errors.filter((e) => !e.startsWith("unsigned:"));
 
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), "aisdlc-export-"));
+  const root = mkdtempSync(join(tmpdir(), "arsdlc-export-"));
   t.after(() => { assert.ok(resolve(root).startsWith(resolve(tmpdir()))); rmSync(root, { recursive: true, force: true }); });
   return root;
 }
@@ -30,7 +30,7 @@ function scaffold(root) {
 }
 
 test("statement and envelope follow in-toto v1 and DSSE exactly", () => {
-  const statement = statementOf({ subjects: [{ name: "aisdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("spec") } }], predicate: { feature: { slug: "x" } } });
+  const statement = statementOf({ subjects: [{ name: "arsdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("spec") } }], predicate: { feature: { slug: "x" } } });
   assert.equal(statement._type, STATEMENT_TYPE);
   assert.equal(statement.predicateType, PREDICATE_TYPE);
   const envelope = dsseEnvelope(statement);
@@ -38,16 +38,16 @@ test("statement and envelope follow in-toto v1 and DSSE exactly", () => {
   assert.deepEqual(envelope.signatures, [], "an unsigned envelope says so instead of pretending");
   assert.equal(Buffer.from(envelope.payload, "base64").toString("utf8"), JSON.stringify(statement));
 
-  const digests = new Map([["aisdlc:bundle/artifacts/spec.md", sha256("spec")]]);
+  const digests = new Map([["arsdlc:bundle/artifacts/spec.md", sha256("spec")]]);
   assert.deepEqual(hard(verifyBundle({ statement, envelope, digests })), []);
   assert.match(verifyBundle({ statement, envelope, digests }).join(" "), /unsigned: integrity only, not authorship/);
 });
 
 test("verifier names a tampered file, a hidden file and an invented file", () => {
-  const statement = statementOf({ subjects: [{ name: "aisdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("spec") } }], predicate: {} });
+  const statement = statementOf({ subjects: [{ name: "arsdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("spec") } }], predicate: {} });
   const envelope = dsseEnvelope(statement);
 
-  const edited = hard(verifyBundle({ statement, envelope, digests: new Map([["aisdlc:bundle/artifacts/spec.md", sha256("edited")]]) }));
+  const edited = hard(verifyBundle({ statement, envelope, digests: new Map([["arsdlc:bundle/artifacts/spec.md", sha256("edited")]]) }));
   assert.equal(edited.length, 1);
   assert.match(edited[0], /spec\.md: digest mismatch/);
   assert.ok(edited[0].includes(sha256("edited").slice(0, 8)) && edited[0].includes(sha256("spec").slice(0, 8)), "both digests are printed");
@@ -55,11 +55,11 @@ test("verifier names a tampered file, a hidden file and an invented file", () =>
   const hidden = hard(verifyBundle({ statement, envelope, digests: new Map() }));
   assert.match(hidden.join(" "), /listed in the statement but absent from the bundle/);
 
-  const invented = hard(verifyBundle({ statement, envelope, digests: new Map([["aisdlc:bundle/artifacts/extra.md", sha256("x")]]) }));
+  const invented = hard(verifyBundle({ statement, envelope, digests: new Map([["arsdlc:bundle/artifacts/extra.md", sha256("x")]]) }));
   assert.match(invented.join(" "), /present in the bundle but absent from the statement/);
 
-  const rewroteStatement = { ...statement, subject: [{ name: "aisdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("edited") } }] };
-  assert.match(hard(verifyBundle({ statement: rewroteStatement, envelope, digests: new Map([["aisdlc:bundle/artifacts/spec.md", sha256("edited")]]) })).join(" "),
+  const rewroteStatement = { ...statement, subject: [{ name: "arsdlc:bundle/artifacts/spec.md", digest: { sha256: sha256("edited") } }] };
+  assert.match(hard(verifyBundle({ statement: rewroteStatement, envelope, digests: new Map([["arsdlc:bundle/artifacts/spec.md", sha256("edited")]]) })).join(" "),
     /envelope\.payload does not match statement\.json/, "re-signing the statement without the envelope is caught");
 });
 
@@ -72,8 +72,8 @@ test("sarif 2.1.0 carries one result per failing check and unsatisfied row", () 
   });
   assert.equal(sarif.version, "2.1.0");
   assert.equal(sarif.runs.length, 1);
-  assert.equal(sarif.runs[0].tool.driver.name, "aisdlc");
-  assert.deepEqual(sarif.runs[0].tool.driver.rules.map((r) => r.id), ["aisdlc/g4", "aisdlc/acceptance"]);
+  assert.equal(sarif.runs[0].tool.driver.name, "arsdlc");
+  assert.deepEqual(sarif.runs[0].tool.driver.rules.map((r) => r.id), ["arsdlc/g4", "arsdlc/acceptance"]);
   assert.equal(sarif.runs[0].results.length, 2, "the passing row is not reported");
   assert.equal(sarif.runs[0].results[0].message.text, "G4 Acceptance proof: human sign-off (SoD) - unsigned");
   assert.equal(sarif.runs[0].results[1].level, "warning");

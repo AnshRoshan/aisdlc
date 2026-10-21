@@ -1,4 +1,4 @@
-# aisdlc: Constitution
+# arsdlc: Constitution
 
 Version: 1.1
 Amended: 2026-10-07
@@ -10,7 +10,7 @@ Non-negotiables every agent and human in this project obeys. Add project-specifi
 3. Segregation of duties: the approver is never the author or the prompter.
 4. Humans own the acceptance bar (Approved-by lines are human-signed).
 5. Stranger-trust: done = run artifact recorded as evidence.
-6. Disk is state. Chat is not. `aisdlc next` derives the truth from files.
+6. Disk is state. Chat is not. `arsdlc next` derives the truth from files.
 7. Secrets never land in files. Placeholders only. Fail closed.
 8. Fail loud, never fake green. Infra-down means IMPLEMENTED-NOT-VERIFIED, not PASS.
 

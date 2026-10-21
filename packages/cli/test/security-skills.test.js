@@ -6,7 +6,7 @@ import { parseAcceptance } from "../src/engine.js";
 
 const repo = new URL("../../../", import.meta.url);
 const text = (path) => readFileSync(new URL(path, repo), "utf8").replace(/\r\n/g, "\n");
-const protocol = text("skills/aisdlc-verify/references/security-verification.md");
+const protocol = text("skills/arsdlc-verify/references/security-verification.md");
 const controls = [
   "SQL injection", "Cross-site scripting (XSS)", "CSRF protection", "Secure file uploads",
   "Broken Object-Level Authorization (BOLA)", "Rate limiting", "Secure JWT handling",
@@ -27,12 +27,12 @@ test("security protocol includes every requested control exactly once in its mat
 
 test("verification, review, quality and release route to final security checks", () => {
   for (const name of ["verify", "review", "quality", "release"]) {
-    const skill = text(`skills/aisdlc-${name}/SKILL.md`);
+    const skill = text(`skills/arsdlc-${name}/SKILL.md`);
     assert.match(skill, /## Final security verification/);
     assert.match(skill, /security-review\.md/);
     assert.match(skill, /NOT_VERIFIED/);
   }
-  const verify = text("skills/aisdlc-verify/SKILL.md");
+  const verify = text("skills/arsdlc-verify/SKILL.md");
   assert.match(verify, /read `references\/security-verification\.md` and follow it/);
   assert.ok(verify.indexOf("## Final security verification") < verify.indexOf("## Hand off"));
 });

@@ -13,10 +13,10 @@ jobs:
         run: node scripts/check-skills.mjs
         working-directory: packages/cli
       - name: the kit must pass its own gates
-        run: node bin/aisdlc.js scan
+        run: node bin/arsdlc.js scan
         working-directory: packages/cli
       - name: the live program must pass the gates it has crossed
-        run: node bin/aisdlc.js ci market-readiness
+        run: node bin/arsdlc.js ci market-readiness
         working-directory: packages/cli
         # Scoped on purpose: docs/features/demo is deliberate unfinished scaffolding, and a
         # green run that ignores it is worth more than one that fails on a fixture.
@@ -32,17 +32,17 @@ jobs:
       - name: smoke the CLI end to end
         run: |
           mkdir /tmp/demo && cd /tmp/demo && git init -q && git config user.name ci && git config user.email ci@example.com
-          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js init --harness all
-          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js new "Demo" --kind backend
-          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js next --json
-          node $GITHUB_WORKSPACE/packages/cli/bin/aisdlc.js doctor
+          node $GITHUB_WORKSPACE/packages/cli/bin/arsdlc.js init --harness all
+          node $GITHUB_WORKSPACE/packages/cli/bin/arsdlc.js new "Demo" --kind backend
+          node $GITHUB_WORKSPACE/packages/cli/bin/arsdlc.js next --json
+          node $GITHUB_WORKSPACE/packages/cli/bin/arsdlc.js doctor
   hooks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: node --check hooks/aisdlc-guard.mjs
+      - run: node --check hooks/arsdlc-guard.mjs
       - run: node --test hooks/test/*.test.mjs
   site:
     runs-on: ubuntu-latest

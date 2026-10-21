@@ -101,7 +101,7 @@ test("scanner checks all matches and never exempts a neighboring real secret", (
   const key = "AKIA" + "ABCDEFGHIJKLMNOP";
   assert.equal(scanSecrets("example " + key + " " + key).length, 2);
   assert.equal(scanSecrets('password: "${ENV_PASSWORD}"').length, 0);
-  assert.equal(scanSecrets(key + " # aisdlc:allow-secret").length, 0);
+  assert.equal(scanSecrets(key + " # arsdlc:allow-secret").length, 0);
 });
 
 test("guardrail placeholders and blank kill switches cannot borrow the next line", () => {

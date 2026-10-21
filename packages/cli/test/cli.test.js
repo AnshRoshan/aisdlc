@@ -8,9 +8,9 @@ import { spawnSync, execFileSync } from "node:child_process";
 import { HARNESSES } from "../src/harnesses.js";
 import { sourceFingerprint, listSkills, readJson, upsertBlock, copyOrLink, projectRoot } from "../src/fsx.js";
 
-const cli = fileURLToPath(new URL("../bin/aisdlc.js", import.meta.url));
+const cli = fileURLToPath(new URL("../bin/arsdlc.js", import.meta.url));
 function project(t, { git = true } = {}) {
-  const root = mkdtempSync(join(tmpdir(), "aisdlc-test-"));
+  const root = mkdtempSync(join(tmpdir(), "arsdlc-test-"));
   t.after(() => { assert.ok(resolve(root).startsWith(resolve(tmpdir()) + "\\") || resolve(root).startsWith(resolve(tmpdir()) + "/")); rmSync(root, { recursive: true, force: true }); });
   if (git) {
     for (const args of [["init", "-q"], ["config", "user.name", "Fixture Author"], ["config", "user.email", "fixture@example.invalid"]]) execFileSync("git", args, { cwd: root, stdio: "ignore" });
@@ -58,7 +58,7 @@ test("installer covers every harness, preserves user instructions and is repeata
   good(run(root, ["init", "--harness", "all"]));
   for (const h of Object.values(HARNESSES)) {
     assert.equal(readdirSync(join(root, h.skillsDir)).length, 20);
-    assert.ok(get(root, h.instructions).includes("aisdlc:start"));
+    assert.ok(get(root, h.instructions).includes("arsdlc:start"));
     if (h.commandsDir) assert.equal(readdirSync(join(root, h.commandsDir)).length, 20);
     if (h.agentsDir) assert.equal(readdirSync(join(root, h.agentsDir)).length, 2);
   }
@@ -72,9 +72,9 @@ test("installer covers every harness, preserves user instructions and is repeata
 test("link installation works and unknown harnesses do not write", (t) => {
   const root = project(t);
   assert.notEqual(run(root, ["init", "--harness", "missing"]).code, 0);
-  assert.equal(existsSync(join(root, "aisdlc.json")), false);
+  assert.equal(existsSync(join(root, "arsdlc.json")), false);
   good(run(root, ["init", "--harness", "universal", "--link"]));
-  assert.ok(lstatSync(join(root, ".agents/skills/aisdlc-flow")).isSymbolicLink());
+  assert.ok(lstatSync(join(root, ".agents/skills/arsdlc-flow")).isSymbolicLink());
 });
 
 test("feature scaffold, state, trace, validators and skipped gates agree", (t) => {
@@ -130,7 +130,7 @@ test("nonzero, missing executable and changed-during-run evidence never fake gre
   const root = project(t);
   prepare(root);
   assert.equal(record(root, "process.exit(7)").code, 3);
-  assert.equal(run(root, ["evidence", "export", "--", "aisdlc-no-such-executable"]).code, 3);
+  assert.equal(run(root, ["evidence", "export", "--", "arsdlc-no-such-executable"]).code, 3);
   good(record(root, "require('node:fs').writeFileSync('src.js', 'changed during run')"));
   const rec = JSON.parse(get(root, dir + "evidence/" + evidenceFile(root)));
   assert.equal(rec.sourceChangedDuringRun, true);
@@ -187,10 +187,10 @@ test("JSON and configuration corruption fail closed", (t) => {
   const root = project(t);
   newFeature(root);
   for (const value of ["{ broken", "null", "[]", JSON.stringify({ featuresDir: "../escape" }), JSON.stringify({ docsDir: "C:\\escape" }), JSON.stringify({ policy: { minApprovals: { G1: 0 } } }), JSON.stringify({ test: { gate: "unknown" } }), JSON.stringify({ test: { gate: "none-by-design" } })]) {
-    put(root, "aisdlc.json", value);
+    put(root, "arsdlc.json", value);
     assert.notEqual(run(root, ["next", "export", "--json"]).code, 0, value);
   }
-  put(root, "aisdlc.json", {});
+  put(root, "arsdlc.json", {});
   put(root, dir + "approvals.json", "{broken");
   assert.notEqual(run(root, ["next", "export", "--json"]).code, 0);
 });
@@ -217,7 +217,7 @@ test("secrets scan returns nonzero JSON and evidence redacts recognized output s
 
 test("filesystem helpers support CRLF, preserve marked blocks, and protect sources", (t) => {
   const root = project(t, { git: false });
-  put(root, "skills/aisdlc-demo/SKILL.md", "---\r\nname: aisdlc-demo\r\ndescription: Test description\r\n---\r\nBody");
+  put(root, "skills/arsdlc-demo/SKILL.md", "---\r\nname: arsdlc-demo\r\ndescription: Test description\r\n---\r\nBody");
   assert.equal(listSkills(join(root, "skills"))[0].description, "Test description");
   const file = join(root, "instructions.md");
   put(root, "instructions.md", "User text\n");
@@ -226,12 +226,12 @@ test("filesystem helpers support CRLF, preserve marked blocks, and protect sourc
   assert.ok(get(root, "instructions.md").startsWith("User text"));
   assert.equal(get(root, "instructions.md").split("START").length, 2);
   copyOrLink(join(root, "skills"), join(root, "skills"), false);
-  assert.ok(existsSync(join(root, "skills/aisdlc-demo/SKILL.md")));
+  assert.ok(existsSync(join(root, "skills/arsdlc-demo/SKILL.md")));
   assert.throws(() => copyOrLink(join(root, "skills"), join(root, "skills/nested"), false));
   assert.deepEqual(readJson(join(root, "missing.json"), []), []);
   put(root, "bad.json", "broken");
   assert.throws(() => readJson(join(root, "bad.json"), []));
-  put(root, "aisdlc.json", {});
+  put(root, "arsdlc.json", {});
   mkdirSync(join(root, "nested"));
   assert.equal(projectRoot(join(root, "nested")), root);
 });
@@ -319,11 +319,11 @@ test("doctor reports the enforcement level it can point at, never a capability",
   assert.equal(levels["codex"], "none");
   assert.ok(bare.enforcement.every((e) => e.reason && e.install), "every level carries a reason and a command");
 
-  put(root, ".github/workflows/gates.yml", "name: aisdlc gate\n");
+  put(root, ".github/workflows/gates.yml", "name: arsdlc gate\n");
   const withCi = json(run(root, ["doctor", "--json"]));
   assert.equal(Object.fromEntries(withCi.enforcement.map((e) => [e.id, e.enforcement]))["codex"], "ci");
 
-  put(root, "hooks/aisdlc-guard.mjs", "export default {};\n");
+  put(root, "hooks/arsdlc-guard.mjs", "export default {};\n");
   put(root, "hooks/hooks.json", '{"modules":[]}\n');
   const withGuard = json(run(root, ["doctor", "--json"]));
   const guardLevels = Object.fromEntries(withGuard.enforcement.map((e) => [e.id, e.enforcement]));

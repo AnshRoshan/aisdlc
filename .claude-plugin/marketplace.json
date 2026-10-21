@@ -1,5 +1,5 @@
 {
-  "name": "aisdlc",
+  "name": "arsdlc",
   "metadata": { "description": "Local-first engineering process skills, evidence gates and human approvals." },
   "owner": {
     "name": "Ansh Roshan",
@@ -7,9 +7,9 @@
   },
   "plugins": [
     {
-      "name": "aisdlc",
+      "name": "arsdlc",
       "source": "./",
-      "description": "Agents write code, aisdlc runs the process. 20 skills + evidence gates G1-G6, hash-bound approvals, EARS spec validation.",
+      "description": "Agents write code, arsdlc runs the process. 20 skills + evidence gates G1-G6, hash-bound approvals, EARS spec validation.",
       "version": "0.3.0",
       "category": "engineering-process",
       "keywords": ["sdlc", "spec-driven-development", "ears", "verification", "agent-skills"]

@@ -18,7 +18,7 @@ is higher. Prune before you add.
   The skill carries the instruction, not the argument for it.
 
 Say a thing once. The only intentional duplication is the eight invariants, which appear in
-`aisdlc-flow` and in the generated instructions block because a skill must stand alone when
+`arsdlc-flow` and in the generated instructions block because a skill must stand alone when
 installed on its own.
 
 ## Shape
@@ -27,7 +27,7 @@ installed on its own.
 - Every question a skill asks a human carries exactly one recommended answer with a one-line why.
   A neutral menu pushes the work back onto the user and gets skipped.
 - Close with the output contract: one line of `lane · state -> next action -> owner`, the files you
-  touched, and the `aisdlc next` output after the change. No "summary of what I did" paragraphs.
+  touched, and the `arsdlc next` output after the change. No "summary of what I did" paragraphs.
 - Length is not a goal. 60 tight lines beat 120 that include six of encouragement.
 
 ## When to add a sub-file
@@ -61,7 +61,7 @@ budget stops meaning anything. Raise a number only when the path genuinely needs
 and write the reason in the comment next to it.
 
 A prune must not change behavior. If a cut might, say so and prove it by running the flow:
-`aisdlc new` in a scratch repo, walk the gates, compare `next` output before and after.
+`arsdlc new` in a scratch repo, walk the gates, compare `next` output before and after.
 
 ## Portability
 

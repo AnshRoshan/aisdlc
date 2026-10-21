@@ -2,7 +2,7 @@
 
 ## What this is
 
-aisdlc is an MIT process kit for AI-assisted engineering. It combines 20 Agent Skills with a zero-dependency Node CLI so that a feature moves through spec, plan, tasks, implementation, verification, review, release and operation with recorded evidence and human approvals. The kit is local-first: no server, no account, no telemetry. The CLI derives state from files; the skills tell the agent what to do next.
+arsdlc is an MIT process kit for AI-assisted engineering. It combines 20 Agent Skills with a zero-dependency Node CLI so that a feature moves through spec, plan, tasks, implementation, verification, review, release and operation with recorded evidence and human approvals. The kit is local-first: no server, no account, no telemetry. The CLI derives state from files; the skills tell the agent what to do next.
 
 ## Who it's for
 
@@ -12,13 +12,13 @@ aisdlc is an MIT process kit for AI-assisted engineering. It combines 20 Agent S
 
 ## Core flows
 
-1. **Install**: `aisdlc init --harness ...` writes skills, commands and agents into the harness layout; alternatives are the Claude plugin marketplace and the `skills` CLI.
-2. **Start**: `aisdlc new "<title>" --kind ... --lane ...` creates `docs/features/<slug>/` with the artifact set.
+1. **Install**: `arsdlc init --harness ...` writes skills, commands and agents into the harness layout; alternatives are the Claude plugin marketplace and the `skills` CLI.
+2. **Start**: `arsdlc new "<title>" --kind ... --lane ...` creates `docs/features/<slug>/` with the artifact set.
 3. **Specify and plan**: discovery or spec, then a plan; G1 requires a human signature on the plan.
-4. **Build**: tasks with seams and `after:` edges; one task at a time; every run recorded with `aisdlc evidence`.
+4. **Build**: tasks with seams and `after:` edges; one task at a time; every run recorded with `arsdlc evidence`.
 5. **Verify and accept**: G3 checks merge safety, then an independent review fills acceptance and a human signs G4.
 6. **Release and operate**: G5 approves rollout and rollback; G6 checks runtime guardrails and the runbook.
-7. **Learn**: `aisdlc report` reads the logs back; `aisdlc-retro` turns lessons into edits to the constitution, taste or a skill.
+7. **Learn**: `arsdlc report` reads the logs back; `arsdlc-retro` turns lessons into edits to the constitution, taste or a skill.
 
 Lanes decide the gate set: `spike` (G3), `quick` (G2-G4), `standard` (G1-G6), `regulated` (G1-G6, two approvers). Lanes only ratchet up.
 

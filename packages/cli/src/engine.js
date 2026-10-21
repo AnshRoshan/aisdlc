@@ -1,5 +1,5 @@
 /**
- * aisdlc engine: pure functions. Same inputs ⇒ same state.
+ * arsdlc engine: pure functions. Same inputs ⇒ same state.
  * Invariant #6: disk is state, chat is not. Nothing here touches the filesystem.
  */
 import { createHash } from "node:crypto";
@@ -224,7 +224,7 @@ const PLACEHOLDER = /(<[^>]+>|your[-_]|xxxx|example|\$\{|CHANGE_ME|placeholder|d
 export function scanSecrets(text, filename = "input") {
   const out = [];
   (text || "").split("\n").forEach((line, i) => {
-    if (/aisdlc:allow-secret/.test(line)) return;
+    if (/arsdlc:allow-secret/.test(line)) return;
     for (const [family, re] of SECRET_PATTERNS) {
       re.lastIndex = 0;
       let m;
@@ -310,7 +310,7 @@ export function valueSourcing(text) {
 
 /* ───────────── Log analysis ─────────────
  * The gates answer "is this feature allowed to move". Nobody answered "what does the log say",
- * so the evidence and approval files were write-only. This is the pure half of `aisdlc report`:
+ * so the evidence and approval files were write-only. This is the pure half of `arsdlc report`:
  * same files, same numbers, any machine. The one thing it cannot derive from disk is when code
  * last changed, so the caller injects that (git), and it is optional.
  */
@@ -490,13 +490,13 @@ export function runGate(gate, ctx) {
       const ordered = (ctx.evidence || []).filter((e) => !e.legacy).sort((a, b) => (ts(a.startedAt) ?? 0) - (ts(b.startedAt) ?? 0)).reverse();
       const latestFull = ordered.find((e) => (lane === "spike" ? /^(full|spike)$/i : /^full$/i).test(e.label || ""));
       push("test evidence present", (ctx.evidence || []).length > 0, (ctx.evidence || []).length ? `${(ctx.evidence || []).length} recorded run(s)` : "no run artifact: IMPLEMENTED-NOT-VERIFIED");
-      // Three states, from aisdlc.json test.gate: a repo with a runner, one that deliberately has
+      // Three states, from arsdlc.json test.gate: a repo with a runner, one that deliberately has
       // none, and one that simply never set it up. Only the second relaxes the suite, and it says so.
       const policy = ctx.testPolicy || "configured";
       if (policy === "none-by-design") {
         push("full suite recorded", true, `waived by test.gate: none-by-design - G3 still needs a recorded run, and G4's human sign-off carries the risk`);
       } else {
-        push("full suite recorded", !!latestFull, latestFull ? `${latestFull.command}` : policy === "none-yet" ? `no runner configured (aisdlc.json test.gate): either set one up or declare none-by-design with a reason` : "run: aisdlc evidence <slug> --label full -- <test cmd>");
+        push("full suite recorded", !!latestFull, latestFull ? `${latestFull.command}` : policy === "none-yet" ? `no runner configured (arsdlc.json test.gate): either set one up or declare none-by-design with a reason` : "run: arsdlc evidence <slug> --label full -- <test cmd>");
       }
       const green = policy === "none-by-design" && !latestFull ? ordered[0] : latestFull;
       push("latest full run green", !!green && green.exitCode === 0, green ? `exit ${green.exitCode} (${green.command})` : policy === "none-by-design" ? "no green run at all, by design or not" : "");
@@ -592,16 +592,16 @@ export function runAllGates(ctx) {
 /* ───────────── Flow state machine ───────────── */
 export const STATES = ["DISCOVER", "SPECIFY", "PLAN", "TASKS", "BUILD", "VERIFY", "ACCEPT", "RELEASE", "OPERATE", "DONE"];
 const STATE_SKILL = {
-  DISCOVER: "aisdlc-discover",
-  SPECIFY: "aisdlc-spec",
-  PLAN: "aisdlc-plan",
-  TASKS: "aisdlc-tasks",
-  BUILD: "aisdlc-implement",
-  VERIFY: "aisdlc-verify",
-  ACCEPT: "aisdlc-review",
-  RELEASE: "aisdlc-release",
-  OPERATE: "aisdlc-release",
-  DONE: "aisdlc-retro",
+  DISCOVER: "arsdlc-discover",
+  SPECIFY: "arsdlc-spec",
+  PLAN: "arsdlc-plan",
+  TASKS: "arsdlc-tasks",
+  BUILD: "arsdlc-implement",
+  VERIFY: "arsdlc-verify",
+  ACCEPT: "arsdlc-review",
+  RELEASE: "arsdlc-release",
+  OPERATE: "arsdlc-release",
+  DONE: "arsdlc-retro",
 };
 
 export function deriveFlow(ctx) {
@@ -652,7 +652,7 @@ export function deriveFlow(ctx) {
     state = "DONE";
   }
   const nextTask = tasks.find((t) => !t.done) || null;
-  const skill = state === "DONE" ? "aisdlc-retro" : STATE_SKILL[state];
+  const skill = state === "DONE" ? "arsdlc-retro" : STATE_SKILL[state];
   return { state, lane, owner, blocking, skill, nextTask, gates, requiredGates: LANE_GATES[lane], spec: { errors: spec.errors, warnings: spec.warnings, signedBy: spec.signedBy }, tasks: { total: tasks.length, done: tasks.filter((t) => t.done).length } };
 }
 

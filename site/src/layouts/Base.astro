@@ -1,12 +1,12 @@
 ---
 import "../styles/global.css";
 import { base } from "../lib/base.js";
-const { title, description = "Agents write code, aisdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
-const REPO = "https://github.com/AnshRoshan/aisdlc";
+const { title, description = "Agents write code, arsdlc runs the process. EARS specs, six evidence gates, hash-bound approvals, local-first, any harness." } = Astro.props;
+const REPO = "https://github.com/AnshRoshan/arsdlc";
 const ORIGIN = "https://anshroshan.github.io";
 const canonical = new URL(Astro.url.pathname, Astro.site ?? ORIGIN).href;
 const ogImage = `${ORIGIN}${base}/og.png`;
-const page = title ? `${title} · aisdlc` : "aisdlc: agents write code, aisdlc runs the process";
+const page = title ? `${title} · arsdlc` : "arsdlc: agents write code, arsdlc runs the process";
 const path = Astro.url.pathname.replace(base, "") || "/";
 const link = (href) => `${base}${href}`;
 const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
@@ -34,7 +34,7 @@ const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
       <nav class="nav" aria-label="Main">
-        <a href={link("/")} class="brand"><i>▸</i>aisdlc</a>
+        <a href={link("/")} class="brand"><i>▸</i>arsdlc</a>
         <div class="nav-links">
           <a href={link("/skills")} aria-current={here("/skills") ? "page" : undefined}>Skills</a>
           <a href={link("/docs")} aria-current={here("/docs") ? "page" : undefined}>Tour</a>
@@ -49,7 +49,7 @@ const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
     <footer class="site-footer">
       <div class="footer-grid">
         <div>
-          <h4>aisdlc</h4>
+          <h4>arsdlc</h4>
           <p class="footer-note">A process kit for AI-assisted engineering. Local-first: no server, no account, no telemetry. Every claim is a file check.</p>
         </div>
         <div>
@@ -74,13 +74,13 @@ const here = (href) => (href === "/" ? path === "/" : path.startsWith(href));
           <h4>Install</h4>
           <ul>
             <li><a href={`${REPO}/#install`}>Claude Code plugin</a></li>
-            <li><a href="https://github.com/AnshRoshan/aisdlc#install">skills.sh</a></li>
-            <li><a href="https://www.npmjs.com/package/aisdlc">npm (pending)</a></li>
+            <li><a href="https://github.com/AnshRoshan/arsdlc#install">skills.sh</a></li>
+            <li><a href="https://www.npmjs.com/package/arsdlc">npm (pending)</a></li>
             <li><a href={`${REPO}/issues`}>Issues</a></li>
           </ul>
         </div>
       </div>
-      <p class="footer-bar">MIT · © Ansh Roshan · agents write code, aisdlc runs the process</p>
+      <p class="footer-bar">MIT · © Ansh Roshan · agents write code, arsdlc runs the process</p>
     </footer>
     <script>
       import { bindCopyButtons } from "../lib/copy.js";

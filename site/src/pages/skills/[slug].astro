@@ -12,7 +12,7 @@ const sentences = skill.description.split(/(?<=\.)\s/);
 const [first, ...rest] = sentences;
 const sections = outline(skill.html);
 const link = (href) => `${base}${href}`;
-const REPO_FILE = `https://github.com/AnshRoshan/aisdlc/blob/main/skills/${skill.name}/SKILL.md`;
+const REPO_FILE = `https://github.com/AnshRoshan/arsdlc/blob/main/skills/${skill.name}/SKILL.md`;
 ---
 <Base title={`/${skill.name}`} description={skill.description.slice(0, 150)}>
   <div class="wrap doc">
@@ -33,11 +33,11 @@ const REPO_FILE = `https://github.com/AnshRoshan/aisdlc/blob/main/skills/${skill
 
       <div class="panel" style="margin-top:2rem;padding:1.4rem 1.5rem 1.5rem;">
         <h2 class="h3" style="font-size:1rem;">Install everything, or just this one</h2>
-        <div class="cmdline" style="margin-top:1rem;"><code>npx skills add AnshRoshan/aisdlc</code><button data-copy>copy</button></div>
-        <div class="cmdline" style="margin-top:0.6rem;"><code>npx skills add AnshRoshan/aisdlc --skill {skill.name}</code><button data-copy>copy</button></div>
+        <div class="cmdline" style="margin-top:1rem;"><code>npx skills add AnshRoshan/arsdlc</code><button data-copy>copy</button></div>
+        <div class="cmdline" style="margin-top:0.6rem;"><code>npx skills add AnshRoshan/arsdlc --skill {skill.name}</code><button data-copy>copy</button></div>
         <p class="install-note">
-          Claude Code: <code>/plugin marketplace add AnshRoshan/aisdlc</code>, then
-          <code>/plugin install aisdlc@aisdlc</code>. Skills work without the CLI; the CLI is what makes done mean something.
+          Claude Code: <code>/plugin marketplace add AnshRoshan/arsdlc</code>, then
+          <code>/plugin install arsdlc@arsdlc</code>. Skills work without the CLI; the CLI is what makes done mean something.
         </p>
       </div>
 

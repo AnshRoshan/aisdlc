@@ -8,7 +8,7 @@ const skills = getSkills();
 const stages = [...new Set(skills.map((s) => s.stage))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
 const link = (href) => `${base}${href}`;
 ---
-<Base title="Skills" description="All 20 aisdlc skills: one folder each, plain Markdown, read the same way by every coding agent.">
+<Base title="Skills" description="All 20 arsdlc skills: one folder each, plain Markdown, read the same way by every coding agent.">
   <div class="wrap doc">
     <nav class="doc-rail" aria-label="Skill stages">
       {stages.map((s) => <a href={`#${s}`}>{s === "any" ? "cross-cutting" : s}</a>)}

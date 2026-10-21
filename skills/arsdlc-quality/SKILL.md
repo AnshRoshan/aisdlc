@@ -1,0 +1,50 @@
+---
+name: arsdlc-quality
+description: Bridge to code-quality-tools, the runner guide for lint, autofix, dead-code, complexity and security CLIs on JS/TS and Python (fallow, eslint, biome, knip, tsc, ruff, mypy, vulture, bandit, semgrep - which tool, in what order, what mutates vs detects). Use during BUILD and VERIFY for a mechanical pass before G3 or a security scan, or when the user says "lint", "dead code", "typecheck", "complexity". Tools advise, the CLI gates.
+license: MIT
+metadata:
+  author: arsdlc
+  version: "1.0"
+  stage: verify
+  companion: AnshRoshan/ansh-other-skills (code-quality-tools)
+---
+
+# arsdlc-quality
+
+The mechanical complement to `arsdlc-craft` (judgment) and `arsdlc-ponytail` (scope): which CLI to run for each quality problem, in what order, and which ones are allowed to touch your files.
+
+## 0. Companion resolution (silent, every session)
+
+1. If a skill named `code-quality-tools` is available (Claude Code plugin `ansh-other-skills@ansh-other-skills`, a `.agents/skills/code-quality-tools/SKILL.md` copy, or any harness that reads SKILL.md), invoke it for the full tool matrix, the language-specific reference files, and the complete fix sequence. Then apply §2 of this file.
+2. If not installed, apply §1-§2 below. Say once per session: "official `code-quality-tools` not installed; using arsdlc's embedded distillation. Install with `npx @anshroshan/arsdlc addon quality-tools`."
+3. Never install anything without asking.
+
+## 1. Embedded distillation
+
+**Mutate vs detect - the one rule.** The only tools that edit code are `ruff format`, `ruff check --fix`, `eslint --fix`, `biome check --write`/`biome format --write`, `prettier --write`, `oxlint --fix`, `knip --fix`, `fallow fix`, `npm audit fix`, `pip-audit --fix`. Everything else (`tsc`, `mypy`, `pyright`, `pylint`, `vulture`, `bandit`, `radon`, `xenon`, `madge`, `jscpd`, `depcheck`, `semgrep`, `osv-scanner`) is detect-only. Never claim a detect-only tool autofixes.
+
+**Safe order (JS/TS):** types (`tsc --noEmit`) → lint safe fixes (`eslint --fix` or `biome check --write`) → format (`prettier --write` or biome, never both) → structural pass (`fallow` or `knip` for unused files/exports/deps) → detect-only extras (complexity, jscpd duplication, `madge --circular`, security: `eslint-plugin-security`/`semgrep`, CVEs: `npm audit`/`osv-scanner`).
+
+**Safe order (Python):** import sort → `ruff check --fix` → `ruff format` (sort BEFORE format) → types (`mypy`) → dead code (`vulture`, confirm by hand) → complexity (`radon`/`xenon`) → security (`bandit`, CVEs: `pip-audit`).
+
+## 2. The arsdlc part: tools advise, the CLI gates
+
+1. **Evidence comes from `arsdlc evidence`, nothing else.** A lint or typecheck run only counts for G3 when wrapped: `npx @anshroshan/arsdlc evidence <slug> --label quality -- <command>`. A green linter output pasted in chat is not evidence.
+2. **Findings route, they don't auto-apply.** A detect-only finding becomes (a) a fix task in `tasks.md`, (b) an `arsdlc-delta` if it reveals the spec was wrong, or (c) a review finding in `acceptance.md`. A mutating tool may only run on the task's blast radius - a repo-wide `--fix` inside a BUILD task is scope creep with a commit attached.
+3. **Deletion needs confirmation, then evidence.** knip/vulture candidates are candidates until a human-checked dynamic-reference pass says otherwise; the deletion still has to survive the full evidence run.
+4. **Secrets are the CLI's job.** G3's secrets scan runs inside `arsdlc gate G3`; bandit/semgrep findings complement it and route as findings.
+5. **New tool commands the project should always run?** Put them in the project's own verification command (the one you record with `arsdlc evidence`), not in a side script - the gate is the contract.
+
+## Final security verification
+
+A green lint/CVE scan does not verify authorization, CSRF, JWTs or runtime controls. For a security audit or web/API/auth/data/infra change, use `arsdlc-verify`'s Final security verification protocol and record the tool findings in `security-review.md`. Confirmed vulnerabilities become fix tasks; after permitted upgrades, inspect the lockfile and rerun the full suite/build and audit. Scanner failure is NOT_VERIFIED, never zero vulnerabilities.
+
+## Smells to refuse
+
+- Pasting a linter's output in chat and calling it evidence. Wrap the run: `npx @anshroshan/arsdlc evidence <slug> --label quality -- <command>`.
+- Claiming a detect-only tool autofixed something, or a mutating tool "just reformatted one line" repo-wide inside a task.
+- Running a repo-wide `--fix` during a BUILD task. The blast radius is the task's requirement, nothing more; everything else is scope creep with a commit attached.
+- Auto-applying a finding without routing it. Detect-only output becomes a task, a delta, or a review finding — never a silent edit.
+- Deleting code because a tool listed it. Dynamic references (reflection, routes, DI, templates, string-built imports) are invisible to every dead-code tool here; confirm by hand first.
+- Adding a new tool to the process without putting it in the gate command. A check nobody's gate runs is a check that does not exist.
+- Letting a green linter stand in for a green suite. Types and style are not behaviour.

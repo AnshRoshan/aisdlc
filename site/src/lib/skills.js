@@ -61,7 +61,7 @@ export function outline(html) {
 
 export function getSkills() {
   return readdirSync(SKILLS_DIR)
-    .filter((d) => d.startsWith("aisdlc-"))
+    .filter((d) => d.startsWith("arsdlc-"))
     .map((dir) => {
       const raw = readFileSync(path.join(SKILLS_DIR, dir, "SKILL.md"), "utf8").replace(/\r\n/g, "\n");
       const fm = raw.slice(raw.indexOf("---") + 3, raw.indexOf("---", 3));
@@ -90,4 +90,4 @@ export function clean(text) {
     .replace(/,\s*,/g, ",");
 }
 
-export const skillSlug = (name) => name.replace(/^aisdlc-/, "");
+export const skillSlug = (name) => name.replace(/^arsdlc-/, "");

@@ -26,8 +26,8 @@ export const HARNESSES = {
   cursor: {
     label: "Cursor",
     skillsDir: ".cursor/skills",
-    instructions: ".cursor/rules/aisdlc.mdc",
-    instructionsHeader: "---\ndescription: aisdlc process rules (spec → gates → evidence)\nalwaysApply: true\n---\n",
+    instructions: ".cursor/rules/arsdlc.mdc",
+    instructionsHeader: "---\ndescription: arsdlc process rules (spec → gates → evidence)\nalwaysApply: true\n---\n",
     detect: [".cursor"],
   },
   antigravity: {
@@ -40,7 +40,7 @@ export const HARNESSES = {
   devin: {
     label: "Devin Desktop",
     skillsDir: ".devin/skills",
-    instructions: ".devin/rules/aisdlc.md",
+    instructions: ".devin/rules/arsdlc.md",
     detect: [".devin"],
     note: "Devin Desktop replaced Windsurf on 2026-06-02; .windsurf/ remains the legacy layout.",
   },
@@ -64,7 +64,7 @@ export const HARNESSES = {
   windsurf: {
     label: "Windsurf (legacy)",
     skillsDir: ".windsurf/skills",
-    instructions: ".windsurf/rules/aisdlc.md",
+    instructions: ".windsurf/rules/arsdlc.md",
     detect: [".windsurf"],
     retired: "Windsurf became Devin Desktop on 2026-06-02. .windsurf/ still resolves; prefer --harness devin for new installs.",
   },
@@ -105,13 +105,13 @@ export function resolveHarnessList(input, root) {
 }
 
 /**
- * Companion skills: maintained third-party skills that aisdlc bridges to.
- * aisdlc works without them (each bridge skill embeds a fallback), but the official ones are updated upstream.
+ * Companion skills: maintained third-party skills that arsdlc bridges to.
+ * arsdlc works without them (each bridge skill embeds a fallback), but the official ones are updated upstream.
  */
 export const COMPANIONS = {
   ponytail: {
     about: "lazy-senior-dev minimalism: YAGNI ladder, stdlib/platform before deps, shortest working diff (DietrichGebert/ponytail)",
-    bridge: "aisdlc-ponytail",
+    bridge: "arsdlc-ponytail",
     install: "npx skills@latest add DietrichGebert/ponytail --skill ponytail",
     alternatives: [
       "Claude Code:  /plugin marketplace add DietrichGebert/ponytail   then   /plugin install ponytail@ponytail",
@@ -124,7 +124,7 @@ export const COMPANIONS = {
   },
   grilling: {
     about: "the relentless-interview primitive behind /grill-me: frontier rounds with recommended answers (mattpocock/skills)",
-    bridge: "aisdlc-grill",
+    bridge: "arsdlc-grill",
     install: "npx skills@latest add mattpocock/skills --skill grilling",
     alternatives: [
       "Claude Code:  claude plugins install mattpocock-skills   (or /plugin install mattpocock-skills)",
@@ -134,7 +134,7 @@ export const COMPANIONS = {
   },
   "code-craft": {
     about: "line-level clean-code craft: the ladder before writing, smell-fix on touched lines, dead-code deletion with dynamic-reference checks (AnshRoshan/ansh-other-skills)",
-    bridge: "aisdlc-craft",
+    bridge: "arsdlc-craft",
     install: "npx skills@latest add AnshRoshan/ansh-other-skills --skill code-craft",
     alternatives: [
       "Claude Code:  /plugin marketplace add AnshRoshan/ansh-other-skills   then   /plugin install ansh-other-skills@ansh-other-skills",
@@ -144,7 +144,7 @@ export const COMPANIONS = {
   },
   "quality-tools": {
     about: "the lint/dead-code/complexity/security CLI runner: which tool, safe order, what mutates vs detects (AnshRoshan/ansh-other-skills)",
-    bridge: "aisdlc-quality",
+    bridge: "arsdlc-quality",
     install: "npx skills@latest add AnshRoshan/ansh-other-skills --skill code-quality-tools",
     alternatives: [
       "Claude Code:  /plugin marketplace add AnshRoshan/ansh-other-skills   then   /plugin install ansh-other-skills@ansh-other-skills",
@@ -175,17 +175,17 @@ export function detectCompanions(root) {
  */
 export function enforcement(root, { exists = (p) => existsSync(join(root, p)), text = (p) => { try { return readFileSync(join(root, p), "utf8"); } catch { return ""; } } } = {}) {
   const gateWorkflow = exists(".github/workflows/gates.yml") || exists(".github/workflows/gates.yaml");
-  const repoGuard = exists("hooks/aisdlc-guard.mjs") && exists("hooks/hooks.json");
-  const installedGuard = text(".claude/settings.json").includes("aisdlc-guard") || text(".claude/settings.local.json").includes("aisdlc-guard");
+  const repoGuard = exists("hooks/arsdlc-guard.mjs") && exists("hooks/hooks.json");
+  const installedGuard = text(".claude/settings.json").includes("arsdlc-guard") || text(".claude/settings.local.json").includes("arsdlc-guard");
   return HARNESS_IDS.map((id) => {
     const h = HARNESSES[id];
     const native = id === "claude-code" && (repoGuard || installedGuard);
     const level = native ? "native" : gateWorkflow ? "ci" : "none";
     const reason = native
-      ? repoGuard ? "aisdlc-guard.mjs is in this project and registers on tool.call" : "a project hook registers aisdlc-guard"
+      ? repoGuard ? "arsdlc-guard.mjs is in this project and registers on tool.call" : "a project hook registers arsdlc-guard"
       : id === "claude-code"
-        ? "the guard ships with the aisdlc plugin, but nothing in this project proves it is loaded"
+        ? "the guard ships with the arsdlc plugin, but nothing in this project proves it is loaded"
         : `no verified hook adapter for ${h.label}; hooks are tracked as an open assumption`;
-    return { id, label: h.label, enforcement: level, reason, install: `npx @anshroshan/aisdlc init --harness ${id}`, retired: h.retired || null };
+    return { id, label: h.label, enforcement: level, reason, install: `npx @anshroshan/arsdlc init --harness ${id}`, retired: h.retired || null };
   });
 }

@@ -8,12 +8,12 @@
 
 export const TOOLS = [
   {
-    name: "aisdlc_next",
+    name: "arsdlc_next",
     description: "Derived state for one feature: stage, owner, blockers, the next task and the skill to load. Read-only; nothing here writes to disk.",
     inputSchema: { type: "object", properties: { feature: { type: "string", description: "feature slug; omit for the first open feature" } }, additionalProperties: false },
   },
   {
-    name: "aisdlc_status",
+    name: "arsdlc_status",
     description: "Every feature with its lane, state, task counts and gate lights. Read-only.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
@@ -35,8 +35,8 @@ export function handleRequest(message, api) {
       return reply({
         protocolVersion: params.protocolVersion || "2025-03-26",
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: api.name, version: api.version, title: "aisdlc process state" },
-        instructions: "aisdlc exposes read-only process state. Evidence and approvals are CLI actions a human performs; ask the user to run them.",
+        serverInfo: { name: api.name, version: api.version, title: "arsdlc process state" },
+        instructions: "arsdlc exposes read-only process state. Evidence and approvals are CLI actions a human performs; ask the user to run them.",
       });
     case "ping":
       return reply({});
@@ -48,14 +48,14 @@ export function handleRequest(message, api) {
         const attempted = String(name || "");
         const isWrite = [...WRITE_ACTIONS].some((a) => attempted.toLowerCase().includes(a));
         return fail(-32602, isWrite
-          ? `"${attempted}" is not exposed over MCP: writing state through an agent would break segregation of duties. Ask the human to run \`aisdlc ${attempted.replace(/^aisdlc[-_]?/i, "").trim() || "approve"}\`.`
+          ? `"${attempted}" is not exposed over MCP: writing state through an agent would break segregation of duties. Ask the human to run \`arsdlc ${attempted.replace(/^arsdlc[-_]?/i, "").trim() || "approve"}\`.`
           : `unknown tool "${attempted}". available: ${TOOLS.map((t) => t.name).join(", ")}`);
       }
       try {
-        const result = name === "aisdlc_next" ? api.next(params.arguments?.feature) : api.status();
+        const result = name === "arsdlc_next" ? api.next(params.arguments?.feature) : api.status();
         return reply({ content: [{ type: "text", text: JSON.stringify(result, null, 2) }], structuredContent: result, isError: false });
       } catch (error) {
-        return reply({ content: [{ type: "text", text: `aisdlc could not answer: ${error.message}` }], isError: true });
+        return reply({ content: [{ type: "text", text: `arsdlc could not answer: ${error.message}` }], isError: true });
       }
     }
     default:

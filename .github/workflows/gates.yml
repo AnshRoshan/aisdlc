@@ -1,12 +1,12 @@
-name: aisdlc gate
+name: arsdlc gate
 
 # The enforcement layer for harnesses that have no native hook, and the merge check for all of them.
-# `aisdlc ci` evaluates every gate the work has already crossed, plus any gate a human has signed,
+# `arsdlc ci` evaluates every gate the work has already crossed, plus any gate a human has signed,
 # and exits non-zero on a regression, a stale approval or a tree that moved after a signature.
 #
 # Callers add their own trigger and either call this job or copy the file:
 #   on: pull_request
-#   jobs: { gates: { uses: AnshRoshan/aisdlc/.github/workflows/gates.yml@v1 } }
+#   jobs: { gates: { uses: AnshRoshan/arsdlc/.github/workflows/gates.yml@v1 } }
 # Branch protection then requires the "gates" check, so an agent cannot merge past a red gate by
 # describing it as green in the PR body. It is not wired to this repo's own pull requests: the
 # kit dogfoods the command in ci.yml, scoped to the feature that is actually in progress.
@@ -20,7 +20,7 @@ on:
         type: string
         default: ""
       version:
-        description: "aisdlc version to run"
+        description: "arsdlc version to run"
         required: false
         type: string
         default: "latest"
@@ -48,10 +48,10 @@ jobs:
           AISDLC_VERSION: ${{ inputs.version || 'latest' }}
           AISDLC_FEATURE: ${{ inputs.feature || '' }}
         run: |
-          if [ -f packages/cli/bin/aisdlc.js ]; then
-            node packages/cli/bin/aisdlc.js ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+          if [ -f packages/cli/bin/arsdlc.js ]; then
+            node packages/cli/bin/arsdlc.js ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           else
-            npx --yes "@anshroshan/aisdlc@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
+            npx --yes "@anshroshan/arsdlc@${AISDLC_VERSION}" ci ${AISDLC_FEATURE:+"$AISDLC_FEATURE"}
           fi
-      # SARIF upload arrives with `aisdlc export --format sarif`; a findings file that does not exist
+      # SARIF upload arrives with `arsdlc export --format sarif`; a findings file that does not exist
       # yet must not become a step that silently uploads nothing.

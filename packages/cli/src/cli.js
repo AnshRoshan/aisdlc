@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * aisdlc CLI: install the process into any harness, scaffold features, and run the deterministic checks.
+ * arsdlc CLI: install the process into any harness, scaffold features, and run the deterministic checks.
  * Zero dependencies. Node 18+.
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -63,8 +63,8 @@ function parseArgs(argv) {
 
 /* ───────────── project + feature context (disk ⇒ ctx) ───────────── */
 function loadConfig(root) {
-  const raw = readJson(join(root, "aisdlc.json"), {});
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("aisdlc.json must be an object");
+  const raw = readJson(join(root, "arsdlc.json"), {});
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("arsdlc.json must be an object");
   const cfg = { docsDir: "docs", featuresDir: "docs/features", policy: { minApprovals: {} }, ...raw };
   for (const key of ["docsDir", "featuresDir"]) {
     const value = cfg[key];
@@ -92,7 +92,7 @@ function resolveSlug(root, cfg, input) {
   const feats = listFeatures(root, cfg);
   if (!input) {
     if (feats.length === 1) return feats[0];
-    if (!feats.length) fail(`No features yet. Run: aisdlc new "<title>" --kind <kind>`);
+    if (!feats.length) fail(`No features yet. Run: arsdlc new "<title>" --kind <kind>`);
     fail(`Which feature? One of: ${feats.join(", ")}`);
   }
   if (feats.includes(input)) return input;
@@ -234,7 +234,7 @@ const commands = {
     const skills = listSkills(src);
     const project = args.flags.name || basename(root);
     const cfg = loadConfig(root); // Validate policy and paths before replacing any installed files.
-    console.log(c.bold(`aisdlc ${VERSION}: installing into ${relp(process.cwd(), root) || "."}`));
+    console.log(c.bold(`arsdlc ${VERSION}: installing into ${relp(process.cwd(), root) || "."}`));
     console.log(c.dim(`harnesses: ${harnesses.join(", ")}  ·  skills: ${skills.length}  ·  mode: ${link ? "symlink" : "copy"}`));
 
     const done = new Set();
@@ -270,7 +270,7 @@ const commands = {
     else if (link && modes.has("symlink")) console.log(c.dim("  linked with real symlinks"));
 
     const created = [];
-    if (writeIfMissing(join(root, "aisdlc.json"), JSON.stringify({ version: 1, project, docsDir: cfg.docsDir, featuresDir: cfg.featuresDir, harnesses, policy: { minApprovals: { G1: 1, G5: 1 } } }, null, 2) + "\n")) created.push("aisdlc.json");
+    if (writeIfMissing(join(root, "arsdlc.json"), JSON.stringify({ version: 1, project, docsDir: cfg.docsDir, featuresDir: cfg.featuresDir, harnesses, policy: { minApprovals: { G1: 1, G5: 1 } } }, null, 2) + "\n")) created.push("arsdlc.json");
     if (writeIfMissing(join(root, cfg.docsDir, "constitution.md"), T.CONSTITUTION(project))) created.push(`${cfg.docsDir}/constitution.md`);
     if (writeIfMissing(join(root, cfg.docsDir, "taste.md"), T.TASTE)) created.push(`${cfg.docsDir}/taste.md`);
     ensureDir(join(root, cfg.featuresDir));
@@ -278,15 +278,15 @@ const commands = {
 
     const comp = detectCompanions(root);
     const missing = Object.keys(COMPANIONS).filter((k) => !comp.includes(k));
-    if (missing.length) console.log(`${warn(`companions not installed: ${missing.join(", ")}`)} ${c.dim(`aisdlc bridges to them and works without them. Install: aisdlc addon all`)}`);
+    if (missing.length) console.log(`${warn(`companions not installed: ${missing.join(", ")}`)} ${c.dim(`arsdlc bridges to them and works without them. Install: arsdlc addon all`)}`);
     else console.log(ok(`companions installed: ${comp.join(", ")}`));
-    console.log(`\n${c.bold("Next:")}  tell your agent ${c.cyan('"use aisdlc-brainstorm, I want to build ..."')}  or run  ${c.cyan('aisdlc new "My feature" --kind backend --lane quick')}`);
+    console.log(`\n${c.bold("Next:")}  tell your agent ${c.cyan('"use arsdlc-brainstorm, I want to build ..."')}  or run  ${c.cyan('arsdlc new "My feature" --kind backend --lane quick')}`);
     console.log(c.dim("Restart your agent session so it picks up the new skills."));
   },
 
   async new(args, root) {
     const title = args._.join(" ").trim();
-    if (!title) fail('Usage: aisdlc new "<title>" [--kind backend] [--author name]');
+    if (!title) fail('Usage: arsdlc new "<title>" [--kind backend] [--author name]');
     const kind = args.flags.kind || "other";
     if (!KINDS.includes(kind)) fail(`--kind must be one of ${KINDS.join(", ")}`);
     const lane = args.flags.lane || "standard";
@@ -311,7 +311,7 @@ const commands = {
     console.log(ok(`created ${relp(root, dir)}/  kind=${kind}  lane=${lane}  author=${author}`));
     console.log(c.dim(`verify model for ${kind}: ${KIND_HINTS[kind]}`));
     console.log(c.dim(`lane ${lane}: ${LANE_HINTS[lane]} → gates ${LANE_GATES[lane].join(" ")}`));
-    console.log(`\nNext: ${c.cyan(`aisdlc next ${slug}`)}`);
+    console.log(`\nNext: ${c.cyan(`arsdlc next ${slug}`)}`);
   },
 
   async kinds() {
@@ -341,7 +341,7 @@ const commands = {
     meta.laneHistory = [...(meta.laneHistory || []), { from: cur, to: target, at: new Date().toISOString(), by: gitUser(root) || process.env.USER || "unknown", note: args.flags.note || "" }];
     write(join(dir, "feature.json"), JSON.stringify(meta, null, 2) + "\n");
     console.log(ok(`${slug}: lane ${cur} → ${target}  gates ${LANE_GATES[target].join(" ")}`));
-    console.log(c.dim("Run `aisdlc next` to see the new required gates."));
+    console.log(c.dim("Run `arsdlc next` to see the new required gates."));
   },
 
   async addon(args, root) {
@@ -349,7 +349,7 @@ const commands = {
     if (which === "list") {
       const present = detectCompanions(root);
       for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(`${present.includes(id) ? ok(id.padEnd(10)) : c.dim(`  ${id.padEnd(10)}`)} ${c.dim(cpn.about)}\n             ${c.cyan(cpn.install)}  ${c.dim(`bridged by ${cpn.bridge}`)}`);
-      console.log(c.dim("\naisdlc addon <ponytail|grilling|code-craft|quality-tools|all> [--print]   (--print only shows the commands)"));
+      console.log(c.dim("\narsdlc addon <ponytail|grilling|code-craft|quality-tools|all> [--print]   (--print only shows the commands)"));
       return;
     }
     const ids = which === "all" ? Object.keys(COMPANIONS) : which.split(",").map((x) => x.trim());
@@ -364,7 +364,7 @@ const commands = {
       if (r.status !== 0) {
         console.log(warn(`${id} install did not complete (exit ${r.status ?? "?"}). Alternatives:`));
         for (const alt of cpn.alternatives) console.log(c.dim(`  ${alt}`));
-        console.log(c.dim(`  aisdlc keeps working: ${cpn.bridge} falls back to its embedded copy.`));
+        console.log(c.dim(`  arsdlc keeps working: ${cpn.bridge} falls back to its embedded copy.`));
       } else console.log(ok(`${id} installed. ${cpn.bridge} will use it. Restart your agent session.`));
     }
   },
@@ -372,7 +372,7 @@ const commands = {
   async status(args, root) {
     const cfg = loadConfig(root);
     const feats = listFeatures(root, cfg);
-    if (!feats.length) return console.log(args.flags.json ? "[]" : c.dim('No features. Run: aisdlc new "<title>" --kind <kind>'));
+    if (!feats.length) return console.log(args.flags.json ? "[]" : c.dim('No features. Run: arsdlc new "<title>" --kind <kind>'));
     const rows = feats.map((slug) => {
       const ctx = loadCtx(root, cfg, slug, { scan: !args.flags["no-scan"] });
       const f = deriveFlow(ctx);
@@ -401,7 +401,7 @@ const commands = {
 
   async check(args, root) {
     const what = args._[0];
-    if (what !== "spec" && what !== "delta") fail("Usage: aisdlc check spec|delta <path|feature>");
+    if (what !== "spec" && what !== "delta") fail("Usage: arsdlc check spec|delta <path|feature>");
     let p = args._[1];
     const cfg = loadConfig(root);
     if (what === "spec") {
@@ -435,7 +435,7 @@ const commands = {
 
   async gate(args, root) {
     const g = (args._[0] || "").toUpperCase();
-    if (!GATES.includes(g)) fail(`Usage: aisdlc gate <G1..G6> [feature]`);
+    if (!GATES.includes(g)) fail(`Usage: arsdlc gate <G1..G6> [feature]`);
     const cfg = loadConfig(root);
     const slug = resolveSlug(root, cfg, args._[1]);
     const res = runGate(g, loadCtx(root, cfg, slug));
@@ -485,7 +485,7 @@ const commands = {
     const cfg = loadConfig(root);
     const slug = resolveSlug(root, cfg, args._[0]);
     const cmd = args.passthrough;
-    if (!cmd.length) fail('Usage: aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>');
+    if (!cmd.length) fail('Usage: arsdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>');
     const label = safeName(args.flags.label || "full", "--label");
     if (args.flags.task && !/^T[1-9]\d*$/.test(args.flags.task)) fail("--task must be a task ID such as T3");
     if (scanSecrets(cmd.join(" ")).length) fail("Command contains a secret literal; pass secrets through the environment instead");
@@ -511,7 +511,7 @@ const commands = {
 
   async approve(args, root) {
     const g = (args._[0] || "").toUpperCase();
-    if (!["G1", "G4", "G5"].includes(g)) fail("Usage: aisdlc approve <G1|G4|G5> <feature> --by \"<name>\" [--note text]   (human only)");
+    if (!["G1", "G4", "G5"].includes(g)) fail("Usage: arsdlc approve <G1|G4|G5> <feature> --by \"<name>\" [--note text]   (human only)");
     const by = typeof args.flags.by === "string" ? args.flags.by.trim() : "";
     if (!by || /^(?:unknown|none|tbd|todo|[_-]+|<.*>)$/i.test(by)) fail("--by \"<your name>\" is required. Approvals are human actions; agents must never run this.");
     if (process.env.AISDLC_AGENT) fail("Refusing: AISDLC_AGENT is set. Agents cannot approve (segregation of duties).");
@@ -552,7 +552,7 @@ const commands = {
   async report(args, root) {
     const cfg = loadConfig(root);
     const feats = listFeatures(root, cfg);
-    if (!feats.length) fail("No features yet. Run: aisdlc new \"<title>\" --kind <kind>");
+    if (!feats.length) fail("No features yet. Run: arsdlc new \"<title>\" --kind <kind>");
     const wanted = args._[0] ? [resolveSlug(root, cfg, args._[0])] : feats;
     const rows = wanted.map((slug) => {
       const ctx = loadCtx(root, cfg, slug);
@@ -602,7 +602,7 @@ const commands = {
       return;
     }
     console.log(c.bold("harnesses detected: ") + (detected.length ? detected.join(", ") : c.dim("none (universal only)")));
-    console.log(c.dim("enforcement: native = a guard module in this project · ci = the aisdlc gate workflow · none = gates run only when someone runs them"));
+    console.log(c.dim("enforcement: native = a guard module in this project · ci = the arsdlc gate workflow · none = gates run only when someone runs them"));
     const skills = listSkills();
     for (const [id, h] of Object.entries(HARNESSES)) {
       const dir = join(root, h.skillsDir);
@@ -616,15 +616,15 @@ const commands = {
       console.log(present === skills.length && instr && have === want.length ? ok(line) : present || instr || h.agentsDir ? warn(line) : c.dim(`  ${line}`));
       if (h.retired) console.log(`  ${c.yellow(h.retired)}`);
     }
-    console.log(existsSync(join(root, "aisdlc.json")) ? ok("aisdlc.json") : warn("aisdlc.json missing (run aisdlc init)"));
+    console.log(existsSync(join(root, "arsdlc.json")) ? ok("arsdlc.json") : warn("arsdlc.json missing (run arsdlc init)"));
     console.log(existsSync(join(root, "docs", "constitution.md")) ? ok("docs/constitution.md") : warn("docs/constitution.md missing"));
-    console.log(existsSync(join(root, "docs", "taste.md")) ? ok("docs/taste.md") : warn("docs/taste.md missing (run the aisdlc-taste skill)"));
-    console.log(existsSync(join(root, "docs", "glossary.md")) ? ok("docs/glossary.md") : c.dim("  docs/glossary.md missing (aisdlc-discover / aisdlc-taste seed it)"));
+    console.log(existsSync(join(root, "docs", "taste.md")) ? ok("docs/taste.md") : warn("docs/taste.md missing (run the arsdlc-taste skill)"));
+    console.log(existsSync(join(root, "docs", "glossary.md")) ? ok("docs/glossary.md") : c.dim("  docs/glossary.md missing (arsdlc-discover / arsdlc-taste seed it)"));
     const cfg = loadConfig(root);
     const pol = cfg.test?.gate || cfg.testGate || "configured";
-    console.log((pol === "configured" ? ok : warn)(`test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (aisdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`));
+    console.log((pol === "configured" ? ok : warn)(`test gate: ${pol.padEnd(16)}${c.dim(pol === "none-by-design" ? "no full suite required; a recorded run still is (arsdlc.json test.gate)" : "G3 wants a recorded full-suite run; none-by-design is only for a repo that deliberately ships no runner")}`));
     const comp = detectCompanions(root);
-    for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(comp.includes(id) ? ok(`companion ${id.padEnd(10)} installed (${cpn.bridge} uses it)`) : c.dim(`  companion ${id.padEnd(10)} not installed (${cpn.bridge} uses its embedded fallback; aisdlc addon ${id})`));
+    for (const [id, cpn] of Object.entries(COMPANIONS)) console.log(comp.includes(id) ? ok(`companion ${id.padEnd(10)} installed (${cpn.bridge} uses it)`) : c.dim(`  companion ${id.padEnd(10)} not installed (${cpn.bridge} uses its embedded fallback; arsdlc addon ${id})`));
   },
 
   async ci(args, root) {
@@ -669,7 +669,7 @@ const commands = {
   async export(args, root) {
     const { statementOf, dsseEnvelope, sarifOf, verifyBundle, ARTIFACTS } = await import("./export.js");
     const cfg = loadConfig(root);
-    const outDir = resolve(root, args.flags.out || join(".aisdlc", "export"));
+    const outDir = resolve(root, args.flags.out || join(".arsdlc", "export"));
     if (args.flags.verify) {
       const dir = resolve(root, String(args.flags.verify));
       const statement = readJson(join(dir, "statement.json"), null);
@@ -679,8 +679,8 @@ const commands = {
         const base = join(dir, sub);
         if (!existsSync(base)) return;
         for (const f of readdirSync(base).filter(pattern).sort()) {
-          try { digests.set(`aisdlc:bundle/${sub}/${f}`, sha256File(join(base, f))); }
-          catch { digests.set(`aisdlc:bundle/${sub}/${f}`, null); }
+          try { digests.set(`arsdlc:bundle/${sub}/${f}`, sha256File(join(base, f))); }
+          catch { digests.set(`arsdlc:bundle/${sub}/${f}`, null); }
         }
       };
       collect("artifacts", () => true);
@@ -708,21 +708,21 @@ const commands = {
       const path = join(ctx.dir, name);
       if (!existsSync(path)) continue;
       const bytes = readFileSync(path);
-      const id = `aisdlc:bundle/artifacts/${name}`;
+      const id = `arsdlc:bundle/artifacts/${name}`;
       subjects.push({ name: id, digest: { sha256: sha256(bytes.toString("utf8")) } });
       files.artifacts[name] = bytes;
     }
     const evidenceDir = join(ctx.dir, "evidence");
     for (const f of existsSync(evidenceDir) ? readdirSync(evidenceDir).filter((x) => x.endsWith(".json")).sort() : []) {
       const bytes = readFileSync(join(evidenceDir, f));
-      subjects.push({ name: `aisdlc:bundle/evidence/${f}`, digest: { sha256: sha256(bytes.toString("utf8")) } });
+      subjects.push({ name: `arsdlc:bundle/evidence/${f}`, digest: { sha256: sha256(bytes.toString("utf8")) } });
       files.evidence[f] = bytes;
     }
     const snapshot = {
       subjects,
       predicate: {
         feature: { slug, title: readJson(join(ctx.dir, "feature.json"), {}).title || slug, kind: ctx.kind, lane: ctx.lane },
-        generated: { at: new Date().toISOString(), tool: "aisdlc", version: VERSION },
+        generated: { at: new Date().toISOString(), tool: "arsdlc", version: VERSION },
         git: ctx.git || null,
         sourceSha256: ctx.sourceSha256 || null,
         gates,
@@ -731,7 +731,7 @@ const commands = {
         limits: [
           "Digests prove the bundle was not edited after export. They do not prove authorship; that needs a signature.",
           "Approval identities are names recorded by the CLI, not authenticated identities.",
-          "A gate verdict is only as good as the command it was given; aisdlc cannot judge whether a test suite is meaningful.",
+          "A gate verdict is only as good as the command it was given; arsdlc cannot judge whether a test suite is meaningful.",
         ],
       },
     };
@@ -754,7 +754,7 @@ const commands = {
         `Reproduce locally (offline, no registry, no service):`,
         "",
         "```",
-        `npx @anshroshan/aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`,
+        `npx @anshroshan/arsdlc export --verify ${relp(process.cwd(), outDir) || "."}`,
         "```",
         "",
         "That recomputes every digest in the bundle and compares it with `statement.json`.",
@@ -775,14 +775,14 @@ const commands = {
       else console.log(ok(`signed by ${argv[0]}`));
     }
     console.log(ok(`exported ${slug}  ${c.dim(`${Object.keys(files.artifacts).length} artifacts · ${Object.keys(files.evidence).length} evidence records · ${sarif.runs[0].results.length} SARIF results`)}`));
-    console.log(c.dim(`  ${relp(process.cwd(), outDir) || "."} · verify with: aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`));
+    console.log(c.dim(`  ${relp(process.cwd(), outDir) || "."} · verify with: arsdlc export --verify ${relp(process.cwd(), outDir) || "."}`));
   },
 
   async mcp(args, root) {
     const { readLoop } = await import("./mcp.js");
     const cfg = loadConfig(root);
     const api = {
-      name: "aisdlc",
+      name: "arsdlc",
       version: VERSION,
       next: (feature) => nextJson(root, cfg, feature ? resolveSlug(root, cfg, String(feature)) : (listFeatures(root, cfg)[0] || (() => { throw new Error("no features under the configured featuresDir"); })())),
       status: () => listFeatures(root, cfg).map((slug) => {
@@ -791,8 +791,8 @@ const commands = {
       }),
     };
     if (!args.flags.stdio) {
-      console.log(`${c.bold("aisdlc mcp")}: a read-only MCP server over stdio. Start it with ${c.cyan("aisdlc mcp --stdio")} and speak JSON-RPC 2.0, one object per line.`);
-      console.log(c.dim(`  tools: aisdlc_next, aisdlc_status · writes are absent on purpose: evidence and approvals stay CLI actions a human performs`));
+      console.log(`${c.bold("arsdlc mcp")}: a read-only MCP server over stdio. Start it with ${c.cyan("arsdlc mcp --stdio")} and speak JSON-RPC 2.0, one object per line.`);
+      console.log(c.dim(`  tools: arsdlc_next, arsdlc_status · writes are absent on purpose: evidence and approvals stay CLI actions a human performs`));
       return;
     }
     readLoop(process.stdin, process.stdout, api);
@@ -801,45 +801,45 @@ const commands = {
   async version() { console.log(VERSION); },
 
   async help() {
-    console.log(`${c.bold("aisdlc")} ${VERSION}: agents write code, aisdlc runs the process.
+    console.log(`${c.bold("arsdlc")} ${VERSION}: agents write code, arsdlc runs the process.
 
 ${c.bold("Install")}
-  aisdlc init [--harness auto|all|claude-code,codex,cursor,gemini-cli,copilot,windsurf,opencode] [--link]
-  aisdlc doctor                          show what is installed where
-  aisdlc skills                          list bundled skills
-  aisdlc kinds                           kind verify models and lane gate sets
-  aisdlc addon [ponytail|grilling|code-craft|quality-tools|all]   install the companion skills aisdlc bridges to (optional)
+  arsdlc init [--harness auto|all|claude-code,codex,cursor,gemini-cli,copilot,windsurf,opencode] [--link]
+  arsdlc doctor                          show what is installed where
+  arsdlc skills                          list bundled skills
+  arsdlc kinds                           kind verify models and lane gate sets
+  arsdlc addon [ponytail|grilling|code-craft|quality-tools|all]   install the companion skills arsdlc bridges to (optional)
 
 ${c.bold("Features")}
-  aisdlc new "<title>" --kind <${KINDS.join("|")}> [--lane ${LANES.join("|")}]
-  aisdlc lane <feature> [lane]           show or raise a feature's lane (ratchets up; --force --note to lower)
-  aisdlc status [--json]                 all features, state and gate lights
-  aisdlc next [feature] [--json]         derived state, blockers, next task, skill to load
+  arsdlc new "<title>" --kind <${KINDS.join("|")}> [--lane ${LANES.join("|")}]
+  arsdlc lane <feature> [lane]           show or raise a feature's lane (ratchets up; --force --note to lower)
+  arsdlc status [--json]                 all features, state and gate lights
+  arsdlc next [feature] [--json]         derived state, blockers, next task, skill to load
 
 ${c.bold("Checks (deterministic, from disk)")}
-  aisdlc check spec <path|feature>       EARS validator
-  aisdlc check delta <path|feature>      delta Change-table validator (types, Reason/Migration, FROM/TO)
-  aisdlc trace [feature]                 requirement → task matrix
-  aisdlc gate <G1..G6> [feature]         one gate       ·  aisdlc gates [feature]  all six
-  aisdlc scan                            secrets scan over tracked files
-  aisdlc ci [feature] [--json]           evaluate every crossed gate; non-zero on a regression or a stale approval
-  aisdlc report [feature] [--json]       read the logs back: runs, staleness, approvals, review
+  arsdlc check spec <path|feature>       EARS validator
+  arsdlc check delta <path|feature>      delta Change-table validator (types, Reason/Migration, FROM/TO)
+  arsdlc trace [feature]                 requirement → task matrix
+  arsdlc gate <G1..G6> [feature]         one gate       ·  arsdlc gates [feature]  all six
+  arsdlc scan                            secrets scan over tracked files
+  arsdlc ci [feature] [--json]           evaluate every crossed gate; non-zero on a regression or a stale approval
+  arsdlc report [feature] [--json]       read the logs back: runs, staleness, approvals, review
 
 ${c.bold("Evidence & approvals")}
-  aisdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>
-  aisdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]     (humans only; SoD enforced)
-  aisdlc audit [feature]                 approval chain + evidence log
+  arsdlc evidence <feature> [--label full|green|red|baseline|smoke|spike|blocked|deploy] [--task T3] -- <command>
+  arsdlc approve <G1|G4|G5> <feature> --by "<human>" [--note ...]     (humans only; SoD enforced)
+  arsdlc audit [feature]                 approval chain + evidence log
 
 Evidence out
-  aisdlc export <feature> [--out dir] [--format all|statement|sarif] [--sign "<cmd {envelope}>"]
-  aisdlc export --verify <dir>           recompute every digest offline; non-zero on a mismatch
+  arsdlc export <feature> [--out dir] [--format all|statement|sarif] [--sign "<cmd {envelope}>"]
+  arsdlc export --verify <dir>           recompute every digest offline; non-zero on a mismatch
 
 State for other agents
-  aisdlc mcp [--stdio]                   read-only MCP over stdio: aisdlc_next, aisdlc_status (no writes)
+  arsdlc mcp [--stdio]                   read-only MCP over stdio: arsdlc_next, arsdlc_status (no writes)
 
 Gates: ${GATES.map((g) => `${g} ${GATE_TITLES[g]}`).join(" · ")}
 Lanes: ${LANES.map((l) => `${l} [${LANE_GATES[l].join(" ")}]`).join(" · ")}
-Docs: https://github.com/AnshRoshan/aisdlc`);
+Docs: https://github.com/AnshRoshan/arsdlc`);
   },
 };
 

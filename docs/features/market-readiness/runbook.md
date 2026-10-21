@@ -18,8 +18,8 @@
 
 - GitHub Actions: `ci`, `deploy site`, `publish cli`, `gate`.
 - npm package page: version, provenance, deprecations.
-- Live site: `https://anshroshan.github.io/aisdlc/`.
-- Local: `aisdlc report`, `aisdlc doctor --json`, `aisdlc audit`.
+- Live site: `https://anshroshan.github.io/arsdlc/`.
+- Local: `arsdlc report`, `arsdlc doctor --json`, `arsdlc audit`.
 
 ## Contacts
 

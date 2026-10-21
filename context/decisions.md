@@ -4,7 +4,7 @@ One entry per hard technical decision, written when it is made. Defaults already
 
 ---
 
-## D-01: Adopt project-context-system alongside the aisdlc pipeline - 2026-10-20
+## D-01: Adopt project-context-system alongside the arsdlc pipeline - 2026-10-20
 
 Trigger: the repo had no `AGENTS.md`, `CLAUDE.md`, `context/` or `memory.md`; `.gitignore` actively excluded them. Agents re-derived the project from README and git history every session.
 Options considered: (A) AGENTS.md only, (B) full context system with per-change docs duplicated into `context/feature-specs/`, (C) full context system with `docs/features/` as the single per-change source.
@@ -16,7 +16,7 @@ Correctness policy: `docs/features/` is authoritative for a change. If it disagr
 
 ## D-02: Publish with npm trusted publishing, not a long-lived token - 2026-10-20
 
-Trigger: the publish workflow failed with `ENEEDAUTH`; `aisdlc` is still a 404 on npm.
+Trigger: the publish workflow failed with `ENEEDAUTH`; `arsdlc` is still a 404 on npm.
 Options considered: (A) keep `NPM_TOKEN`, (B) GitHub OIDC trusted publishing with `--provenance`, (C) manual local publish.
 Chosen: B, with a documented fallback to A only if the account cannot use trusted publishing.
 Lost alternative: A, because a long-lived token is a standing credential and the workflow already failed silently in the sense that nothing shipped.
@@ -26,7 +26,7 @@ Correctness policy: a failed publish must never create a release or move a tag. 
 
 ## D-03: Bind approvals to `head` and `tree`, not only artifact text - 2026-10-20
 
-Trigger: AWS AI-DLC fingerprints exact plan bytes and Spec Kitty refuses merges after a post-approval commit; aisdlc hashes only artifact text, so it cannot see that the tree moved.
+Trigger: AWS AI-DLC fingerprints exact plan bytes and Spec Kitty refuses merges after a post-approval commit; arsdlc hashes only artifact text, so it cannot see that the tree moved.
 Options considered: (A) keep artifact hashes, (B) add `head` + `tree` to every approval entry, (C) sign commits and verify signatures.
 Chosen: B. Additive fields; gates fail when the tree changed outside `evidence/`; no-git projects record `git: unavailable` and keep the current behavior with a printed degradation.
 Lost alternative: C, because it imposes identity and key management before the product has shipped.
@@ -56,7 +56,7 @@ Correctness policy: an unsigned export proves integrity against tampering after 
 
 ## D-06: Keep the name; compete on a distinct phrase - 2026-10-20
 
-Trigger: searching "AI-DLC" returns AWS's kit; `aisdlc` reads like a fork. A rename was declined previously.
+Trigger: searching "AI-DLC" returns AWS's kit; `arsdlc` reads like a fork. A rename was declined previously.
 Options considered: (A) rename, (B) sub-brand, (C) keep the name and own descriptive language ("cross-vendor process evidence").
 Chosen: C. No rename without a new decision.
 Lost alternative: A, already declined; the migration cost is not justified before launch.
@@ -99,7 +99,7 @@ Correctness policy: the printed mode must match the filesystem. A junction repor
 ## D-10: Two checklist branches instead of one 111-item file - 2026-10-20
 
 Trigger: the maintainer supplied a 111-item system-design list and required full coverage inside the skill. All 111 in one sub-file measured 9,711 B, over the 9 KB sub-file budget.
-Options considered: (A) one file and raise the budget, (B) one file and prune content, (C) split into the two branches the items actually serve, (D) inline in `aisdlc-plan`'s router.
+Options considered: (A) one file and raise the budget, (B) one file and prune content, (C) split into the two branches the items actually serve, (D) inline in `arsdlc-plan`'s router.
 Chosen: C, 79 items in `system-design-checklist.md` and 32 in `operations-checklist.md`, each with its own trigger and hot-path budget.
 Lost alternative: A, because a ceiling fitted to the current file is how a budget stops meaning anything; D, because the plan router would have gone from 10 KB to 20 KB and every plan run would pay for K8s probes.
 Cost paid: two triggers to place correctly; a plan that crosses both boundaries reads about 20 KB, now budgeted and checked.
@@ -130,11 +130,11 @@ The maintainer said to push and release, so the tag and the npm publish go out w
 
 ## F-05: Single-approver SoD deadlock - 2026-10-20
 
-`aisdlc new` seeds `author` from the git identity, and G1 refuses an approval whose name equals the author. With one maintainer, the standard lane cannot be signed by anyone. `market-readiness` records the agent as author so the human can sign, which is honest but is a workaround, not a design. Nobody has decided how solo projects should pass G1.
+`arsdlc new` seeds `author` from the git identity, and G1 refuses an approval whose name equals the author. With one maintainer, the standard lane cannot be signed by anyone. `market-readiness` records the agent as author so the human can sign, which is honest but is a workaround, not a design. Nobody has decided how solo projects should pass G1.
 
 ## F-01: npm trusted publishing is available for this account - 2026-10-20, answered 2026-10-21
 
-It is not configured, and the assumption is now replaced with a fact. The `v0.2.1` run took the OIDC path correctly (`id-token: write`, no token, setup-node wired), and npm answered the PUT with `E404 Not Found - PUT https://registry.npmjs.org/aisdlc`. That is npm rejecting an unknown package identity, not a broken workflow: the publisher has to be registered on the npm side first, per package name, pointing at this repo and `publish.yml`. Nothing was published and nothing is half-published - the registry still returns 404 and the GitHub release was not created, because that step follows a successful publish.
+It is not configured, and the assumption is now replaced with a fact. The `v0.2.1` run took the OIDC path correctly (`id-token: write`, no token, setup-node wired), and npm answered the PUT with `E404 Not Found - PUT https://registry.npmjs.org/arsdlc`. That is npm rejecting an unknown package identity, not a broken workflow: the publisher has to be registered on the npm side first, per package name, pointing at this repo and `publish.yml`. Nothing was published and nothing is half-published - the registry still returns 404 and the GitHub release was not created, because that step follows a successful publish.
 
 Two ways to finish T2, both a maintainer action: add the trusted publisher on npm and re-run the workflow for the tag, or set `NPM_TOKEN` and let the mode step take the token path (which publishes without provenance). Re-running is the cheaper of the two, and provenance is worth the npm UI visit.
 

@@ -113,16 +113,16 @@ individually for prose, licenses or external operational services.
 |[license](../LICENSE)|MIT terms reviewed; root preserved, package attribution fixed|
 |[product](../PRODUCT.md)|Skill count and product scope consistent; unchanged|
 |[README](../README.md)|Install, command and ownership claims reviewed; honest verification limits added|
-|[researcher](../agents/aisdlc-researcher.md)|Unnecessary Bash capability removed from read-only role|
-|[scout](../agents/aisdlc-scout.md)|Role/model/tools contract reviewed; unchanged|
-|[project marker](../aisdlc.json)|Project layout and approval policy read; unchanged|
+|[researcher](../agents/arsdlc-researcher.md)|Unnecessary Bash capability removed from read-only role|
+|[scout](../agents/arsdlc-scout.md)|Role/model/tools contract reviewed; unchanged|
+|[project marker](../arsdlc.json)|Project layout and approval policy read; unchanged|
 |[dark flow](../assets/flow-dark.svg)|Accessibility, static behavior and gate placement fixed|
 |[light flow](../assets/flow-light.svg)|Accessibility, static behavior and gate placement fixed|
 |[dark hero](../assets/hero-dark.svg)|Authenticity overclaim removed; static accessible art|
 |[light hero](../assets/hero-light.svg)|Authenticity overclaim removed; static accessible art|
-|[next command](../commands/aisdlc-next.md)|Human-owner stop and fallback path corrected|
-|[report command](../commands/aisdlc-report.md)|Exit/staleness recovery instructions corrected|
-|[status command](../commands/aisdlc-status.md)|Blocker query and human signature instructions corrected|
+|[next command](../commands/arsdlc-next.md)|Human-owner stop and fallback path corrected|
+|[report command](../commands/arsdlc-report.md)|Exit/staleness recovery instructions corrected|
+|[status command](../commands/arsdlc-status.md)|Blocker query and human signature instructions corrected|
 |[competitor research](../docs/COMPETITORS.md)|Entire historical research read; duplicate section number corrected|
 |[research](../docs/RESEARCH.md)|Entire text read; historical platform claims explicitly separated|
 |[constitution](../docs/constitution.md)|Invariants read; unchanged|
@@ -138,7 +138,7 @@ individually for prose, licenses or external operational services.
 |[demo tasks](../docs/features/demo/tasks.md)|Unchecked task reviewed; preserved|
 |[taste](../docs/taste.md)|Actual CLI runner documented; remaining UI taste is advisory|
 |[CLI README](../packages/cli/README.md)|Evidence, approvals, Windows and publication limits documented|
-|[CLI entry](../packages/cli/bin/aisdlc.js)|Entry/delegation reviewed; unchanged|
+|[CLI entry](../packages/cli/bin/arsdlc.js)|Entry/delegation reviewed; unchanged|
 |[CLI manifest](../packages/cli/package.json)|Zero dependencies, engines, bins/files/scripts reviewed; unchanged|
 |[corpus checker](../packages/cli/scripts/check-skills.mjs)|All rules read and executed; method/field-shape limitations documented|
 |[package sync](../packages/cli/scripts/sync-skills.mjs)|Canonical copies, fixed deletion targets and MIT attribution improved|
@@ -162,29 +162,29 @@ individually for prose, licenses or external operational services.
 |[skill index](../site/src/pages/skills.astro)|Entire source read; unchanged|
 |[skill detail](../site/src/pages/skills/[slug].astro)|Clipboard/rendering integration reviewed/fixed|
 |[site styles](../site/src/styles/global.css)|Gutters/mobile navigation corrected|
-|[brainstorm](../skills/aisdlc-brainstorm/SKILL.md)|Lane/entry interview contract read; unchanged|
-|[brownfield](../skills/aisdlc-brownfield/SKILL.md)|Portable baseline exploration corrected|
-|[craft](../skills/aisdlc-craft/SKILL.md)|Companion/fallback/ownership contract read; unchanged|
-|[debug](../skills/aisdlc-debug/SKILL.md)|Failure/debug/evidence routing read; unchanged|
-|[delta](../skills/aisdlc-delta/SKILL.md)|Agreement, signature unlock, hashes and validators corrected|
-|[discover](../skills/aisdlc-discover/SKILL.md)|Recommended-answer interview guidance corrected|
-|[flow](../skills/aisdlc-flow/SKILL.md)|Entire router read; unchanged|
-|[manual flow](../skills/aisdlc-flow/references/manual-derivation.md)|Order/lane/evidence rules corrected; no handwritten proof|
-|[grill](../skills/aisdlc-grill/SKILL.md)|Quick/spike clarification bypass removed|
-|[handoff](../skills/aisdlc-handoff/SKILL.md)|Artifact/context contract read; unchanged|
-|[implement](../skills/aisdlc-implement/SKILL.md)|Recorded portable baseline commands corrected|
-|[plan](../skills/aisdlc-plan/SKILL.md)|Constitution review and intent-binding clarified|
-|[ponytail](../skills/aisdlc-ponytail/SKILL.md)|Trivial-change exemption cannot waive required gates|
-|[quality](../skills/aisdlc-quality/SKILL.md)|Tools/fallback/evidence guidance read; unchanged|
-|[release](../skills/aisdlc-release/SKILL.md)|Lane endings and combined approval hash corrected|
-|[retro](../skills/aisdlc-retro/SKILL.md)|Real byte/hot-path conventions used|
-|[review](../skills/aisdlc-review/SKILL.md)|Historical author provenance, families, scenarios and approval counts corrected|
-|[review exit](../skills/aisdlc-review/references/pushback-and-exit.md)|Entire refusal/exit contract read; unchanged|
-|[spec](../skills/aisdlc-spec/SKILL.md)|Validator vs G2 checks and human-only signatures corrected|
-|[tasks](../skills/aisdlc-tasks/SKILL.md)|Analysis-only/read-only path made explicit|
-|[taste skill](../skills/aisdlc-taste/SKILL.md)|Steering/ownership contract read; unchanged|
-|[verify](../skills/aisdlc-verify/SKILL.md)|Full-suite command, source proof and waiver reason corrected|
-|[guard source](../hooks/aisdlc-guard.mjs)|Entire mod read; runtime API/cache/signature/path/compound checks fixed|
+|[brainstorm](../skills/arsdlc-brainstorm/SKILL.md)|Lane/entry interview contract read; unchanged|
+|[brownfield](../skills/arsdlc-brownfield/SKILL.md)|Portable baseline exploration corrected|
+|[craft](../skills/arsdlc-craft/SKILL.md)|Companion/fallback/ownership contract read; unchanged|
+|[debug](../skills/arsdlc-debug/SKILL.md)|Failure/debug/evidence routing read; unchanged|
+|[delta](../skills/arsdlc-delta/SKILL.md)|Agreement, signature unlock, hashes and validators corrected|
+|[discover](../skills/arsdlc-discover/SKILL.md)|Recommended-answer interview guidance corrected|
+|[flow](../skills/arsdlc-flow/SKILL.md)|Entire router read; unchanged|
+|[manual flow](../skills/arsdlc-flow/references/manual-derivation.md)|Order/lane/evidence rules corrected; no handwritten proof|
+|[grill](../skills/arsdlc-grill/SKILL.md)|Quick/spike clarification bypass removed|
+|[handoff](../skills/arsdlc-handoff/SKILL.md)|Artifact/context contract read; unchanged|
+|[implement](../skills/arsdlc-implement/SKILL.md)|Recorded portable baseline commands corrected|
+|[plan](../skills/arsdlc-plan/SKILL.md)|Constitution review and intent-binding clarified|
+|[ponytail](../skills/arsdlc-ponytail/SKILL.md)|Trivial-change exemption cannot waive required gates|
+|[quality](../skills/arsdlc-quality/SKILL.md)|Tools/fallback/evidence guidance read; unchanged|
+|[release](../skills/arsdlc-release/SKILL.md)|Lane endings and combined approval hash corrected|
+|[retro](../skills/arsdlc-retro/SKILL.md)|Real byte/hot-path conventions used|
+|[review](../skills/arsdlc-review/SKILL.md)|Historical author provenance, families, scenarios and approval counts corrected|
+|[review exit](../skills/arsdlc-review/references/pushback-and-exit.md)|Entire refusal/exit contract read; unchanged|
+|[spec](../skills/arsdlc-spec/SKILL.md)|Validator vs G2 checks and human-only signatures corrected|
+|[tasks](../skills/arsdlc-tasks/SKILL.md)|Analysis-only/read-only path made explicit|
+|[taste skill](../skills/arsdlc-taste/SKILL.md)|Steering/ownership contract read; unchanged|
+|[verify](../skills/arsdlc-verify/SKILL.md)|Full-suite command, source proof and waiver reason corrected|
+|[guard source](../hooks/arsdlc-guard.mjs)|Entire mod read; runtime API/cache/signature/path/compound checks fixed|
 |[guard manifest](../hooks/hooks.json)|Current official modules contract and file path verified; unchanged|
 
 ## New reviewed files

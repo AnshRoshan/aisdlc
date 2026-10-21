@@ -1,25 +1,25 @@
 import { KIND_HINTS, LANE_HINTS } from "./engine.js";
 
-export const MARK_START = "<!-- aisdlc:start -->";
-export const MARK_END = "<!-- aisdlc:end -->";
+export const MARK_START = "<!-- arsdlc:start -->";
+export const MARK_END = "<!-- arsdlc:end -->";
 
 export const INSTRUCTIONS_BLOCK = (skillNames) => `${MARK_START}
-# aisdlc: agents write code, aisdlc runs the process
+# arsdlc: agents write code, arsdlc runs the process
 
-This repository uses the aisdlc process. Before starting any engineering task:
+This repository uses the arsdlc process. Before starting any engineering task:
 
-1. Run \`npx @anshroshan/aisdlc next <feature>\` (or \`npx @anshroshan/aisdlc status\`) and trust its output over chat history. If the CLI is unavailable, \`aisdlc-flow\` explains how to derive the state from the files by hand.
+1. Run \`npx @anshroshan/arsdlc next <feature>\` (or \`npx @anshroshan/arsdlc status\`) and trust its output over chat history. If the CLI is unavailable, \`arsdlc-flow\` explains how to derive the state from the files by hand.
 1b. Before writing any code, read \`docs/taste.md\`, \`docs/glossary.md\` and \`docs/constitution.md\`. They are always-on steering: how to build here, what the words mean, what is non-negotiable. They are short by design - read them in full.
-2. Load the skill it names (\`${skillNames.join("`, `")}\`). Start with \`aisdlc-flow\` when unsure, \`aisdlc-brainstorm\` for a new idea, \`aisdlc-debug\` for a bug.
+2. Load the skill it names (\`${skillNames.join("`, `")}\`). Start with \`arsdlc-flow\` when unsure, \`arsdlc-brainstorm\` for a new idea, \`arsdlc-debug\` for a bug.
 2b. Match process to stakes with lanes: spike (answer a question) · quick (bounded change, G2-G4) · standard (all gates) · regulated (two approvers). Lanes only ratchet up.
 3. Obey the eight invariants:
    spec is truth · gates are transitions · approver ≠ author · humans sign the acceptance bar ·
    done = recorded evidence · disk is state · no secrets in files · fail loud, never fake green.
-4. Never write a name into an \`Approved-by:\` line and never run \`aisdlc approve\`. Those are human actions.
-5. Record every test run with \`npx @anshroshan/aisdlc evidence <feature> -- <command>\`. A claim without an evidence file is not a claim.
-6. Any change of intent after the spec is signed goes through \`aisdlc-delta\`.
-7. Write the least code that passes the spec (\`aisdlc-ponytail\`; uses the official \`ponytail\` skill if installed). Ask decisions with recommended answers, find facts yourself (\`aisdlc-grill\`; uses the official \`grilling\` skill if installed).
-8. Before a session ends mid-feature, write \`handoff.md\` (\`aisdlc-handoff\`). After DONE, run \`aisdlc-retro\`.
+4. Never write a name into an \`Approved-by:\` line and never run \`arsdlc approve\`. Those are human actions.
+5. Record every test run with \`npx @anshroshan/arsdlc evidence <feature> -- <command>\`. A claim without an evidence file is not a claim.
+6. Any change of intent after the spec is signed goes through \`arsdlc-delta\`.
+7. Write the least code that passes the spec (\`arsdlc-ponytail\`; uses the official \`ponytail\` skill if installed). Ask decisions with recommended answers, find facts yourself (\`arsdlc-grill\`; uses the official \`grilling\` skill if installed).
+8. Before a session ends mid-feature, write \`handoff.md\` (\`arsdlc-handoff\`). After DONE, run \`arsdlc-retro\`.
 
 Artifacts live in \`docs/features/<slug>/\`; project taste lives in \`docs/taste.md\`; shared vocabulary in \`docs/glossary.md\`; the constitution in \`docs/constitution.md\`.
 ${MARK_END}`;
@@ -36,7 +36,7 @@ Non-negotiables every agent and human in this project obeys. Add project-specifi
 3. Segregation of duties: the approver is never the author or the prompter.
 4. Humans own the acceptance bar (Approved-by lines are human-signed).
 5. Stranger-trust: done = run artifact recorded as evidence.
-6. Disk is state. Chat is not. \`aisdlc next\` derives the truth from files.
+6. Disk is state. Chat is not. \`arsdlc next\` derives the truth from files.
 7. Secrets never land in files. Placeholders only. Fail closed.
 8. Fail loud, never fake green. Infra-down means IMPLEMENTED-NOT-VERIFIED, not PASS.
 
@@ -50,7 +50,7 @@ Non-negotiables every agent and human in this project obeys. Add project-specifi
 `;
 
 export const FEATURE_JSON = (title, slug, kind, author, lane = "standard") =>
-  JSON.stringify({ title, slug, kind, lane, author, created: new Date().toISOString(), aisdlc: 2 }, null, 2) + "\n";
+  JSON.stringify({ title, slug, kind, lane, author, created: new Date().toISOString(), arsdlc: 2 }, null, 2) + "\n";
 
 export const SPEC = (title, kind, lane = "standard") => {
   const ui = kind === "frontend" || kind === "mobile";
@@ -158,7 +158,7 @@ observe. This is what a reviewer runs before reading the diff.>
 ## Risks
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Scope creep without a delta | medium | high | aisdlc-delta |
+| Scope creep without a delta | medium | high | arsdlc-delta |
 
 ## Rollback thinking
 <what is reversible, what is not; migrations are expand/contract; flags default off>
@@ -261,17 +261,17 @@ anti-patterns: generic gradients, unlabeled icons, placeholder copy
 export const CLAUDE_COMMAND = (skill, desc) => `---
 description: ${desc}
 ---
-Load and follow the \`${skill}\` skill in this repository (.claude/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/aisdlc next $ARGUMENTS\` and obey its output.
+Load and follow the \`${skill}\` skill in this repository (.claude/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next $ARGUMENTS\` and obey its output.
 `;
 
 export const GEMINI_COMMAND = (skill, desc) => `description = "${desc.replace(/"/g, '\\"')}"
 prompt = """
-Load and follow the ${skill} skill in this repository (.gemini/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/aisdlc next {{args}}\` and obey its output.
+Load and follow the ${skill} skill in this repository (.gemini/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next {{args}}\` and obey its output.
 """
 `;
 
 export const COPILOT_PROMPT = (skill, desc) => `---
 description: ${desc}
 ---
-Load and follow the \`${skill}\` skill in this repository (.github/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/aisdlc next\` and obey its output.
+Load and follow the \`${skill}\` skill in this repository (.github/skills/${skill}/SKILL.md). Start by running \`npx @anshroshan/arsdlc next\` and obey its output.
 `;

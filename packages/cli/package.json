@@ -1,10 +1,10 @@
 {
-  "name": "@anshroshan/aisdlc",
+  "name": "arsdlc",
   "version": "0.3.0",
-  "description": "Agents write code, aisdlc runs the process. Command: aisdlc (npx aisdlc). Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
+  "description": "Agents write code, arsdlc runs the process. Command: arsdlc (npx arsdlc). Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
   "type": "module",
   "bin": {
-    "aisdlc": "bin/aisdlc.js"
+    "arsdlc": "bin/arsdlc.js"
   },
   "files": [
     "bin",
@@ -38,8 +38,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AnshRoshan/aisdlc.git",
+    "url": "git+https://github.com/AnshRoshan/arsdlc.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/AnshRoshan/aisdlc#readme"
+  "homepage": "https://github.com/AnshRoshan/arsdlc#readme"
 }

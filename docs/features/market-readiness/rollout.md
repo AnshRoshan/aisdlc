@@ -26,7 +26,7 @@ Prereleases go to `next`. `latest` moves only after the smoke path and the site 
 ## Rollback
 
 1. Stop the rollout: do not move `latest`.
-2. `npm deprecate aisdlc@<version> "reason"` and publish a patch from the last good commit.
+2. `npm deprecate arsdlc@<version> "reason"` and publish a patch from the last good commit.
 3. Restore the previous Pages deployment by re-running `deploy site` on the last good commit.
 4. Never move or delete a published tag. Record the incident in `context/current-issues.md`.
 5. Re-run the smoke path and record the recovery evidence.

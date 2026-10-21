@@ -6,23 +6,20 @@ _Last updated: 2026-10-21_
 
 ## Current state
 
-- Repo synced at `b14ebf2`; the tree is dirty with phase 0 to 3 work. Nothing is committed or pushed.
-- Project context is scaffolded and maintained: `AGENTS.md`, `CLAUDE.md`, `context/`, `docs/glossary.md`, this file, `.claude/settings.json`.
-- Enforcement landed and is tested: approvals bind `head`/`tree`/`git` and fail when content moved after a signature; `report` shows the binding and exits 3 on drift; `doctor` prints a per-harness enforcement level; `aisdlc ci` plus `.github/workflows/gates.yml` give every harness a merge check; `antigravity` and `devin` targets exist and the retired layouts print a notice.
-- Evidence is portable: `aisdlc export` writes an in-toto Statement v1, a DSSE envelope, copies of every artifact and evidence record, SARIF 2.1.0 and `verify.md`; `export --verify` recomputes digests offline and exits 1 naming the tampered file; `--sign` shells out to an external signer without requiring one.
-- `aisdlc mcp --stdio` serves read-only state to any MCP client; write-shaped tool calls are refused with the CLI command a human must run.
-- 87/87 CLI tests pass, the corpus check passes with 23 commands cross-checked, and `aisdlc ci` exits 0.
-- Still broken and needing you: npm 404, no GitHub release, the Pages fix is unverified, and G1 is unsigned (the F-04 override is recorded).
+- Renamed throughout to **`arsdlc`**: 873 occurrences, 102 files, 20 skill folders, the bin, the guard module, the `arsdlc.json` marker and both plugin manifests. Registry, PyPI and GitHub all say the name is unclaimed.
+- `main` is pushed through `09e1b4e` (that commit still carried `@anshroshan/aisdlc`); the rename is the working tree at the time of writing and is about to be committed and pushed.
+- Enforcement is tested and live: commit-bound approvals, `arsdlc ci`, per-harness enforcement levels in `doctor`, the reusable gate workflow, `antigravity` and `devin` targets. Evidence exports as in-toto/DSSE plus SARIF and verifies offline. `arsdlc mcp --stdio` serves read-only state.
+- 87/87 CLI tests, 12/12 guard tests, 6/6 site tests, corpus check green on 23 commands, secrets scan clean, site builds 23 pages, plugin validation passes.
+- Still open externally: nothing is on npm, there is no GitHub release, and the GitHub repo is still named `aisdlc` until it is renamed.
 
 ## Next step
 
-Publish `@anshroshan/aisdlc@0.3.0` from `packages/cli` with `npm publish --access public` - no `--provenance`, because a local publish has no OIDC identity provider and npm answers `Automatic provenance generation not supported for provider: null`.
+Two commands, in this order, from you:
 
-The unscoped `aisdlc` is refused outright: npm returned `403 Package name too similar to existing package ai-sdlc`, and that package is live with 138 versions in the same category. A registry 404 means unclaimed, not claimable.
+1. `gh repo rename arsdlc` in the repo root - GitHub redirects the old URL.
+2. Publish `arsdlc@0.3.0` with `npm publish --access public`, no `--provenance`. If npm again answers `403 too similar to ai-sdlc`, publish `@anshroshan/arsdlc` instead; the bin and every string in the repo stay `arsdlc` either way.
 
-Then I cut the release, flip the README install cell, and close T2, T3 and T4.
-
-T20 needs a runner and real model runs before any number is published. T13 needs a Codex or Copilot client that actually accepts a catalog file.
+Then I create the release, flip the README install cell to the live command, and close T2, T3 and T4 with recorded evidence. T20 needs a runner and real model runs before any number exists; T13 needs a Codex or Copilot client that accepts a catalog file.
 
 ## Open questions
 

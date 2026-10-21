@@ -3,7 +3,7 @@
 ## 1. Context
 
 Kind: **lib**. Lane: **standard** (new capability; all six gates). Verify model: API contract tests + semver + back-compat.
-Problem: aisdlc is synced but unshipped (npm 404, no release, broken Pages deploy, no audience), and the October 2026 market now has deterministic enforcement from AWS AI-DLC and Spec Kitty, so the "competitors only advise" claim is false. Approvals bind artifact text but not commits, the guard is Claude-only, and evidence cannot be consumed by CI or audit tooling.
+Problem: arsdlc is synced but unshipped (npm 404, no release, broken Pages deploy, no audience), and the October 2026 market now has deterministic enforcement from AWS AI-DLC and Spec Kitty, so the "competitors only advise" claim is false. Approvals bind artifact text but not commits, the guard is Claude-only, and evidence cannot be consumed by CI or audit tooling.
 Users: the maintainer shipping the kit; contributors changing the corpus; developers adopting it; reviewers and auditors who must verify a claim without trusting the author.
 
 ## 2. Goals / Non-goals
@@ -22,7 +22,7 @@ Users: the maintainer shipping the kit; contributors changing the corpus; develo
 
 ### Requirement: Publish a release
 
-WHEN a `v*` tag is pushed and the CLI suite passes THE SYSTEM SHALL publish `aisdlc` to the npm registry with provenance and create a GitHub release pointing at the tagged commit.
+WHEN a `v*` tag is pushed and the CLI suite passes THE SYSTEM SHALL publish `arsdlc` to the npm registry with provenance and create a GitHub release pointing at the tagged commit.
 
 #### Scenario: Publish succeeds
 - GIVEN trusted publishing is configured and the test suite passes
@@ -79,7 +79,7 @@ WHEN a human signs G1, G4 or G5 THE SYSTEM SHALL record the current `head` commi
 
 ### Requirement: Report enforcement honestly
 
-WHEN `aisdlc doctor --json` runs THE SYSTEM SHALL report every supported harness with an enforcement level of `native`, `ci` or `none` and the exact install command, and SHALL NOT report `native` unless a guard module is installed and its manifest validates.
+WHEN `arsdlc doctor --json` runs THE SYSTEM SHALL report every supported harness with an enforcement level of `native`, `ci` or `none` and the exact install command, and SHALL NOT report `native` unless a guard module is installed and its manifest validates.
 
 #### Scenario: Claude Code with the guard
 - GIVEN the plugin and guard are installed and validated
@@ -107,7 +107,7 @@ WHEN the reusable gate workflow runs on a pull request THE SYSTEM SHALL evaluate
 
 ### Requirement: Export portable evidence
 
-WHEN `aisdlc export <feature> --format all --out <dir>` runs THE SYSTEM SHALL write an in-toto Statement v1, a DSSE envelope, a SARIF 2.1.0 file when findings exist, and a verifier note containing the exact offline verification command.
+WHEN `arsdlc export <feature> --format all --out <dir>` runs THE SYSTEM SHALL write an in-toto Statement v1, a DSSE envelope, a SARIF 2.1.0 file when findings exist, and a verifier note containing the exact offline verification command.
 
 #### Scenario: Export succeeds
 - GIVEN a feature with recorded evidence and at least one approval
@@ -126,7 +126,7 @@ WHEN `aisdlc export <feature> --format all --out <dir>` runs THE SYSTEM SHALL wr
 
 ### Requirement: Expose read-only state over MCP
 
-WHEN `aisdlc mcp --stdio` receives a `tools/list` request THE SYSTEM SHALL return read-only `next` and `status` tools, and a tool call SHALL NOT write files, record evidence or approve.
+WHEN `arsdlc mcp --stdio` receives a `tools/list` request THE SYSTEM SHALL return read-only `next` and `status` tools, and a tool call SHALL NOT write files, record evidence or approve.
 
 #### Scenario: List tools
 - GIVEN a configured project
@@ -136,7 +136,7 @@ WHEN `aisdlc mcp --stdio` receives a `tools/list` request THE SYSTEM SHALL retur
 #### Scenario: State request
 - GIVEN an open feature
 - WHEN the client calls `next`
-- THEN it returns the same state, blockers and skill name as `aisdlc next --json`
+- THEN it returns the same state, blockers and skill name as `arsdlc next --json`
 
 #### Scenario: Write attempt
 - GIVEN a client tries an unsupported write action
@@ -145,7 +145,7 @@ WHEN `aisdlc mcp --stdio` receives a `tools/list` request THE SYSTEM SHALL retur
 
 ### Requirement: Support current harness names
 
-WHEN `aisdlc init --harness antigravity` or `--harness devin` runs THE SYSTEM SHALL install into that harness's current layout, and WHEN a retired name is used THE SYSTEM SHALL install into the legacy-compatible path and print a deprecation warning.
+WHEN `arsdlc init --harness antigravity` or `--harness devin` runs THE SYSTEM SHALL install into that harness's current layout, and WHEN a retired name is used THE SYSTEM SHALL install into the legacy-compatible path and print a deprecation warning.
 
 #### Scenario: Antigravity install
 - GIVEN Antigravity CLI is the active harness
@@ -163,7 +163,7 @@ WHEN a user installs through the skills CLI, the Codex or Copilot marketplace, o
 
 #### Scenario: Skills CLI install
 - GIVEN a clean project
-- WHEN `npx skills add AnshRoshan/aisdlc` runs
+- WHEN `npx skills add AnshRoshan/arsdlc` runs
 - THEN all 20 skills install and a lockfile pins the source
 
 #### Scenario: Plugin validation
@@ -219,7 +219,7 @@ Approved-by: ______  Date: ______
 - Pure engine functions: `artifactHashFor`, gate evaluators, approval parsing, evidence validation, export builder.
 - Workflow files: `.github/workflows/publish.yml`, `deploy.yml`, `gate.yml`.
 - Plugin manifests: `.claude-plugin/plugin.json`, portable root `plugin.json`, `.agents/plugins/marketplace.json`.
-- Guard module: `hooks/aisdlc-guard.mjs` and its manifest.
+- Guard module: `hooks/arsdlc-guard.mjs` and its manifest.
 
 ## 8. UX & interaction (n/a: lib)
 
@@ -233,9 +233,9 @@ Every value this feature produces, computes or displays, and where it comes from
 |---|---|---|
 | Gate verdict | Engine pure function over parsed artifacts | `gate` evaluation in `engine.js` |
 | Approval freshness | Approval hash + recorded `head`/`tree` vs current files and git state | `artifactHashFor` plus `git rev-parse` / `git write-tree` |
-| Evidence checksum | SHA-256 of the recorded run and source fingerprints | Evidence record written by `aisdlc evidence` |
+| Evidence checksum | SHA-256 of the recorded run and source fingerprints | Evidence record written by `arsdlc evidence` |
 | Harness enforcement level | Installed manifest probe plus `claude plugin validate` result | `doctor --json` probe |
-| Export statement | Feature artifacts, approvals and evidence records | `aisdlc export` builder |
+| Export statement | Feature artifacts, approvals and evidence records | `arsdlc export` builder |
 | Findings | `acceptance.md` findings table and gate failures | Parser in `engine.js` |
 | Publish status | npm registry and GitHub release APIs | Workflow output, never invented locally |
 | Eval pass rate | Eval runner results for gated and ungated runs | Eval suite output |

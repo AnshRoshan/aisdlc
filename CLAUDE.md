@@ -6,4 +6,4 @@ The `@AGENTS.md` import above loads the master instruction file at launch. Keep 
 
 Personal, uncommitted overrides go in `CLAUDE.local.md` (gitignored, loaded after this file).
 
-This repo is also an aisdlc project. Before any engineering task, run `node packages/cli/bin/aisdlc.js next <feature>` and trust the disk over chat.
+This repo is also an arsdlc project. Before any engineering task, run `node packages/cli/bin/arsdlc.js next <feature>` and trust the disk over chat.

@@ -8,7 +8,7 @@
  */
 
 export const STATEMENT_TYPE = "https://in-toto.io/Statement/v1";
-export const PREDICATE_TYPE = "https://aisdlc.dev/attestation/gate-evidence/v1";
+export const PREDICATE_TYPE = "https://arsdlc.dev/attestation/gate-evidence/v1";
 export const PAYLOAD_TYPE = "application/vnd.in-toto+json";
 export const ARTIFACTS = ["spec.md", "plan.md", "tasks.md", "acceptance.md", "rollout.md", "guardrails.yaml", "runbook.md"];
 
@@ -41,7 +41,7 @@ export function sarifOf({ toolVersion, gates, acceptanceRows, feature }) {
   };
   for (const g of gates || []) {
     for (const check of (g.checks || []).filter((c) => !c.ok)) {
-      const id = `aisdlc/${g.gate.toLowerCase()}`;
+      const id = `arsdlc/${g.gate.toLowerCase()}`;
       addRule(id, `${g.gate} ${g.title}`);
       results.push({
         ruleId: id,
@@ -53,7 +53,7 @@ export function sarifOf({ toolVersion, gates, acceptanceRows, feature }) {
   }
   for (const row of acceptanceRows || []) {
     if (/^(pass|passed|ok)$/i.test(row.result || "")) continue;
-    const id = "aisdlc/acceptance";
+    const id = "arsdlc/acceptance";
     addRule(id, "Acceptance scenario not satisfied");
     results.push({
       ruleId: id,
@@ -65,7 +65,7 @@ export function sarifOf({ toolVersion, gates, acceptanceRows, feature }) {
   return {
     version: "2.1.0",
     $schema: "https://json.schemastore.org/sarif-2.1.0.json",
-    runs: [{ tool: { driver: { name: "aisdlc", version: toolVersion, informationUri: "https://github.com/AnshRoshan/aisdlc", rules } }, results }],
+    runs: [{ tool: { driver: { name: "arsdlc", version: toolVersion, informationUri: "https://github.com/AnshRoshan/arsdlc", rules } }, results }],
   };
 }
 

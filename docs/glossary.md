@@ -4,7 +4,7 @@ The shared vocabulary. Skills and artifacts use these words with exactly these m
 
 | Term | Meaning |
 |---|---|
-| **aisdlc** | This process kit: 20 Agent Skills plus a zero-dependency Node CLI. |
+| **arsdlc** | This process kit: 20 Agent Skills plus a zero-dependency Node CLI. |
 | **Feature** | One unit of work with its own folder under `docs/features/<slug>/` and one system boundary. |
 | **Lane** | The process weight for a feature: `spike`, `quick`, `standard`, `regulated`. Lanes only ratchet up. |
 | **Gate** | A transition that must be satisfied before the next stage. G1 plan approval, G2 artifact consistency, G3 merge safety, G4 acceptance proof, G5 release approval, G6 runtime guardrails. |
@@ -15,7 +15,7 @@ The shared vocabulary. Skills and artifacts use these words with exactly these m
 | **Plan** | `plan.md`: architecture, decisions, data model, contracts, seams, work breakdown and traceability. |
 | **Task** | A tracer-bullet step in `tasks.md`, with a requirement ref, a seam and optional `after:` edges. |
 | **Seam** | The public interface a test attaches to: a CLI command, exported function, route or UI flow. |
-| **Evidence** | A recorded run: exact argv, exit code, timestamps and source fingerprints, written by `aisdlc evidence`. |
+| **Evidence** | A recorded run: exact argv, exit code, timestamps and source fingerprints, written by `arsdlc evidence`. |
 | **Approval** | A human signature bound to an artifact hash and appended to `approvals.json`. Agents never approve. |
 | **Segregation of duties (SoD)** | The author, the reviewer and the approver are different identities. Self-approval fails. |
 | **Hash binding** | An approval is valid only for the exact artifact content it signed. Editing the artifact makes it stale. |
@@ -27,7 +27,7 @@ The shared vocabulary. Skills and artifacts use these words with exactly these m
 | **Guardrail** | A runtime budget, alert or kill switch recorded in `guardrails.yaml`. |
 | **Guard** | The Claude Code mod that blocks bare test runs, self-approval and edits to signed artifacts. |
 | **Enforcement level** | What a harness actually enforces: native guard, CI-only, or none. `doctor` must report the truth. |
-| **Report** | `aisdlc report`: reads evidence and approvals back, shows staleness and the review score. |
+| **Report** | `arsdlc report`: reads evidence and approvals back, shows staleness and the review score. |
 | **Retro** | The close-the-loop skill that turns a finished feature into edits to the constitution, taste, glossary or a skill. |
 | **Handoff** | A session-compaction document so another agent continues without chat history. |
 | **Constitution** | `docs/constitution.md`: the ten invariants every agent and human obeys. |

@@ -9,9 +9,9 @@
  *
  * Rules
  *  1  every skills/<dir>/SKILL.md exists, parses, and its frontmatter is complete and uniform
- *  2  `name:` equals the directory name; dir matches aisdlc-<word>
+ *  2  `name:` equals the directory name; dir matches arsdlc-<word>
  *  3  description length: hard cap 1024, warn at 400 (every installed description loads into every session)
- *  4  every `aisdlc-*` token in the corpus names a skill that exists (or an allowlisted non-skill)
+ *  4  every `arsdlc-*` token in the corpus names a skill that exists (or an allowlisted non-skill)
  *  5  every CLI verb documented anywhere is a real command in src/cli.js
  *  6  every `references|x|modes/<file>.md` a skill tells the agent to read exists in that skill folder
  *  7  portability: no hardcoded model alias in spawn prose, no naming one agent's subagent tool,
@@ -61,13 +61,13 @@ const COMPANIONS = companionIds();
 // `check` takes a noun; gates and lanes and kinds are positional args that follow a real verb.
 const CMD_NOUNS = new Set(["spec", "delta", "all", "json", "auto", "harness", "lane", "link", "label", "kind", "by", "note", "force", "cwd", "task", "skill"]);
 const NON_SKILL_TOKENS = new Map([
-  ["aisdlc", "the npm package name, not a skill"],
-  ["aisdlc-cli", "the package name before 0.3.0; legal only in history documents"],
-  ["aisdlc-site", "the Astro site package name"],
-  ["aisdlc-json", "the project marker file (aisdlc.json)"],
-  ["aisdlc-specific", "prose: the phrase 'not aisdlc-specific', not a skill name"],
-  ["aisdlc-mcp", "roadmap item named in docs/RESEARCH.md, not a shipped skill"],
-  ["aisdlc-guard", "the Claude Code mod in hooks/, not a skill"],
+  ["arsdlc", "the npm package name, not a skill"],
+  ["arsdlc-cli", "the package name before 0.3.0; legal only in history documents"],
+  ["arsdlc-site", "the Astro site package name"],
+  ["arsdlc-json", "the project marker file (arsdlc.json)"],
+  ["arsdlc-specific", "prose: the phrase 'not arsdlc-specific', not a skill name"],
+  ["arsdlc-mcp", "roadmap item named in docs/RESEARCH.md, not a shipped skill"],
+  ["arsdlc-guard", "the Claude Code mod in hooks/, not a skill"],
 ]);
 
 // Claude Code mod: the guard hook, its manifest, and the API contract the host parses from source.
@@ -121,7 +121,7 @@ function slashCommands() {
 const SLASH = slashCommands();
 for (const s of SLASH) NON_SKILL_TOKENS.set(s, `the Claude Code slash command commands/${s}.md`);
 
-// Read-only subagent definitions are aisdlc-<role> too.
+// Read-only subagent definitions are arsdlc-<role> too.
 const AGENT_DIR = join(root, "agents");
 const AGENTS = existsSync(AGENT_DIR) ? readdirSync(AGENT_DIR).filter((f) => f.endsWith(".md")).map((f) => f.replace(/\.md$/, "")) : [];
 for (const a of AGENTS) NON_SKILL_TOKENS.set(a, `the read-only subagent agents/${a}.md`);
@@ -146,28 +146,28 @@ const WARN_AT = 0.9;
 // A path budget sums the files a real run loads: every `required` file plus the largest
 // alternative in `oneOf`. Budgeting the sum is the only number that reflects the cost.
 const HOT_PATHS = [
-  { name: "route a task (any run)", required: ["skills/aisdlc-flow/SKILL.md"], oneOf: [] },
+  { name: "route a task (any run)", required: ["skills/arsdlc-flow/SKILL.md"], oneOf: [] },
   {
     name: "route + one stage",
-    required: ["skills/aisdlc-flow/SKILL.md"],
+    required: ["skills/arsdlc-flow/SKILL.md"],
     oneOf: [
-      "skills/aisdlc-discover/SKILL.md",
-      "skills/aisdlc-spec/SKILL.md",
-      "skills/aisdlc-plan/SKILL.md",
-      "skills/aisdlc-tasks/SKILL.md",
-      "skills/aisdlc-implement/SKILL.md",
-      "skills/aisdlc-verify/SKILL.md",
-      "skills/aisdlc-review/SKILL.md",
-      "skills/aisdlc-release/SKILL.md",
+      "skills/arsdlc-discover/SKILL.md",
+      "skills/arsdlc-spec/SKILL.md",
+      "skills/arsdlc-plan/SKILL.md",
+      "skills/arsdlc-tasks/SKILL.md",
+      "skills/arsdlc-implement/SKILL.md",
+      "skills/arsdlc-verify/SKILL.md",
+      "skills/arsdlc-review/SKILL.md",
+      "skills/arsdlc-release/SKILL.md",
     ],
   },
-  { name: "brownfield repo entry", required: ["skills/aisdlc-flow/SKILL.md", "skills/aisdlc-brownfield/SKILL.md"], oneOf: [] },
+  { name: "brownfield repo entry", required: ["skills/arsdlc-flow/SKILL.md", "skills/arsdlc-brownfield/SKILL.md"], oneOf: [] },
   // The split-off branches: they only cost when taken, which is the whole point of taking them out.
-  { name: "route with no CLI", required: ["skills/aisdlc-flow/SKILL.md", "skills/aisdlc-flow/references/manual-derivation.md"], oneOf: [] },
-  { name: "review + exit", required: ["skills/aisdlc-review/SKILL.md", "skills/aisdlc-review/references/pushback-and-exit.md"], oneOf: [] },
+  { name: "route with no CLI", required: ["skills/arsdlc-flow/SKILL.md", "skills/arsdlc-flow/references/manual-derivation.md"], oneOf: [] },
+  { name: "review + exit", required: ["skills/arsdlc-review/SKILL.md", "skills/arsdlc-review/references/pushback-and-exit.md"], oneOf: [] },
   // The design checklist is 111 numbered items in two branches; each branch costs only its own half.
-  { name: "plan + design checklist", required: ["skills/aisdlc-plan/SKILL.md", "skills/aisdlc-plan/references/system-design-checklist.md"], oneOf: [] },
-  { name: "plan + operations checklist", required: ["skills/aisdlc-plan/SKILL.md", "skills/aisdlc-plan/references/operations-checklist.md"], oneOf: [] },
+  { name: "plan + design checklist", required: ["skills/arsdlc-plan/SKILL.md", "skills/arsdlc-plan/references/system-design-checklist.md"], oneOf: [] },
+  { name: "plan + operations checklist", required: ["skills/arsdlc-plan/SKILL.md", "skills/arsdlc-plan/references/operations-checklist.md"], oneOf: [] },
 ];
 const HOT_BUDGET = {
   "route a task (any run)": 12 * KB,
@@ -217,7 +217,7 @@ for (const dir of skillDirs) {
     err(rel(join(SKILLS, dir)), "skill folder has no SKILL.md");
     continue;
   }
-  if (!/^aisdlc-[a-z]+$/.test(dir)) err(rel(path), `folder name "${dir}" is not aisdlc-<word>`);
+  if (!/^arsdlc-[a-z]+$/.test(dir)) err(rel(path), `folder name "${dir}" is not arsdlc-<word>`);
   const text = LF(readFileSync(path, "utf8"));
   const fm = frontmatter(text);
   if (fm === null) {
@@ -272,7 +272,7 @@ for (const file of claimFiles) {
   const where = rel(file);
 
   // rule 4: skill tokens
-  for (const tok of new Set([...text.matchAll(/\baisdlc-[a-z][a-z0-9-]*\b/g)].map((m) => m[0]))) {
+  for (const tok of new Set([...text.matchAll(/\barsdlc-[a-z][a-z0-9-]*\b/g)].map((m) => m[0]))) {
     if (skillNames.has(tok)) continue;
     if (NON_SKILL_TOKENS.has(tok)) continue;
     const stem = tok.replace(/-$/, "");
@@ -280,20 +280,20 @@ for (const file of claimFiles) {
     err(where, `names "${tok}" which is neither a skill, a slash command, nor an allowlisted token`);
   }
 
-  // rule 5: documented CLI verbs, read only from code (prose that starts "aisdlc would…" is not a claim)
+  // rule 5: documented CLI verbs, read only from code (prose that starts "arsdlc would…" is not a claim)
   if (!HISTORY.has(where)) {
     const code = [
       ...[...text.matchAll(/```[\s\S]*?```/g)].map((m) => m[0]),
       ...[...text.matchAll(/`[^`\n]*`/g)].map((m) => m[0]),
     ].join("\n");
     const verbs = new Set();
-    for (const m of code.matchAll(/npx @anshroshan\/aisdlc\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
-    for (const m of code.matchAll(/(?:^|[\s$>])aisdlc\s+([a-z][a-z-]*)/gm)) verbs.add(m[1]);
+    for (const m of code.matchAll(/npx @anshroshan\/arsdlc\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
+    for (const m of code.matchAll(/(?:^|[\s$>])arsdlc\s+([a-z][a-z-]*)/gm)) verbs.add(m[1]);
     for (const v of verbs) {
       if (v === "cli") continue;
-      if (CMDS.has(v) || CMD_NOUNS.has(v) || COMPANIONS.has(v) || SLASH.has(`aisdlc-${v}`)) continue;
+      if (CMDS.has(v) || CMD_NOUNS.has(v) || COMPANIONS.has(v) || SLASH.has(`arsdlc-${v}`)) continue;
       if (/^g[1-6]$/.test(v)) continue;
-      err(where, `documents the command \`aisdlc ${v}\` which does not exist (real: ${[...CMDS].sort().join(", ")})`);
+      err(where, `documents the command \`arsdlc ${v}\` which does not exist (real: ${[...CMDS].sort().join(", ")})`);
     }
   }
 

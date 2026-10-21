@@ -1,4 +1,4 @@
-# DESIGN.md — aisdlc site
+# DESIGN.md — arsdlc site
 
 ## World: "the evidence ledger"
 The product's whole promise is that state lives on disk and every claim has a recorded run. The site is designed as if you are reading that ledger: ink-black file surface, hash-chains, gate stamps, monospace where data appears, and a display voice with enough character to feel authored. Dark because the audience reads it in a terminal-adjacent context at night; not dark because devtools are dark.

@@ -9,7 +9,7 @@
 | Agent Skills (SKILL.md) | open format | The 20 process skills | Portable across harnesses; progressive disclosure keeps context cost low |
 | Astro | 7.3.8 | Static documentation site | Static output, no runtime server, GitHub Pages deploy |
 | GitHub Actions | hosted | CI, Pages deploy, npm publish | The project's only automation surface |
-| Claude Code mods | current API | The `aisdlc-guard.mjs` enforcement layer | In-process hooks can block actions, not just advise |
+| Claude Code mods | current API | The `arsdlc-guard.mjs` enforcement layer | In-process hooks can block actions, not just advise |
 | node:test | built-in | Test runner | Zero dependency, works on every supported Node |
 
 Full decision rationale lives in `context/decisions.md`; competitor research lives in `docs/COMPETITORS.md`.
@@ -18,7 +18,7 @@ Full decision rationale lives in `context/decisions.md`; competitor research liv
 
 ```
 packages/cli/
-  bin/aisdlc.js        entry, delegates to src/cli.js
+  bin/arsdlc.js        entry, delegates to src/cli.js
   src/cli.js           command parsing and filesystem/process effects
   src/engine.js        pure functions: lanes, gates, parsers, hashes, flow, report
   src/fsx.js           filesystem helpers, installer, Windows-safe argv
@@ -30,7 +30,7 @@ packages/cli/
 skills/                canonical SKILL.md corpus (edit here only)
 agents/                canonical read-only subagent definitions
 commands/              slash commands for Claude Code
-hooks/                 aisdlc-guard.mjs and its manifest/tests
+hooks/                 arsdlc-guard.mjs and its manifest/tests
 docs/                  constitution, conventions, taste, research, feature artifacts
 context/               project state for agents (this system)
 site/                  Astro documentation site
@@ -39,10 +39,10 @@ site/                  Astro documentation site
 
 ## System boundaries and data flow
 
-1. A harness session loads a skill and runs `aisdlc next`. The CLI reads `aisdlc.json`, `docs/features/<slug>/` and `evidence/`, then prints state, blockers and the next skill.
+1. A harness session loads a skill and runs `arsdlc next`. The CLI reads `arsdlc.json`, `docs/features/<slug>/` and `evidence/`, then prints state, blockers and the next skill.
 2. The agent writes artifacts (spec, plan, tasks, acceptance, rollout, runbook). The engine parses them with pure functions and returns gate verdicts.
-3. `aisdlc evidence` executes the requested command, records argv, exit code, timestamps and source fingerprints, and writes a record under the feature's evidence directory.
-4. `aisdlc approve` is human-only. It appends a hash-chained approval entry bound to the artifact hash.
+3. `arsdlc evidence` executes the requested command, records argv, exit code, timestamps and source fingerprints, and writes a record under the feature's evidence directory.
+4. `arsdlc approve` is human-only. It appends a hash-chained approval entry bound to the artifact hash.
 5. The Claude guard reads the cached `next --json` state once per turn and blocks bare test runs, self-approval, writes to evidence/approvals, and edits to signed specs.
 6. The site renders `skills/**/SKILL.md` at build time. The corpus checker fails CI when a documented command or skill token does not exist.
 
@@ -53,7 +53,7 @@ site/                  Astro documentation site
 - Evidence and approvals are written only by the CLI, never by an agent.
 - A gate that can be satisfied by rephrasing prose is not a gate.
 - No runtime dependency. Optional integrations are external commands with a documented fallback.
-- Every documented command exists in `cli.js`; every `aisdlc-*` token names a real skill, command or agent.
+- Every documented command exists in `cli.js`; every `arsdlc-*` token names a real skill, command or agent.
 - Windows and POSIX behave the same: no shell concatenation, no POSIX-only glue.
 - The canonical corpus is `skills/`; `packages/cli/skills/` is generated.
 

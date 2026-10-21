@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Master instruction file for anyone working on aisdlc. Read this first, in every session, in every tool.
+Master instruction file for anyone working on arsdlc. Read this first, in every session, in every tool.
 
 ## What this repo is
 
-aisdlc is an MIT process kit for AI-assisted engineering: 20 Agent Skills plus a zero-dependency Node CLI that turns a spec into gated, evidenced work. The corpus and the CLI are the product; the site is documentation. Users install it into their own repo; this repo dogfoods the same process on itself.
+arsdlc is an MIT process kit for AI-assisted engineering: 20 Agent Skills plus a zero-dependency Node CLI that turns a spec into gated, evidenced work. The corpus and the CLI are the product; the site is documentation. Users install it into their own repo; this repo dogfoods the same process on itself.
 
 ## Reading order (tiered, never preload everything)
 
@@ -33,8 +33,8 @@ Read when the task touches it:
 - Sync canonical skills: `node packages/cli/scripts/sync-skills.mjs` (never hand-edit `packages/cli/skills/`)
 - Site build: `cd site && npm ci && npm run build`
 - Plugin check: `claude plugin validate .`
-- CLI entry: `node packages/cli/bin/aisdlc.js --help`
-- Feature artifacts: `docs/features/<slug>/`; project marker: `aisdlc.json`
+- CLI entry: `node packages/cli/bin/arsdlc.js --help`
+- Feature artifacts: `docs/features/<slug>/`; project marker: `arsdlc.json`
 - Windows is a first-class target. No POSIX-only shell glue, no shell-concatenated argv.
 
 ## Invariants
@@ -56,13 +56,13 @@ Repo-specific:
 
 - Every command documented in a skill, doc, page or README must exist in `packages/cli/src/cli.js`.
 - Engine gates are pure functions over files. Same files, same answer, any machine.
-- Evidence and approvals are written by the CLI, never by hand. Never fill an `Approved-by:` line and never run `aisdlc approve`.
+- Evidence and approvals are written by the CLI, never by hand. Never fill an `Approved-by:` line and never run `arsdlc approve`.
 - Never edit generated copies: `packages/cli/skills/`, `packages/cli/agents/`, `site/dist/`.
 - A claim that cannot be checked is not a feature. Cite the test, the gate or the command.
 
 ## Workflow
 
-- Dogfood aisdlc: `node packages/cli/bin/aisdlc.js next <feature>` and obey its output over chat history.
+- Dogfood arsdlc: `node packages/cli/bin/arsdlc.js next <feature>` and obey its output over chat history.
 - One feature or system boundary at a time. New ideas go into `context/build-plan.md`, never silently into code.
 - Record while working: `context/progress-tracker.md` when starting and finishing; `context/decisions.md` for hard calls; `context/current-issues.md` for bugs; `memory.md` at session end.
 - Before implementing, cross-check spec, plan and tasks read-only. Fix the artifacts, not the code.
@@ -70,7 +70,7 @@ Repo-specific:
 
 ## Skills
 
-The 20 skills are in `skills/`. Load the one `next` names; `aisdlc-flow` when unsure. Use `aisdlc-grill` for decisions, `aisdlc-ponytail` for the minimal implementation, and `aisdlc-review` for a two-axis review before asking for G4.
+The 20 skills are in `skills/`. Load the one `next` names; `arsdlc-flow` when unsure. Use `arsdlc-grill` for decisions, `arsdlc-ponytail` for the minimal implementation, and `arsdlc-review` for a two-axis review before asking for G4.
 
 ## Verification
 

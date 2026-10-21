@@ -21,7 +21,7 @@
 ## Risks
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Scope creep without a delta | medium | high | aisdlc-delta |
+| Scope creep without a delta | medium | high | arsdlc-delta |
 
 ## Rollback thinking
 <what is reversible>

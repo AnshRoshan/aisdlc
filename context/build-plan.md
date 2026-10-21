@@ -26,7 +26,7 @@ One program, five phases. Scope (what) stays separate from technology (how). The
 ## Phase 3 - Exportable evidence (P1)
 
 - Feature 07: Attestations and findings -> T16-T19
-  - in-toto Statement v1 with a gate-evidence predicate, DSSE envelope, SARIF 2.1.0, `aisdlc export`, optional signing.
+  - in-toto Statement v1 with a gate-evidence predicate, DSSE envelope, SARIF 2.1.0, `arsdlc export`, optional signing.
 
 ## Phase 4 - Credibility (P2)
 
@@ -43,4 +43,4 @@ One program, five phases. Scope (what) stays separate from technology (how). The
 
 ## Delivered out of band
 
-- Feature 10: system-design and operations checklists, 111 numbered items in two plan branches -> `skills/aisdlc-plan/references/`. Shipped 2026-10-20 on the maintainer's request; decision D-10. Not part of the market-readiness task list.
+- Feature 10: system-design and operations checklists, 111 numbered items in two plan branches -> `skills/arsdlc-plan/references/`. Shipped 2026-10-20 on the maintainer's request; decision D-10. Not part of the market-readiness task list.

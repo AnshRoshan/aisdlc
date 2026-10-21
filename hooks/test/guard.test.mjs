@@ -4,13 +4,13 @@ import { readFileSync } from "node:fs";
 
 let serial = 0;
 async function harness({ state = { state: "BUILD", feature: "demo" }, files = {}, fallback = false } = {}) {
-  const { register } = await import(`../aisdlc-guard.mjs?test=${serial++}`);
+  const { register } = await import(`../arsdlc-guard.mjs?test=${serial++}`);
   const handlers = [];
   const calls = [], logs = [], statuses = [];
   const $ = {
     process: { async run(argv) {
       calls.push(argv);
-      if (fallback && argv[0] === "aisdlc") throw new Error("not installed");
+      if (fallback && argv[0] === "arsdlc") throw new Error("not installed");
       const payload = argv.includes("report") ? [{ feature: "demo", state: "BUILD", runs: { total: 0 } }] : state;
       return { exitCode: 0, stdout: JSON.stringify(payload), stderr: "" };
     } },
@@ -41,7 +41,7 @@ test("CLI argv stays intact across prompts and completion reports", async () => 
   await h.fire("prompt.submit", { context: [] });
   await h.fire("prompt.submit", { context: [] });
   await h.fire("turn.complete", { answer: "All tests pass" });
-  assert.deepEqual(h.calls, [["aisdlc", "next", "--json"], ["aisdlc", "next", "--json"], ["aisdlc", "report", "demo", "--json"]]);
+  assert.deepEqual(h.calls, [["arsdlc", "next", "--json"], ["arsdlc", "next", "--json"], ["arsdlc", "report", "demo", "--json"]]);
   assert.equal(h.logs.length, 1);
 });
 
@@ -49,7 +49,7 @@ test("fallback CLI retains the node script prefix", async () => {
   const h = await harness({ fallback: true });
   await h.fire("prompt.submit");
   await h.fire("prompt.submit");
-  assert.deepEqual(h.calls.at(-1), ["node", "packages/cli/bin/aisdlc.js", "next", "--json"]);
+  assert.deepEqual(h.calls.at(-1), ["node", "packages/cli/bin/arsdlc.js", "next", "--json"]);
 });
 
 test("bare tests are held, recorded evidence passes through", async () => {
@@ -58,29 +58,29 @@ test("bare tests are held, recorded evidence passes through", async () => {
   for (const command of ["npm test", "npm run test", "npm run build", "pytest", "python -m pytest", "node --test"]) {
     assert.match((await h.fire("tool.call", { tool: "Bash", command })).deny, /evidence demo/);
   }
-  assert.ok((await h.fire("tool.call", { tool: "Bash", command: "aisdlc evidence demo --label full -- npm test" })).forwarded);
-  assert.match((await h.fire("tool.call", { tool: "Bash", command: "aisdlc approve G1 demo" })).deny, /human actions/);
+  assert.ok((await h.fire("tool.call", { tool: "Bash", command: "arsdlc evidence demo --label full -- npm test" })).forwarded);
+  assert.match((await h.fire("tool.call", { tool: "Bash", command: "arsdlc approve G1 demo" })).deny, /human actions/);
 });
 
 test("unrelated process commands do not exempt an unrecorded test", async () => {
   const h = await harness();
   await h.fire("prompt.submit");
-  for (const command of ["aisdlc status && npm test", 'echo "aisdlc status"; npm test']) {
+  for (const command of ["arsdlc status && npm test", 'echo "arsdlc status"; npm test']) {
     assert.match((await h.fire("tool.call", { tool: "Bash", command })).deny, /unrecorded|evidence/);
   }
-  assert.ok((await h.fire("tool.call", { tool: "Bash", command: "node packages/cli/bin/aisdlc.js evidence demo -- npm test" })).forwarded);
+  assert.ok((await h.fire("tool.call", { tool: "Bash", command: "node packages/cli/bin/arsdlc.js evidence demo -- npm test" })).forwarded);
 });
 
 test("compound evidence prefix cannot exempt a second bare test", async () => {
   const h = await harness();
   await h.fire("prompt.submit");
-  assert.match((await h.fire("tool.call", { tool: "Bash", command: "aisdlc evidence demo -- npm test && npm test" })).deny, /evidence/);
-  assert.ok((await h.fire("tool.call", { tool: "Bash", command: 'aisdlc evidence demo -- node -e "console.log(1 | 2)"' })).forwarded);
+  assert.match((await h.fire("tool.call", { tool: "Bash", command: "arsdlc evidence demo -- npm test && npm test" })).deny, /evidence/);
+  assert.ok((await h.fire("tool.call", { tool: "Bash", command: 'arsdlc evidence demo -- node -e "console.log(1 | 2)"' })).forwarded);
 });
 
 test("direct node approval commands are held", async () => {
   const h = await harness();
-  assert.match((await h.fire("tool.call", { tool: "Bash", command: "node packages/cli/bin/aisdlc.js approve G1 demo" })).deny, /human actions/);
+  assert.match((await h.fire("tool.call", { tool: "Bash", command: "node packages/cli/bin/arsdlc.js approve G1 demo" })).deny, /human actions/);
 });
 
 test("CLI-owned paths use Windows or POSIX separators", async () => {

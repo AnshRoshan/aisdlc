@@ -7,9 +7,9 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { commandInvocation, copyOrLink, sourceFingerprint } from "../src/fsx.js";
 import { runGate, reviewerNotes, approvedBy, scanSecrets } from "../src/engine.js";
-const cli = fileURLToPath(new URL("../bin/aisdlc.js", import.meta.url));
+const cli = fileURLToPath(new URL("../bin/arsdlc.js", import.meta.url));
 function fixture(t) {
-  const root = mkdtempSync(join(tmpdir(), "aisdlc-edge-"));
+  const root = mkdtempSync(join(tmpdir(), "arsdlc-edge-"));
   t.after(() => { assert.equal(dirname(root), resolve(tmpdir())); rmSync(root, { recursive: true, force: true }); });
   return root;
 }
@@ -72,12 +72,12 @@ test("link mode prefers real symlinks and falls back to junctions only when Wind
 
 test("invalid config is rejected before installer side effects", (t) => {
   const root = fixture(t);
-  put(root, "aisdlc.json", "{broken");
+  put(root, "arsdlc.json", "{broken");
   put(root, "AGENTS.md", "user instructions");
   const result = invoke(root, ["init", "--harness", "all"]);
   assert.notEqual(result.status, 0);
   assert.equal(readFileSync(join(root, "AGENTS.md"), "utf8"), "user instructions");
-  assert.deepEqual(readdirSync(root).sort(), ["AGENTS.md", "aisdlc.json"]);
+  assert.deepEqual(readdirSync(root).sort(), ["AGENTS.md", "arsdlc.json"]);
 });
 
 test("valid legacy history cannot prove a gate but a new recorded run recovers it", (t) => {

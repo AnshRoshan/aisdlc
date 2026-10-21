@@ -1,6 +1,6 @@
 # Feature Specs Index
 
-Per-change artifacts are canonical in `docs/features/<slug>/`, because the aisdlc CLI reads that path (`aisdlc.json` -> `featuresDir`). This folder indexes them; it never holds a second copy. Two copies of the same spec is the failure mode this system exists to prevent.
+Per-change artifacts are canonical in `docs/features/<slug>/`, because the arsdlc CLI reads that path (`arsdlc.json` -> `featuresDir`). This folder indexes them; it never holds a second copy. Two copies of the same spec is the failure mode this system exists to prevent.
 
 | Feature | Lane | State | Source |
 |---|---|---|---|

@@ -3,14 +3,14 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
-  <img src="assets/hero-dark.svg" alt="aisdlc: agents write code, aisdlc runs the process. The nine-state pipeline with build highlighted." width="100%">
+  <img src="assets/hero-dark.svg" alt="arsdlc: agents write code, arsdlc runs the process. The nine-state pipeline with build highlighted." width="100%">
 </picture>
 
 <br>
 
-[![CI](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/aisdlc/actions/workflows/ci.yml)
+[![CI](https://github.com/AnshRoshan/arsdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/AnshRoshan/arsdlc/actions/workflows/ci.yml)
 [![skills](https://img.shields.io/badge/agent_skills-20-b1e57c)](#the-20-skills)
-[![Node](https://img.shields.io/node/v/aisdlc)](packages/cli/package.json)
+[![Node](https://img.shields.io/node/v/arsdlc)](packages/cli/package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A process kit for AI-assisted engineering that installs into any coding agent.
@@ -34,31 +34,31 @@ Local files and identity fields are trusted inputs, not an adversarial security 
 <td valign="top">
 
 ```
-/plugin marketplace add AnshRoshan/aisdlc
-/plugin install aisdlc@aisdlc
+/plugin marketplace add AnshRoshan/arsdlc
+/plugin install arsdlc@arsdlc
 ```
 
-20 skills, the guard mod, and the `/aisdlc-next`, `/aisdlc-status` and `/aisdlc-report` commands, updated through the plugin system.
+20 skills, the guard mod, and the `/arsdlc-next`, `/arsdlc-status` and `/arsdlc-report` commands, updated through the plugin system.
 
 </td>
 <td valign="top">
 
 ```bash
-npx skills add AnshRoshan/aisdlc
+npx skills add AnshRoshan/arsdlc
 ```
 
-The skills only, symlinked into every harness it finds. One skill: `--skill aisdlc-debug`.
+The skills only, symlinked into every harness it finds. One skill: `--skill arsdlc-debug`.
 
 </td>
 <td valign="top">
 
 ```bash
-git clone https://github.com/AnshRoshan/aisdlc
-node aisdlc/packages/cli/bin/aisdlc.js init --harness all
+git clone https://github.com/AnshRoshan/arsdlc
+node arsdlc/packages/cli/bin/arsdlc.js init --harness all
 ```
 
-Not published to the registry yet; this cell becomes `npx @anshroshan/aisdlc init` the moment 0.3.0
-lands. The bare name `aisdlc` is refused by npm as too similar to the existing `ai-sdlc`, so the
+Not published to the registry yet; this cell becomes `npx @anshroshan/arsdlc init` the moment 0.3.0
+lands. The bare name `arsdlc` is refused by npm as too similar to the existing `ai-sdlc`, so the
 package carries the scope. The two paths beside it install the skills today, and the CLI above installs
 skills, instructions, slash commands **and** the read-only subagents, detected for your harness.
 
@@ -66,28 +66,28 @@ skills, instructions, slash commands **and** the read-only subagents, detected f
 </tr>
 </table>
 
-`aisdlc init` detects **Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop and OpenCode** (plus the legacy `gemini-cli` and `windsurf` layouts, which still install and print a retirement notice), writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `aisdlc.json` marker. Then talk to your agent:
+`arsdlc init` detects **Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop and OpenCode** (plus the legacy `gemini-cli` and `windsurf` layouts, which still install and print a retirement notice), writes the canonical copy to `.agents/skills/`, per-harness copies (or symlinks with `--link`), the process tree in `docs/`, and an `arsdlc.json` marker. Then talk to your agent:
 
 ```bash
-use aisdlc-brainstorm, I want to build payment retries
+use arsdlc-brainstorm, I want to build payment retries
 ```
 
-> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx @anshroshan/aisdlc next`, and the agent obeys the disk, not the chat.
+> It classifies the work into a lane, interviews you with recommended answers, and routes to the right skill. Every stage ends with `npx @anshroshan/arsdlc next`, and the agent obeys the disk, not the chat.
 
 ## Where to start
 
 | you have | start here |
 |---|---|
-| a new idea, nothing written yet | `aisdlc-brainstorm` → it picks the lane, then routes to `aisdlc-discover` → `aisdlc-spec` |
-| an existing codebase you must not break | `aisdlc-brownfield` first: baseline, characterization tests, named seams, then the normal spine |
-| one bounded change or a bug | `aisdlc new "…" --lane quick`, then `aisdlc-flow`; `aisdlc-debug` when it misbehaves |
-| a spec that changed after signature | `aisdlc-delta` - never a quiet edit; approvals go stale on purpose |
-| no idea where a feature actually is | `aisdlc next <feature>` (or `aisdlc-flow`, which reads the same disk) |
+| a new idea, nothing written yet | `arsdlc-brainstorm` → it picks the lane, then routes to `arsdlc-discover` → `arsdlc-spec` |
+| an existing codebase you must not break | `arsdlc-brownfield` first: baseline, characterization tests, named seams, then the normal spine |
+| one bounded change or a bug | `arsdlc new "…" --lane quick`, then `arsdlc-flow`; `arsdlc-debug` when it misbehaves |
+| a spec that changed after signature | `arsdlc-delta` - never a quiet edit; approvals go stale on purpose |
+| no idea where a feature actually is | `arsdlc next <feature>` (or `arsdlc-flow`, which reads the same disk) |
 
 ## Why
 
 <table>
-<tr><th width="30%" align="left">You have probably heard</th><th width="35%" align="left">What actually happened</th><th width="35%" align="left">What aisdlc does</th></tr>
+<tr><th width="30%" align="left">You have probably heard</th><th width="35%" align="left">What actually happened</th><th width="35%" align="left">What arsdlc does</th></tr>
 <tr><td>"All tests pass."</td><td>Nothing ran. The agent wrote the sentence it predicted you wanted.</td><td>Only counts a run it recorded itself: command, exit code, output hash.</td></tr>
 <tr><td>The spec drifted at 2 a.m.</td><td>A requirement was quietly rewritten to match the code.</td><td>Turns the edit into a delta, invalidates stale approvals, moves state backwards on purpose.</td></tr>
 <tr><td>The agent approved its own plan.</td><td>Segregation of duties is a policy nobody enforces on a Friday.</td><td>Refuses approvals from the author, and refuses agents entirely.</td></tr>
@@ -102,30 +102,30 @@ use aisdlc-brainstorm, I want to build payment retries
   <img src="assets/flow-dark.svg" alt="Nine states (discover, spec, plan, tasks, build, verify, accept, release, operate) with gates G1-G6 hanging over their transitions." width="100%">
 </picture>
 
-The agent runs `npx @anshroshan/aisdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
+The agent runs `npx @anshroshan/arsdlc next`, gets the state and the skill to load, does the work, and runs it again. Humans are asked for exactly two things: **signatures and approvals**. Every check is a pure function over files (`packages/cli/src/engine.js`): same files, same answer, any machine. That is what makes it auditable.
 
 ### Hard mode: the Claude Code mod
 
 Comes with the plugin install, nothing to enable. The CLI is the referee, but a referee only sees what
-gets reported to it. `hooks/aisdlc-guard.mjs` is a
+gets reported to it. `hooks/arsdlc-guard.mjs` is a
 Claude Code [mod](https://code.claude.com/docs/en/plugins/mods/overview) - code that runs inside the
 agent's process - and it closes the three holes that cost the most:
 
 | it holds | because |
 |---|---|
-| a bare `npm test` / `pytest` / `cargo test` while a feature is open | the run records nothing; re-run it as `aisdlc evidence <feature> --label full -- …` (invariant 5) |
-| any `aisdlc approve` the agent tries to run | approvals are human actions, refused before the call rather than after (invariants 3 and 4) |
+| a bare `npm test` / `pytest` / `cargo test` while a feature is open | the run records nothing; re-run it as `arsdlc evidence <feature> --label full -- …` (invariant 5) |
+| any `arsdlc approve` the agent tries to run | approvals are human actions, refused before the call rather than after (invariants 3 and 4) |
 | an edit to a signed `spec.md`, or a hand-written `Approved-by:` line | intent changes go through a delta; the signature is yours (invariants 1 and 4) |
 | a write to `evidence/` or `approvals.json` | those are the files the gates trust; a hand-made one is a forged one |
 | an answer that says the suite passed | if no run is recorded, or the newest one predates the last code change, the log line says so in front of you (invariant 5) |
 
-It also reads `aisdlc next` once per turn and puts the real state in front of the model *and* in your
+It also reads `arsdlc next` once per turn and puts the real state in front of the model *and* in your
 status line, so "where are we" has an answer you did not have to ask for. Everything else stays the
 portable contract: the mod is an accelerator for one harness, it fails open when it cannot decide, and
 the other six harnesses lose nothing but the interception.
 
 <details open>
-<summary><strong>Lanes: how much process a feature carries</strong> (set by <code>aisdlc-brainstorm</code>, ratchets only up)</summary>
+<summary><strong>Lanes: how much process a feature carries</strong> (set by <code>arsdlc-brainstorm</code>, ratchets only up)</summary>
 <br>
 
 | lane | required gates | spec signature | typical |
@@ -160,22 +160,22 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 
 | artifact | written by | read by | who may change it |
 |---|---|---|---|
-| `aisdlc.json` | `aisdlc init` | every CLI command | you: policy, harnesses, `test.gate` |
-| `docs/constitution.md` | init, then `aisdlc-retro` | every stage | amendment a human agrees to |
-| `docs/taste.md` | `aisdlc-taste` | plan, implement, review | you; retro proposes edits |
-| `docs/brief.md` | `aisdlc-discover` | brainstorm, spec, retro | a new discovery run, not an edit |
+| `arsdlc.json` | `arsdlc init` | every CLI command | you: policy, harnesses, `test.gate` |
+| `docs/constitution.md` | init, then `arsdlc-retro` | every stage | amendment a human agrees to |
+| `docs/taste.md` | `arsdlc-taste` | plan, implement, review | you; retro proposes edits |
+| `docs/brief.md` | `arsdlc-discover` | brainstorm, spec, retro | a new discovery run, not an edit |
 | `docs/glossary.md` | discover or taste, then anyone who meets a new term | spec, plan, tasks, review | additive, one line per term |
-| `docs/decisions/*.md` | `aisdlc-plan` for cross-feature calls | plan, review | supersedes with a new ADR; never rewritten |
-| `spec.md` | `aisdlc-spec` | plan, tasks, implement, verify, review | **only** through `aisdlc-delta` once signed |
-| `plan.md` | `aisdlc-plan` | tasks, implement | author until G1; an edit after G1 makes the approval stale on purpose |
-| `tasks.md` | `aisdlc-tasks` | implement, verify | `aisdlc-implement` checks boxes; only tasks/plan adds or reorders them |
-| `acceptance.md` | `aisdlc-review` | verify, release, the human | reviewer fills rows, **only a human signs** |
-| `rollout.md`, `guardrails.yaml`, `runbook.md` | `aisdlc-release` | operate, retro | before G5/G6; after, through a delta |
-| `deltas/*.md` | `aisdlc-delta` | spec, plan, tasks | author writes, human decides |
+| `docs/decisions/*.md` | `arsdlc-plan` for cross-feature calls | plan, review | supersedes with a new ADR; never rewritten |
+| `spec.md` | `arsdlc-spec` | plan, tasks, implement, verify, review | **only** through `arsdlc-delta` once signed |
+| `plan.md` | `arsdlc-plan` | tasks, implement | author until G1; an edit after G1 makes the approval stale on purpose |
+| `tasks.md` | `arsdlc-tasks` | implement, verify | `arsdlc-implement` checks boxes; only tasks/plan adds or reorders them |
+| `acceptance.md` | `arsdlc-review` | verify, release, the human | reviewer fills rows, **only a human signs** |
+| `rollout.md`, `guardrails.yaml`, `runbook.md` | `arsdlc-release` | operate, retro | before G5/G6; after, through a delta |
+| `deltas/*.md` | `arsdlc-delta` | spec, plan, tasks | author writes, human decides |
 | `evidence/*.json` | the CLI, from a run it spawned | `next`, G3, G4, review | nobody. Appending-only; an edited run is a forged run |
-| `approvals.json` | the CLI, from `aisdlc approve` | every gate | nobody. The hash chain reports the edit |
-| `handoff.md` | `aisdlc-handoff` | `aisdlc-flow` on the next start | the next handoff replaces it |
-| `retro.md` | `aisdlc-retro` | the next feature's discovery | you |
+| `approvals.json` | the CLI, from `arsdlc approve` | every gate | nobody. The hash chain reports the edit |
+| `handoff.md` | `arsdlc-handoff` | `arsdlc-flow` on the next start | the next handoff replaces it |
+| `retro.md` | `arsdlc-retro` | the next feature's discovery | you |
 
 ## Verification contract and limits
 
@@ -196,7 +196,7 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 - Secret detection is pattern-based, not exhaustive. Common credential flags and recognized output
   secrets are rejected/redacted, but use environment variables and never persist raw sensitive logs.
 - No account, server or telemetry is added. Explicit addon installation and commands you choose to
-  record can access the network; aisdlc cannot promise those third-party commands are local-only.
+  record can access the network; arsdlc cannot promise those third-party commands are local-only.
 
 ## The 20 skills
 
@@ -209,40 +209,40 @@ written by the CLI and by nobody else, which is what makes them evidence rather 
 <tr>
 <td valign="top">
 
-- [`aisdlc-flow`](skills/aisdlc-flow/SKILL.md) — the router
-- [`aisdlc-brainstorm`](skills/aisdlc-brainstorm/SKILL.md)
-- [`aisdlc-discover`](skills/aisdlc-discover/SKILL.md)
-- [`aisdlc-brownfield`](skills/aisdlc-brownfield/SKILL.md)
-- [`aisdlc-taste`](skills/aisdlc-taste/SKILL.md)
-- [`aisdlc-spec`](skills/aisdlc-spec/SKILL.md)
+- [`arsdlc-flow`](skills/arsdlc-flow/SKILL.md) — the router
+- [`arsdlc-brainstorm`](skills/arsdlc-brainstorm/SKILL.md)
+- [`arsdlc-discover`](skills/arsdlc-discover/SKILL.md)
+- [`arsdlc-brownfield`](skills/arsdlc-brownfield/SKILL.md)
+- [`arsdlc-taste`](skills/arsdlc-taste/SKILL.md)
+- [`arsdlc-spec`](skills/arsdlc-spec/SKILL.md)
 
 </td>
 <td valign="top">
 
-- [`aisdlc-plan`](skills/aisdlc-plan/SKILL.md)
-- [`aisdlc-tasks`](skills/aisdlc-tasks/SKILL.md)
-- [`aisdlc-implement`](skills/aisdlc-implement/SKILL.md)
-- [`aisdlc-debug`](skills/aisdlc-debug/SKILL.md)
-- [`aisdlc-craft`](skills/aisdlc-craft/SKILL.md)
-- [`aisdlc-verify`](skills/aisdlc-verify/SKILL.md)
-- [`aisdlc-review`](skills/aisdlc-review/SKILL.md)
-- [`aisdlc-quality`](skills/aisdlc-quality/SKILL.md)
+- [`arsdlc-plan`](skills/arsdlc-plan/SKILL.md)
+- [`arsdlc-tasks`](skills/arsdlc-tasks/SKILL.md)
+- [`arsdlc-implement`](skills/arsdlc-implement/SKILL.md)
+- [`arsdlc-debug`](skills/arsdlc-debug/SKILL.md)
+- [`arsdlc-craft`](skills/arsdlc-craft/SKILL.md)
+- [`arsdlc-verify`](skills/arsdlc-verify/SKILL.md)
+- [`arsdlc-review`](skills/arsdlc-review/SKILL.md)
+- [`arsdlc-quality`](skills/arsdlc-quality/SKILL.md)
 
 </td>
 <td valign="top">
 
-- [`aisdlc-release`](skills/aisdlc-release/SKILL.md)
-- [`aisdlc-retro`](skills/aisdlc-retro/SKILL.md)
-- [`aisdlc-grill`](skills/aisdlc-grill/SKILL.md)
-- [`aisdlc-ponytail`](skills/aisdlc-ponytail/SKILL.md)
-- [`aisdlc-delta`](skills/aisdlc-delta/SKILL.md)
-- [`aisdlc-handoff`](skills/aisdlc-handoff/SKILL.md)
+- [`arsdlc-release`](skills/arsdlc-release/SKILL.md)
+- [`arsdlc-retro`](skills/arsdlc-retro/SKILL.md)
+- [`arsdlc-grill`](skills/arsdlc-grill/SKILL.md)
+- [`arsdlc-ponytail`](skills/arsdlc-ponytail/SKILL.md)
+- [`arsdlc-delta`](skills/arsdlc-delta/SKILL.md)
+- [`arsdlc-handoff`](skills/arsdlc-handoff/SKILL.md)
 
 </td>
 </tr>
 </table>
 
-Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx @anshroshan/aisdlc addon all` installs them; works without them.
+Plain Markdown in the open Agent Skills format, read identically by every harness above. Bridges to four maintained third-party skills — [ponytail](https://github.com/DietrichGebert/ponytail), [grilling](https://github.com/mattpocock/skills), and the two from [ansh-other-skills](https://github.com/AnshRoshan/ansh-other-skills) (code-craft, code-quality-tools) — using the official ones when installed and an embedded fallback otherwise. `npx @anshroshan/arsdlc addon all` installs them; works without them.
 
 ## Repo layout
 
@@ -250,9 +250,9 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 |---|---|
 | [`skills/`](skills/) | the 20 canonical skills (source of truth) |
 | [`agents/`](agents/) | two read-only subagent definitions `init` installs for Claude Code |
-| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18); `node packages/cli/bin/aisdlc.js` until it is on npm |
-| [`commands/`](commands/) | Claude Code plugin slash commands (`/aisdlc-next`, `/aisdlc-status`) |
-| [`hooks/`](hooks/) | the `aisdlc-guard` Claude Code mod; it ships with the plugin install |
+| [`packages/cli/`](packages/cli/) | zero-dependency Node CLI (Node ≥ 18); `node packages/cli/bin/arsdlc.js` until it is on npm |
+| [`commands/`](commands/) | Claude Code plugin slash commands (`/arsdlc-next`, `/arsdlc-status`) |
+| [`hooks/`](hooks/) | the `arsdlc-guard` Claude Code mod; it ships with the plugin install |
 | [`.claude-plugin/`](.claude-plugin/) | plugin manifest + marketplace listing |
 | [`site/`](site/) | Astro static site; the deploy workflow runs, Pages itself is not enabled yet |
 | [`docs/conventions.md`](docs/conventions.md) | how a skill is written: what earns a line, when to split a file, the budgets |
@@ -264,25 +264,25 @@ Plain Markdown in the open Agent Skills format, read identically by every harnes
 <br>
 
 ```
-aisdlc init      skills + instructions + slash commands + subagents, detected for your harness
-aisdlc doctor    what is installed where, which companions, which test gate
-aisdlc skills    list the bundled skills
-aisdlc kinds     kind verify models and lane gate sets
-aisdlc new       open a feature with a kind and a lane
-aisdlc lane      show or raise a feature's lane (a downgrade needs --force --note)
-aisdlc status    every feature and its state
-aisdlc next      derive state from disk: blockers, next task, the skill to load
-aisdlc check     spec (EARS) or a delta file
-aisdlc trace     requirement → task matrix
-aisdlc gate      one of G1-G6  ·  aisdlc gates runs all six
-aisdlc scan      secrets over tracked files
-aisdlc report    read the logs back: runs, pass rate, staleness, stale approvals, review state
-aisdlc ci        every gate the work has crossed, plus staleness and tree drift; non-zero on a regression
-aisdlc evidence  run a command and record the run as evidence
-aisdlc approve   human gate approval (G1, G4, G5); refuses agents and refuses the author
-aisdlc audit     approval chain + evidence log
-aisdlc export    in-toto Statement v1 + DSSE envelope + SARIF, and `--verify` recomputes it offline
-aisdlc mcp       read-only state over stdio (aisdlc_next, aisdlc_status); writes are not exposed
+arsdlc init      skills + instructions + slash commands + subagents, detected for your harness
+arsdlc doctor    what is installed where, which companions, which test gate
+arsdlc skills    list the bundled skills
+arsdlc kinds     kind verify models and lane gate sets
+arsdlc new       open a feature with a kind and a lane
+arsdlc lane      show or raise a feature's lane (a downgrade needs --force --note)
+arsdlc status    every feature and its state
+arsdlc next      derive state from disk: blockers, next task, the skill to load
+arsdlc check     spec (EARS) or a delta file
+arsdlc trace     requirement → task matrix
+arsdlc gate      one of G1-G6  ·  arsdlc gates runs all six
+arsdlc scan      secrets over tracked files
+arsdlc report    read the logs back: runs, pass rate, staleness, stale approvals, review state
+arsdlc ci        every gate the work has crossed, plus staleness and tree drift; non-zero on a regression
+arsdlc evidence  run a command and record the run as evidence
+arsdlc approve   human gate approval (G1, G4, G5); refuses agents and refuses the author
+arsdlc audit     approval chain + evidence log
+arsdlc export    in-toto Statement v1 + DSSE envelope + SARIF, and `--verify` recomputes it offline
+arsdlc mcp       read-only state over stdio (arsdlc_next, arsdlc_status); writes are not exposed
 ```
 
 </details>
@@ -304,19 +304,19 @@ Whatever you already have. The skills are plain Markdown; Claude Code, Codex, Cu
 <details>
 <summary><strong>How is this different from Spec Kit or BMAD?</strong></summary>
 <br>
-Those give you excellent templates and advice. aisdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, recorded evidence that prose alone cannot satisfy, and separation-of-duties checks over trusted local identity fields.
+Those give you excellent templates and advice. arsdlc adds enforcement: approvals bound to artifact hashes that go stale when you edit, recorded evidence that prose alone cannot satisfy, and separation-of-duties checks over trusted local identity fields.
 </details>
 
 <details>
 <summary><strong>Can I use it on an existing codebase?</strong></summary>
 <br>
-Yes, <code>aisdlc-brownfield</code>: baseline, characterization tests and named seams before any delta-only change is allowed.
+Yes, <code>arsdlc-brownfield</code>: baseline, characterization tests and named seams before any delta-only change is allowed.
 </details>
 
 <details>
 <summary><strong>Does it combine with an AGENTS.md / context/ state system?</strong></summary>
 <br>
-Yes — they are different layers. aisdlc runs the <em>per-change</em> pipeline (EARS spec → plan → gates → evidence → approval); the <a href="https://github.com/AnshRoshan/project-context-system">project-context-system</a> skill maintains the <em>per-project</em> state (AGENTS.md, <code>context/</code> with architecture, build plan, decisions log, progress tracker, memory.md handoff). aisdlc reads the project's AGENTS.md and context files as constraints. When both are installed, one rule holds: spec artifacts stay owned by the aisdlc gates, decisions land in <code>context/decisions.md</code>, and no parallel spec tree is created.
+Yes — they are different layers. arsdlc runs the <em>per-change</em> pipeline (EARS spec → plan → gates → evidence → approval); the <a href="https://github.com/AnshRoshan/project-context-system">project-context-system</a> skill maintains the <em>per-project</em> state (AGENTS.md, <code>context/</code> with architecture, build plan, decisions log, progress tracker, memory.md handoff). arsdlc reads the project's AGENTS.md and context files as constraints. When both are installed, one rule holds: spec artifacts stay owned by the arsdlc gates, decisions land in <code>context/decisions.md</code>, and no parallel spec tree is created.
 </details>
 
 <details>
@@ -330,8 +330,8 @@ MIT. Fork it, vendor it, ship it inside your company. If you find it useful, sta
 <br>
 A skill loads in full whenever the run takes that branch, so every line is a recurring cost. Most
 skills are one file because splitting short, common content costs more in missed reads than it saves in
-tokens; the two rare branches that were genuinely long moved to `references/` (`aisdlc-flow`,
-`aisdlc-review`). <code>node packages/cli/scripts/check-skills.mjs</code> prints the bytes a real run
+tokens; the two rare branches that were genuinely long moved to `references/` (`arsdlc-flow`,
+`arsdlc-review`). <code>node packages/cli/scripts/check-skills.mjs</code> prints the bytes a real run
 loads per path and fails the build when a path or a file goes over budget, so the number is watched
 rather than promised.
 </details>
@@ -341,9 +341,9 @@ rather than promised.
 <br>
 You should not, on sight - which is why the corpus is checked. <code>check-skills.mjs</code> reads every
 skill, doc and page against <code>packages/cli/src/cli.js</code>: a documented command must exist, an
-<code>aisdlc-*</code> token must name a real skill or subagent, a referenced sub-file must be on disk, a
+<code>arsdlc-*</code> token must name a real skill or subagent, a referenced sub-file must be on disk, a
 relative link must resolve, frontmatter must be uniform. It runs in CI. The phantom
-<code>aisdlc verify</code> this README shipped with - advertised, never implemented - is exactly the
+<code>arsdlc verify</code> this README shipped with - advertised, never implemented - is exactly the
 defect class it kills.
 </details>
 

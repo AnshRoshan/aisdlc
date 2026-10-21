@@ -132,9 +132,11 @@ The maintainer said to push and release, so the tag and the npm publish go out w
 
 `aisdlc new` seeds `author` from the git identity, and G1 refuses an approval whose name equals the author. With one maintainer, the standard lane cannot be signed by anyone. `market-readiness` records the agent as author so the human can sign, which is honest but is a workaround, not a design. Nobody has decided how solo projects should pass G1.
 
-## F-01: Trusted publishing is available for this npm account - 2026-10-20
+## F-01: npm trusted publishing is available for this account - 2026-10-20, answered 2026-10-21
 
-We assume the account can configure GitHub OIDC trusted publishing. Nobody has verified it. If not, D-02 falls back to a scoped automation token.
+It is not configured, and the assumption is now replaced with a fact. The `v0.2.1` run took the OIDC path correctly (`id-token: write`, no token, setup-node wired), and npm answered the PUT with `E404 Not Found - PUT https://registry.npmjs.org/aisdlc-cli`. That is npm rejecting an unknown package identity, not a broken workflow: the publisher has to be registered on the npm side first, per package name, pointing at this repo and `publish.yml`. Nothing was published and nothing is half-published - the registry still returns 404 and the GitHub release was not created, because that step follows a successful publish.
+
+Two ways to finish T2, both a maintainer action: add the trusted publisher on npm and re-run the workflow for the tag, or set `NPM_TOKEN` and let the mode step take the token path (which publishes without provenance). Re-running is the cheaper of the two, and provenance is worth the npm UI visit.
 
 ## F-02: Harness hook APIs are stable enough to target - 2026-10-20, partially answered 2026-10-21
 

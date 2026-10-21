@@ -1,0 +1,28 @@
+{
+  "label": "full",
+  "task": null,
+  "command": "npm --prefix packages/cli test",
+  "argv": [
+    "npm",
+    "--prefix",
+    "packages/cli",
+    "test"
+  ],
+  "executedArgv": [
+    "npm",
+    "--prefix",
+    "packages/cli",
+    "test"
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T07:51:27.947Z",
+  "durationMs": 25176,
+  "outputSha256": "505cb78a8a82618c886b348deed8ec8aa6cbe35794317eb43a24a894d7a28dd7",
+  "outputTail": "✔ malformed and unknown messages answer with JSON-RPC errors instead of crashing (1.1142ms)\n✔ the stdio loop answers a real client line by line (305.0953ms)\n✔ security protocol includes every requested control exactly once in its matrix (3.6022ms)\n✔ verification, review, quality and release route to final security checks (3.8259ms)\n✔ security reporting preserves evidence, applicability and trust boundaries (0.854ms)\n✔ provider comparison requires actual official evidence rather than certification claims (0.8823ms)\n✔ acceptance security notes start unverified and do not add scenario-table rows (2.489ms)\n✔ security reference fits the existing sub-file budget (0.6627ms)\n✔ spec seed carries the value-sourcing table G2 requires (6.302ms)\n✔ acceptance seed cannot pass G4 by leaving placeholders in (7.1408ms)\n✔ constitution seed is a governed document (3.6663ms)\n✔ spec seed: section 8 for UI kinds, n/a for others, blocks until filled (5.1466ms)\n✔ plan seed has every section the plan skill requires (1.1113ms)\n✔ acceptance seed carries finding triage and reviewer notes (0.6968ms)\n✔ rollout seed carries rollback steps; guardrails require measured budgets and a real flag (2.3535ms)\n✔ instruction block always-loads steering; taste seed carries the sections taste skill reads (0.4063ms)\nℹ tests 87\nℹ suites 0\nℹ pass 87\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 24796.405\n",
+  "sourceSha256": "64fe8cfb2bb4212832ad82d586be15b4daee82eb8ceb25a07b931bc76c40e621",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "0fd2211e2bbb0b9bc9e5766352c1c928c55fb2801591985347231fd4147bdf62"
+}

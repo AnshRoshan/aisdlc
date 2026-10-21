@@ -15,9 +15,14 @@ jobs:
       - name: the kit must pass its own gates
         run: node bin/arsdlc.js scan
         working-directory: packages/cli
+      - name: run the suite and record it against this exact tree
+        run: node packages/cli/bin/arsdlc.js evidence market-readiness --label full -- npm --prefix packages/cli test
+        # Without this, `ci` below compares the PR's files against whatever run was last committed on
+        # main, so any branch that touches a Markdown file or a lockfile is red before it starts - a
+        # Dependabot bump proved it. Recording here is not a shortcut: the tests actually execute on this
+        # commit, and the record is discarded when the runner goes away.
       - name: the live program must pass the gates it has crossed
-        run: node bin/arsdlc.js ci market-readiness
-        working-directory: packages/cli
+        run: node packages/cli/bin/arsdlc.js ci market-readiness
         # Scoped on purpose: docs/features/demo is deliberate unfinished scaffolding, and a
         # green run that ignores it is worth more than one that fails on a fixture.
   cli:

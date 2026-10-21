@@ -19,6 +19,12 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
 - The bug template asks for `--version`, `arsdlc doctor`, `next --json` and the evidence JSON, because a
   report about a process kit is only useful if it can be reproduced from files instead of a chat log.
 - Repo description still read "aisdlc runs the process" after the rename; the About field is now `arsdlc`.
+- The dogfooded gate was red on its own tooling: Dependabot's first bump PR failed `arsdlc ci` with
+  "the last full run predates the current source", because the gate compares the branch's files against
+  whatever run was last **committed** on main. Any branch that edits a lockfile or a Markdown file was
+  red before it began - a check that cannot be satisfied by doing the work is how red gets ignored. The
+  corpus job now records a full run on the commit under test and then evaluates the gates against it, so
+  the proof is that tree's own test execution rather than inherited history.
 
 ## [0.3.1] - 2026-10-21
 

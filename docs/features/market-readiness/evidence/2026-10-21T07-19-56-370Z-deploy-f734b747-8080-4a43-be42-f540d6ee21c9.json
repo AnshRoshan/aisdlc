@@ -1,0 +1,38 @@
+{
+  "label": "deploy",
+  "task": null,
+  "command": "gh run list --repo AnshRoshan/aisdlc --limit 4 --json workflowName,conclusion",
+  "argv": [
+    "gh",
+    "run",
+    "list",
+    "--repo",
+    "AnshRoshan/aisdlc",
+    "--limit",
+    "4",
+    "--json",
+    "workflowName,conclusion"
+  ],
+  "executedArgv": [
+    "gh",
+    "run",
+    "list",
+    "--repo",
+    "AnshRoshan/aisdlc",
+    "--limit",
+    "4",
+    "--json",
+    "workflowName,conclusion"
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T07:19:56.370Z",
+  "durationMs": 1089,
+  "outputSha256": "41dcc2235c873d3d6e0962fd65506eff8d584d1453c14b5a3cf1a7845daf17ef",
+  "outputTail": "[{\"conclusion\":\"success\",\"workflowName\":\"ci\"},{\"conclusion\":\"success\",\"workflowName\":\"deploy site\"},{\"conclusion\":\"failure\",\"workflowName\":\"ci\"},{\"conclusion\":\"success\",\"workflowName\":\"deploy site\"}]\n",
+  "sourceSha256": "59f20ad0850eab714a3a2302c3cae34a606036eae326a8717c7e5467c50d3196",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "864da01529ea1f5ae8d4f8bf311958b43655b25216fdf7f04c537dca40a1f39b"
+}

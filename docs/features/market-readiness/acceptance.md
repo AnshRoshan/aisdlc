@@ -7,7 +7,7 @@ No scenario is accepted yet. A row may show `pass` only after a reviewer who did
 | A1 | Publish a release | Publish succeeds | none yet (needs a tag push) | pending |
 | A2 | Publish a release | Credentials are missing | none yet | pending |
 | A3 | Publish a release | Tests fail | none yet | pending |
-| A4 | Deploy the site | Deploy succeeds on HEAD | evidence/2026-10-21T07-07-29-988Z-deploy-f74b0652-2f97-4c36-887f-d6f4fe98fdb3.json | pending |
+| A4 | Deploy the site | Deploy succeeds on HEAD | evidence/2026-10-21T07-19-56-370Z-deploy-f734b747-8080-4a43-be42-f540d6ee21c9.json | pending |
 | A5 | Deploy the site | Build fails | none yet | pending |
 | A6 | Bind approvals to the tree | Tree unchanged | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |
 | A7 | Bind approvals to the tree | Code changed after approval | evidence/2026-10-21T07-18-37-958Z-full-de2ef626-9fa8-469b-9cb6-cd7f72ef3817.json | pending |

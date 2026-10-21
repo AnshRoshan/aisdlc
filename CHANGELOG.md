@@ -6,6 +6,10 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
 
 ## [0.3.2] - 2026-10-21
 
+**Status: committed at `1bbee21`, not on the registry yet.** npm answered the publish with `EOTP` - the
+account requires a one-time password from the maintainer's authenticator, and the `v0.3.2` tag is held back
+until the version exists so CI cannot attest to a build it will not ship.
+
 Everything under **Repository hygiene** below, plus the release plumbing that came out of shipping it.
 
 ### Release plumbing

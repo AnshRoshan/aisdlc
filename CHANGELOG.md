@@ -4,6 +4,31 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-21
+
+Everything under **Repository hygiene** below, plus the release plumbing that came out of shipping it.
+
+### Release plumbing
+- `publish cli` now refuses to publish twice. A preflight reads the manifest version, fails the run when a
+  version tag does not name that version, and skips the publish when the registry already has it. The
+  reason is specific and already visible in the logs: while npm's trusted publisher is unregistered, a
+  retry reaches Sigstore first and writes a **signed provenance statement for a version npm then refuses**,
+  leaving a public attestation for a build that never existed. Two of those are out there for `arsdlc@0.3.1`
+  (logIndex 3353477021 and 3353537406) from the tag and from re-pointing it. `0.3.1` is therefore skipped as
+  a version - it is tagged, never published, and cannot be reused without the attestations describing a
+  different tree.
+- The dogfooded gate stopped being red on its own tooling. Dependabot's first bump PR failed `arsdlc ci`
+  with "the last full run predates the current source" because the corpus job compared the branch's files
+  against the last run *committed on main*, so any lockfile or Markdown change started stale by construction.
+  The job now records a full run on the commit under test before evaluating gates: produced proof, not
+  inherited proof.
+- Five dependency bumps merged: `actions/checkout@v7`, `actions/setup-node@v7`, `actions/deploy-pages@v5`,
+  `withastro/action@v6` and the grouped Astro site dependencies. Dependabot is configured (actions weekly,
+  `/site` npm monthly; `packages/cli` is absent on purpose - it has no dependencies to track) and its
+  security alerts are enabled. `checkout@v7` had to be merged by hand: four workflow files conflicted with
+  the corpus-job change made the same day, resolved by taking main's content and re-applying the bump, which
+  is the only reason a bot PR needed a merge commit at all.
+
 ### Repository hygiene
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, `.github/ISSUE_TEMPLATE/{bug_report,feature_request,config}`,
   `.github/PULL_REQUEST_TEMPLATE.md` and `.github/dependabot.yml` (actions weekly, site deps monthly).
@@ -27,6 +52,10 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
   the proof is that tree's own test execution rather than inherited history.
 
 ## [0.3.1] - 2026-10-21
+
+Never published. `v0.3.1` is tagged, npm refused the CI publish for want of a trusted publisher, and the
+content shipped as 0.3.2 instead - reusing 0.3.1 would have meant two orphan Sigstore attestations
+describing a tree that is not what the version now contains. The tag stays as history.
 
 ### Package presentation
 - Every install string in the repo is now `npx arsdlc …` (205 occurrences across skills, the three slash commands, the CI gates workflow, the CLI's own help and templates, both READMEs). The scoped fallback is gone: the unscoped name is live and `@anshroshan/arsdlc` was never published.

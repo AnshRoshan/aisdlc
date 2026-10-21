@@ -32,8 +32,34 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm test
         working-directory: packages/cli
+      - name: the tag must name the version, and the version must not already be published
+        id: preflight
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./packages/cli/package.json').version")
+          if [ "$REF_TYPE" = "tag" ] && [ "$REF_NAME" != "v$VERSION" ]; then
+            echo "::error::tag $REF_NAME does not match packages/cli/package.json version $VERSION"
+            exit 1
+          fi
+          if npm view "arsdlc@${VERSION}" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::arsdlc@${VERSION} is already on the registry; skipping the publish"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+            echo "arsdlc@${VERSION} is not on the registry yet"
+          fi
+        # Two failures this prevents, both real here. A tag whose version does not match the manifest
+        # published nothing and left a release pointing at the wrong tree. And a retry of a version that
+        # is already out reaches npm's PUT, is refused, and by then the job has written a signed
+        # provenance statement for that version to the Sigstore transparency log - a public, permanent
+        # attestation for a build that does not exist. Check the registry first, and do not attest at all
+        # when there is nothing to publish.
       - name: choose the publish path
         id: mode
+        if: steps.preflight.outputs.already == 'false'
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -45,11 +71,11 @@ jobs:
             echo "::notice::publishing through npm trusted publishing with provenance"
           fi
       - name: publish through npm trusted publishing
-        if: steps.mode.outputs.using == 'oidc'
+        if: steps.preflight.outputs.already == 'false' && steps.mode.outputs.using == 'oidc'
         run: npm publish --access public --provenance
         working-directory: packages/cli
       - name: publish with the automation token
-        if: steps.mode.outputs.using == 'token'
+        if: steps.preflight.outputs.already == 'false' && steps.mode.outputs.using == 'token'
         run: npm publish --access public
         working-directory: packages/cli
         env:

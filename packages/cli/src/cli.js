@@ -12,7 +12,7 @@ import { HARNESSES, resolveHarnessList, detectHarnesses, enforcement, COMPANIONS
 import * as T from "./templates.js";
 import { skillsSourceDir, listSkills, listAgents, read, readJson, write, writeIfMissing, ensureDir, copyOrLink, upsertBlock, slugify, gitUser, repoFiles, isTextFile, projectRoot, lastCodeChange, sourceFingerprint, isProcessArtifact, commandInvocation, gitState, treeDriftSince } from "./fsx.js";
 
-const VERSION = "0.3.1";
+const VERSION = "0.3.2";
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
 const c = {
   dim: (s) => (tty ? `\x1b[2m${s}\x1b[0m` : s),

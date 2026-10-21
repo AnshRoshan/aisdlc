@@ -1,12 +1,12 @@
 name: publish cli
 
 # Publishes the aisdlc CLI to npm. Preferred path: npm trusted publishing (no secret at all) - add
-# this repo and workflow as a trusted publisher on the npm package page, and leave NPM_TOKEN unset.
-# If the account cannot use trusted publishing, set NPM_TOKEN and the second job takes over; npm
-# refuses --provenance for token auth, so that path publishes without provenance.
+# this repo, workflow and environment as a trusted publisher on the npm package page, and leave
+# NPM_TOKEN unset. If the account cannot use trusted publishing, set NPM_TOKEN and the step below
+# switches to it; npm refuses --provenance for token auth, so that path publishes unsigned.
 #
-# The two paths are separate jobs, not two steps: GitHub does not expose the `secrets` context in a
-# step-level `if`, and a step condition that reads it fails the whole workflow file.
+# The branch lives in the shell, not in `if`: GitHub does not expose the `secrets` context in a
+# job-level or step-level `if`, and a workflow that reads it there fails to parse at all.
 #
 # Trigger: push a version tag (git tag vX.Y.Z && git push --tags) or run the workflow manually.
 
@@ -20,9 +20,7 @@ permissions:
   id-token: write   # OIDC identity for npm trusted publishing; short-lived, never stored
 
 jobs:
-  publish-oidc:
-    name: publish (trusted publishing)
-    if: ${{ secrets.NPM_TOKEN == '' }}
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,31 +30,18 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm test
         working-directory: packages/cli
-      - run: npm publish --access public --provenance
-        working-directory: packages/cli
-      - name: create a GitHub release for version tags
-        if: startsWith(github.ref, 'refs/tags/')
-        run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.ref_name }}
-
-  publish-token:
-    name: publish (NPM_TOKEN fallback)
-    if: ${{ secrets.NPM_TOKEN != '' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-      - run: npm test
-        working-directory: packages/cli
-      - run: npm publish --access public
+      - name: publish to npm
         working-directory: packages/cli
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "::notice::publishing with NPM_TOKEN (no provenance: npm refuses it for token auth)"
+            NODE_AUTH_TOKEN="$NPM_TOKEN" npm publish --access public
+          else
+            echo "::notice::publishing through npm trusted publishing with provenance"
+            npm publish --access public --provenance
+          fi
       - name: create a GitHub release for version tags
         if: startsWith(github.ref, 'refs/tags/')
         run: gh release create "$RELEASE_TAG" --verify-tag --generate-notes

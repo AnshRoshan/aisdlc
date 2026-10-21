@@ -30,10 +30,11 @@ Current phase: 3 - evidence is portable · Current goal: get G1 signed, then shi
 
 ## Session notes
 
-- 2026-10-21: pushed as five signed commits (`b14ebf2..`), dated to the day the work was done. `ci` and `deploy site` both green on main; the live site now carries the October harness names and the rendered plan skill. `publish cli` failed instantly on that push because a step-level `if` read the `secrets` context, which GitHub does not allow - the two publish paths are now separate jobs.
+- 2026-10-21: pushed as six signed commits (`b14ebf2..c932f34`), dated to the day the work was done. `ci` and `deploy site` both green on main; the live site now carries the October harness names and the rendered plan skill.
+- 2026-10-21: `publish cli` failed to parse twice. The annotation names the rule: GitHub does not expose `secrets` in a job-level `if` either (Unrecognized named-value, line 25), after the same mistake at step level. One job now, branching in the shell on an env var holding the secret. The lesson is a process one: a workflow change is only verified by a push, so it must never be described as done before the run exists.
 - 2026-10-21: 87/87 CLI tests, 12/12 guard tests, 6/6 site tests; corpus check PASS with 23 commands cross-checked; `aisdlc ci market-readiness` exits 0; eight evidence records on the feature, all green, and the acceptance rows cite the newest full run.
 - 2026-10-21: export, verifier, signer adapter and MCP were implemented before their tests, then tested in the same session. Recorded as finding F6; do not repeat it.
 - 2026-10-20: `main` = `origin/main` at `b14ebf2`; `claude plugin validate .` passes.
-- The last successful Pages deploy is from 2026-10-07; HEAD failed on Node 20 until the pin landed.
+- Pages: `deploy site` is green on main as of 2026-10-21; it had been failing since 2026-10-15 on Node 20.
 - `aisdlc-cli` is not on npm; the publish run failed with `ENEEDAUTH`.
 - The `v0.2.0` tag points at `25a6ff9`, one commit behind HEAD, and has no GitHub release.

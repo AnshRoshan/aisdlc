@@ -2,7 +2,7 @@
 
 The only file that updates constantly. States are mutually exclusive.
 
-Current phase: release - `arsdlc@0.3.0` is live on npm · Current goal: ship 0.3.1 with the corrected package metadata, create the GitHub release, register the npm trusted publisher for provenance, then close the manifest and eval gaps that need a real client or a real run.
+Current phase: released - `arsdlc@0.3.2` on npm as `latest`, tagged at its `gitHead`, GitHub release created by CI, Pages live · Current goal: npm trusted publishing so the next CI publish carries provenance (T2), then the SARIF upload step (T10) and the `references/*.md` pages the site never published (T22).
 
 ## In progress
 
@@ -46,6 +46,7 @@ Current phase: release - `arsdlc@0.3.0` is live on npm · Current goal: ship 0.3
 - 2026-10-21: `v0.2.1` was tagged at `5bcbab6` and never published. `ci` was green on the tag, `deploy site` green on main, and `publish cli` failed with `E404` because the trusted publisher is not registered on npm yet (F-01, answered). Nothing is half-published: no version on the registry and no GitHub release, since that step follows a successful publish.
 - 2026-10-21: export, verifier, signer adapter and MCP were implemented before their tests, then tested in the same session. Recorded as finding F6; do not repeat it.
 - 2026-10-21: `0.3.2` cut at `1bbee21` - package metadata, the corrected changelog, the hygiene files, five merged dependency bumps, the corpus job that records its own proof, and a `publish cli` preflight that refuses a tag whose name is not the manifest version and skips a PUT for a version already on the registry. The preflight's registry branch was proven by running the same shell against 0.3.0 (published → skip) and 0.3.1/0.3.2 (absent → publish). The publish itself stopped at npm's `EOTP`: the account requires 2FA, which only the maintainer can answer, so `v0.3.2` is deliberately untagged - pushing a tag first would have the job attest to Sigstore before npm refuses, which is how 0.3.1 collected two orphan attestations.
+- 2026-10-21: the account owner answered npm's `EOTP` and **`arsdlc@0.3.2` is live as `latest`**. Tag `v0.3.2` points at its `gitHead` (`c102c6f`); the tarball's 38 files were re-verified against that commit with the README's own loop (0 mismatches) before the tag was pushed. The tag run proved the new preflight end to end - registry already has the version → both publish steps skipped → GitHub release created - so no third orphan attestation exists. T3 and T4 closed with recorded smoke/deploy runs rather than a page read; T2 stays open because its done-when demands provenance, and 0.3.2's `dist` has no `attestations` key. Writing T4's check surfaced **T22**: the site renders SKILL.md pages and never `references/*.md`, so "the security verification procedure is public" was true of the repo and false of the site.
 - 2026-10-20: `main` = `origin/main` at `b14ebf2`; `claude plugin validate .` passes.
 - Pages: `deploy site` is green on main as of 2026-10-21; it had been failing since 2026-10-15 on Node 20.
 - `arsdlc` is on npm: 0.3.0 live, no provenance. `aisdlc`, `aisdlc-cli` and `@anshroshan/aisdlc` are 404 and stay that way.

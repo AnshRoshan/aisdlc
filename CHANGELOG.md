@@ -6,9 +6,10 @@ All notable changes to arsdlc are documented here. Format follows [Keep a Change
 
 ## [0.3.2] - 2026-10-21
 
-**Status: committed at `1bbee21`, not on the registry yet.** npm answered the publish with `EOTP` - the
-account requires a one-time password from the maintainer's authenticator, and the `v0.3.2` tag is held back
-until the version exists so CI cannot attest to a build it will not ship.
+**Published.** `arsdlc@0.3.2` is `latest`; its `gitHead` is the tag commit `c102c6f`, and `gh release`
+shows the release was created by CI on the tag push. The maintainers' 2FA prompt (`EOTP`) was answered by
+the account owner, so the tarball is a laptop build: `dist.integrity` and a registry signature, **no
+`attestations` key**. Everything above is what a reader can re-check with `npm pack` and `git hash-object`.
 
 Everything under **Repository hygiene** below, plus the release plumbing that came out of shipping it.
 

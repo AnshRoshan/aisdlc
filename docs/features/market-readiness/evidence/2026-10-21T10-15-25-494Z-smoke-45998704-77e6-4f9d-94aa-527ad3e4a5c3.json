@@ -1,0 +1,28 @@
+{
+  "label": "smoke",
+  "task": null,
+  "command": "node --input-type=module -e import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc.json')).json(); const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const v = reg.versions[pkg.version]; const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));",
+  "argv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc.json')).json(); const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const v = reg.versions[pkg.version]; const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));"
+  ],
+  "executedArgv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc.json')).json(); const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const v = reg.versions[pkg.version]; const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));"
+  ],
+  "cwd": ".",
+  "exitCode": 1,
+  "startedAt": "2026-10-21T10:15:25.494Z",
+  "durationMs": 678,
+  "outputSha256": "503d835891fdcbd18fc9a8e7ea905a99a8ad1f8c7d384a994a355303287fdb64",
+  "outputTail": "file:///D:/SKILLS/aisdlc/[eval1]:1\r\nimport fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc.json')).json(); const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const v = reg.versions[pkg.version]; const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));\r\n                                                                                                                                                                                                                                                                                                                                                  ^\r\n\r\nTypeError: Cannot read properties of undefined (reading '0.3.2')\r\n    at file:///D:/SKILLS/aisdlc/[eval1]:1:339\r\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\r\n\r\nNode.js v24.21.0\r\n",
+  "sourceSha256": "03116346840b743517d871594e1316d110b72e1b6d3fd30e1203c3a2bb43a579",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "185f04fccc97ca3d4779d0fe71b101c9ee7575941054f9f62254267a66509f01"
+}

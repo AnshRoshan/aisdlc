@@ -7,8 +7,8 @@ _Last updated: 2026-10-21_
 ## Current state
 
 - Renamed throughout to **`arsdlc`**: 873 occurrences, 102 files, 20 skill folders, the bin, the guard module, the `arsdlc.json` marker and both plugin manifests. Pushed as `763ccd9`, tagged `v0.3.0`.
-- **`arsdlc@0.3.0` is live on npm** (`latest` → 0.3.0; `0.0.0-stage` is the anti-typosquat hold npm parked the first publish under for a few hours before the staged release cleared). Published from a laptop, so it carries **no provenance**. The scoped `@anshroshan/arsdlc` was never published; every install string is `npx arsdlc …` again.
-- **`0.3.2` is the release commit** (`1bbee21`) - package metadata, the corrected changelog, the hygiene files, five merged dependency bumps, the CI gate that records its own proof, and a publisher preflight. `0.3.1` was tagged and never published, and two orphan Sigstore attestations already describe it, so that version number is burned. npm's `EOTP` means the publish needs the maintainer's 2FA; nothing is on the registry yet for 0.3.2 and no `v0.3.2` tag exists.
+- **`arsdlc@0.3.2` is live and `latest`** (published 2026-10-21 by the account owner after npm's `EOTP`; `gitHead` = tag `v0.3.2` = `c102c6f`, and the GitHub release was created by CI on the tag push). It is still a laptop build: `dist` has no `attestations` key, so `npm audit signatures` shows a registry signature and nothing more. `0.3.0` remains on the registry; `0.3.1` is a tag with no package behind it and two orphan Sigstore attestations, so that number is burned.
+- T3 and T4 are closed by recorded runs, not by reading pages: a smoke check asserts version == `latest` == `gitHead` == tag commit, and a deploy check fetches the live Pages URLs for the released content. Both are green in `docs/features/market-readiness/evidence/`. Checking T4 honestly surfaced **T22**: the site renders SKILL.md pages but not `references/*.md`, so "the security verification procedure is public" is true of the repo and false of the site.
 - `main` is pushed through `763ccd9`; the 0.3.1 packaging pass is the working tree at the time of writing.
 - Enforcement is tested and live: commit-bound approvals, `arsdlc ci`, per-harness enforcement levels in `doctor`, the reusable gate workflow, `antigravity` and `devin` targets. Evidence exports as in-toto/DSSE plus SARIF and verifies offline. `arsdlc mcp --stdio` serves read-only state.
 - 87/87 CLI tests, 12/12 guard tests, 6/6 site tests, corpus check green on 23 commands, secrets scan clean, site builds 23 pages, plugin validation passes.
@@ -18,30 +18,22 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-`0.3.2` is committed and pushed at `1bbee21` (`ci` + `deploy site` green, site live with the new install
-copy), and every dependency bump is merged and green. **The publish is blocked on your npm 2FA** - npm
-answered `EOTP`:
+`arsdlc@0.3.2` is on npm, tagged `v0.3.2` at `c102c6f`, released by CI, and the live Pages site matches it.
+T3 and T4 are closed with recorded evidence. What is left, in order of what it unblocks:
 
-```bash
-cd packages/cli && npm publish --access public
-# npm prints a one-time auth URL; open it, approve, and the publish completes.
-```
+1. **npm trusted publishing** - package page → Publishing → Trusted publishing → publisher: owner
+   `AnshRoshan`, repo `arsdlc`, branch `main`, workflow `publish.yml`, environment empty. That is the only
+   step that removes the `EOTP` prompt and gives a tarball an attestation; T2's done-when is "installable
+   **and** shows provenance", so it stays open until a CI publish lands. Once registered, a patch bump plus
+   tag does the rest without any credentials in the loop.
+2. **T10** - the SARIF upload step in `gates.yml`; `arsdlc export --format sarif` already writes the file.
+3. **T22** (new, found while closing T4) - the site publishes SKILL.md pages but not `references/*.md`, so
+   publish them or stop implying the security-verification procedure is public.
+4. **T13 / T15 / T20 / T21** - catalog manifests (needs a real client), the skills listing plus an external
+   scan, the eval harness (numbers must come from real runs), and the launch post.
 
-The tag is deliberately **not pushed yet**. `publish cli` fires on tag push, so pushing `v0.3.2` before the
-version exists would write a third orphan Sigstore attestation - the new preflight stops a *retry* from
-doing it, not a first attempt. Once `npm view arsdlc version` prints 0.3.2:
-
-```bash
-git tag -s v0.3.2 -m "arsdlc 0.3.2" && git push origin v0.3.2   # from the repo root
-```
-
-CI then runs the preflight, sees the version already published, skips the PUT (no attestation) and creates
-the GitHub release in the same job. To make the *next* release provenanced and OTP-free, register this repo
-as a trusted publisher on the npm package page: owner `AnshRoshan`, repo `arsdlc`, branch `main`, workflow
-`publish.yml`, environment empty.
-
-Then I close T2, T3 and T4 with recorded evidence. T20 needs a runner and real model runs before any number
-exists; T13 needs a Codex or Copilot client that accepts a catalog file.
+Nothing in this list is blocked on the registry any more. G1 and G5 on the program remain unsigned (F-04,
+F-07); the lane model has not yet decided whether pre-approval implementation is acceptable here.
 
 ## Open questions
 

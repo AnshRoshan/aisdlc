@@ -1,0 +1,28 @@
+{
+  "label": "deploy",
+  "task": null,
+  "command": "node --input-type=module -e const need = {'index.html': ['npx arsdlc init', 'Antigravity', 'Devin Desktop'], 'docs/index.html': ['npx arsdlc init'], 'skills/verify/index.html': ['security verification for web/API/auth']}; const bad = []; for (const path of Object.keys(need)) { const html = await (await fetch('https://anshroshan.github.io/arsdlc/' + path)).text(); for (const s of need[path]) if (!html.includes(s)) bad.push(path + ' is missing: ' + s); } if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('live Pages content verified for ' + Object.keys(need).join(', '));",
+  "argv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "const need = {'index.html': ['npx arsdlc init', 'Antigravity', 'Devin Desktop'], 'docs/index.html': ['npx arsdlc init'], 'skills/verify/index.html': ['security verification for web/API/auth']}; const bad = []; for (const path of Object.keys(need)) { const html = await (await fetch('https://anshroshan.github.io/arsdlc/' + path)).text(); for (const s of need[path]) if (!html.includes(s)) bad.push(path + ' is missing: ' + s); } if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('live Pages content verified for ' + Object.keys(need).join(', '));"
+  ],
+  "executedArgv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "const need = {'index.html': ['npx arsdlc init', 'Antigravity', 'Devin Desktop'], 'docs/index.html': ['npx arsdlc init'], 'skills/verify/index.html': ['security verification for web/API/auth']}; const bad = []; for (const path of Object.keys(need)) { const html = await (await fetch('https://anshroshan.github.io/arsdlc/' + path)).text(); for (const s of need[path]) if (!html.includes(s)) bad.push(path + ' is missing: ' + s); } if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('live Pages content verified for ' + Object.keys(need).join(', '));"
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T10:15:50.489Z",
+  "durationMs": 1162,
+  "outputSha256": "aabf34c5d33516e25a8513368383fb0f29b1abc8b33e420acad124118789ce9f",
+  "outputTail": "live Pages content verified for index.html, docs/index.html, skills/verify/index.html\n",
+  "sourceSha256": "03116346840b743517d871594e1316d110b72e1b6d3fd30e1203c3a2bb43a579",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "0be384d5da2bd80d1ffb9cedadc17f4930be723146fde64ed3b7ab5f564d1d96"
+}

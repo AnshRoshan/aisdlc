@@ -1,0 +1,28 @@
+{
+  "label": "smoke",
+  "task": null,
+  "command": "node --input-type=module -e import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc', {headers:{accept:'application/json'}})).json(); const v = reg.versions[pkg.version]; const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', fileCount ' + v.dist.fileCount + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));",
+  "argv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc', {headers:{accept:'application/json'}})).json(); const v = reg.versions[pkg.version]; const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', fileCount ' + v.dist.fileCount + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));"
+  ],
+  "executedArgv": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import fs from 'node:fs'; import cp from 'node:child_process'; const pkg = JSON.parse(fs.readFileSync('packages/cli/package.json','utf8')); const reg = await (await fetch('https://registry.npmjs.org/arsdlc', {headers:{accept:'application/json'}})).json(); const v = reg.versions[pkg.version]; const tagCommit = cp.execSync('git rev-list -n 1 v' + pkg.version, {encoding:'utf8'}).trim(); const bad = []; if (!v) bad.push('version ' + pkg.version + ' is not on the registry'); if (reg['dist-tags'].latest !== pkg.version) bad.push('latest is ' + reg['dist-tags'].latest); if (v && v.gitHead !== tagCommit) bad.push('gitHead ' + v.gitHead + ' != tag commit ' + tagCommit); if (bad.length) { console.error('FAIL ' + bad.join(' | ')); process.exit(1); } console.log('verified ' + pkg.version + ': gitHead == tag v' + pkg.version + ' == ' + tagCommit + ', latest == ' + reg['dist-tags'].latest + ', fileCount ' + v.dist.fileCount + ', provenance ' + (v.dist.attestations ? 'present' : 'ABSENT'));"
+  ],
+  "cwd": ".",
+  "exitCode": 0,
+  "startedAt": "2026-10-21T10:15:43.089Z",
+  "durationMs": 371,
+  "outputSha256": "888e1043bf8d77225945a95b2b75cbdaa83523f05fb57c7c0383fcf4405ae5f6",
+  "outputTail": "verified 0.3.2: gitHead == tag v0.3.2 == c102c6f5b0ec72344a5e79599ca2a1acbb01a617, latest == 0.3.2, fileCount 38, provenance ABSENT\n",
+  "sourceSha256": "03116346840b743517d871594e1316d110b72e1b6d3fd30e1203c3a2bb43a579",
+  "sourceChangedDuringRun": false,
+  "recordedBy": "❖Mʀ᭄Anshᴿᵒˢʰᵃⁿ࿐",
+  "node": "v24.21.0",
+  "recordSha256": "435d45955d3e21007589de035e1e7b04f45591b52df96fc30290ad06f9bf9145"
+}

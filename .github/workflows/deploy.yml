@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: withastro/action@v3
+      - uses: withastro/action@v6
         with:
           path: site
           # Astro 7 refuses to build below 22.12 and the action's default drifts with runners.
@@ -33,4 +33,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

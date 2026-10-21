@@ -162,6 +162,9 @@ const HOT_PATHS = [
   // The split-off branches: they only cost when taken, which is the whole point of taking them out.
   { name: "route with no CLI", required: ["skills/aisdlc-flow/SKILL.md", "skills/aisdlc-flow/references/manual-derivation.md"], oneOf: [] },
   { name: "review + exit", required: ["skills/aisdlc-review/SKILL.md", "skills/aisdlc-review/references/pushback-and-exit.md"], oneOf: [] },
+  // The design checklist is 111 numbered items in two branches; each branch costs only its own half.
+  { name: "plan + design checklist", required: ["skills/aisdlc-plan/SKILL.md", "skills/aisdlc-plan/references/system-design-checklist.md"], oneOf: [] },
+  { name: "plan + operations checklist", required: ["skills/aisdlc-plan/SKILL.md", "skills/aisdlc-plan/references/operations-checklist.md"], oneOf: [] },
 ];
 const HOT_BUDGET = {
   "route a task (any run)": 12 * KB,
@@ -169,6 +172,8 @@ const HOT_BUDGET = {
   "brownfield repo entry": 18 * KB,
   "route with no CLI": 13 * KB,
   "review + exit": 14 * KB,
+  "plan + design checklist": 20 * KB,
+  "plan + operations checklist": 16 * KB,
 };
 
 /* ───────────── corpus files ───────────── */

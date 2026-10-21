@@ -98,7 +98,7 @@ Rules:
 ## Procedure
 
 1. Read `docs/constitution.md` and take its principles one at a time. Present 2-3 architectures in chat, each ≤5 lines with the biggest risk and what it makes hard later, plus your recommendation (skip if `aisdlc-brainstorm` already did this; reuse its choice). Load `aisdlc-grill` in "grill the plan" mode for the decisions that remain open; one round is usually enough.
-2. Draft the plan. Keep architecture boring unless the spec forces otherwise; note the exception in Decisions.
+2. Draft the plan. Keep architecture boring unless the spec forces otherwise; note the exception in Decisions. If the feature touches a network boundary, a datastore, concurrency, background work or an external API, **read `references/system-design-checklist.md` and answer it** in the plan sections it names before writing Architecture; if it changes how anything is built, shipped, scaled or run, read `references/operations-checklist.md` as well. A surface left unanswered is an incident with a date on it, not an omission of taste.
 3. Run the **constitution check**: every principle gets a verdict with evidence. Fix the design for any violation you cannot justify in one sentence.
 4. Drain the unknowns: list each technical unknown, decide it, record decision + rationale + alternatives. If an unknown cannot be decided from the repo or the docs, that is one round of `aisdlc-grill` with a recommended answer — not a coin flip and not a silent assumption.
 5. Fill the data model, interface contracts and smoke path. `n/a` is fine; empty is not. Backend/data/infra: add the sequence or data-flow diagram next to the dependency graph.
@@ -117,6 +117,13 @@ No delta: behaviour is unchanged, only the route. Edit `plan.md`, uncheck every 
 ## Quick lane
 
 The quick lane skips G1: no approval is needed, but `plan.md` still exists in compact form (Architecture in 2 sentences, Constitution check, Decisions with rungs, Data model one line, Seams, Work breakdown, Traceability, Smoke path). Ten lines is fine. The human's acceptance at G4 is the review.
+
+## References
+
+| File | Read it when |
+|---|---|
+| `references/system-design-checklist.md` | the feature touches a network boundary, a datastore, concurrency, background work or an external API |
+| `references/operations-checklist.md` | the feature changes how anything is built, shipped, scaled or run |
 
 ## Smells to refuse
 

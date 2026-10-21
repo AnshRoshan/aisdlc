@@ -22,7 +22,7 @@ Tasks are the unit of agent work and the unit of evidence. One task, one failing
 - [x] T3 [R:<Requirement Name>] <done tasks are checked, never deleted>
 ```
 
-Parser rules (`npx aisdlc trace` and G2 rely on these):
+Parser rules (`npx @anshroshan/aisdlc trace` and G2 rely on these):
 - Line starts with `- [ ]` or `- [x]`, then `T<n>`, then one `[R:...]` group with comma-separated requirement names, then the title.
 - Requirement names must match `### Requirement:` headings in `spec.md` exactly (case-insensitive, whitespace-trimmed). Unknown references fail G2.
 - Every requirement needs at least one task. Uncovered requirements fail G2.
@@ -54,7 +54,7 @@ Order `tasks.md` so the first unchecked line is always runnable, and print the w
 For an `analyze`/consistency-only request, run step 3 and read-only CLI checks only. Report findings; do not generate, repair or reorder tasks.
 
 1. Copy the plan's work breakdown into `tasks.md` in the exact format above. Add `{seam:}` from the plan's Seams section and `{after:}` edges. Derive waves.
-2. Run `npx aisdlc trace <slug>`; fix unknown/uncovered until clean.
+2. Run `npx @anshroshan/aisdlc trace <slug>`; fix unknown/uncovered until clean.
 3. **Consistency pass — read-only, report first.** The CLI proves the three artifacts *link*; only you can prove they *agree*. Read `spec.md`, `plan.md` and `tasks.md` against each other and report, without editing anything:
    - **Contradictions:** a plan decision, constraint or data-model line that cannot hold together with a requirement (e.g. spec says "retry three times", plan says "no retries"; spec §4 says PII is never logged, design logs it).
    - **Conflicts inside the spec:** two requirements that no single implementation can satisfy, or an ambiguous quantifier ("quickly", "many", "as needed") that two tasks resolved differently.
@@ -62,7 +62,7 @@ For an `analyze`/consistency-only request, run step 3 and read-only CLI checks o
    - **Phantom work:** a task whose title describes behaviour no scenario covers, or a task that is really two.
    - **Lost unknowns:** a Research row or `[NEEDS CLARIFICATION]` that no task resolves.
    Anything found goes back to the artifact that owns it: spec problems → `aisdlc-delta`, plan problems → back to `aisdlc-plan` (which makes G1 stale — say so), task problems → fix here. Never resolve a contradiction by quietly rewording the spec.
-4. Run `npx aisdlc gate G2 <slug>`; G2 also re-validates the spec, checks it is signed, and checks the plan has `## Traceability`. Paste the result.
+4. Run `npx @anshroshan/aisdlc gate G2 <slug>`; G2 also re-validates the spec, checks it is signed, and checks the plan has `## Traceability`. Paste the result.
 5. **Readiness verdict** — one line, three values, no fourth:
    - `PASS` — G2 green, consistency pass found nothing blocking.
    - `CONCERNS` — G2 green but the consistency pass logged issues that are safe to build past. List each with the task that will absorb it. Build may start; the concerns are re-read at G4.
@@ -71,7 +71,7 @@ For an `analyze`/consistency-only request, run step 3 and read-only CLI checks o
 
 ## Quick lane
 
-Usually 1-4 tasks. Same format, same G2, same verdict — the consistency pass is one read, not a ceremony. If you are writing task eight, the lane is wrong: `npx aisdlc lane <slug> standard`.
+Usually 1-4 tasks. Same format, same G2, same verdict — the consistency pass is one read, not a ceremony. If you are writing task eight, the lane is wrong: `npx @anshroshan/aisdlc lane <slug> standard`.
 
 ## Smells to refuse
 

@@ -287,7 +287,7 @@ for (const file of claimFiles) {
       ...[...text.matchAll(/`[^`\n]*`/g)].map((m) => m[0]),
     ].join("\n");
     const verbs = new Set();
-    for (const m of code.matchAll(/npx aisdlc\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
+    for (const m of code.matchAll(/npx @anshroshan\/aisdlc\s+([a-z][a-z-]*)/g)) verbs.add(m[1]);
     for (const m of code.matchAll(/(?:^|[\s$>])aisdlc\s+([a-z][a-z-]*)/gm)) verbs.add(m[1]);
     for (const v of verbs) {
       if (v === "cli") continue;

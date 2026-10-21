@@ -754,7 +754,7 @@ const commands = {
         `Reproduce locally (offline, no registry, no service):`,
         "",
         "```",
-        `npx aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`,
+        `npx @anshroshan/aisdlc export --verify ${relp(process.cwd(), outDir) || "."}`,
         "```",
         "",
         "That recomputes every digest in the bundle and compares it with `statement.json`.",

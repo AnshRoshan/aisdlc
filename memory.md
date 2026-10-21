@@ -16,9 +16,11 @@ _Last updated: 2026-10-21_
 
 ## Next step
 
-Publish as `aisdlc@0.3.0` from `packages/cli` with `npm publish --access public` - no `--provenance`: a local publish has no OIDC identity provider and npm refuses with `Automatic provenance generation not supported for provider: null`. Provenance belongs to the CI path; register this repo and `publish.yml` as a trusted publisher on the npm package page afterwards so 0.3.1 onward carries it automatically.
+Publish `@anshroshan/aisdlc@0.3.0` from `packages/cli` with `npm publish --access public` - no `--provenance`, because a local publish has no OIDC identity provider and npm answers `Automatic provenance generation not supported for provider: null`.
 
-Then I cut `v0.3.0`, create the GitHub release, confirm the registry and Pages, and close T2, T3 and T4.
+The unscoped `aisdlc` is refused outright: npm returned `403 Package name too similar to existing package ai-sdlc`, and that package is live with 138 versions in the same category. A registry 404 means unclaimed, not claimable.
+
+Then I cut the release, flip the README install cell, and close T2, T3 and T4.
 
 T20 needs a runner and real model runs before any number is published. T13 needs a Codex or Copilot client that actually accepts a catalog file.
 

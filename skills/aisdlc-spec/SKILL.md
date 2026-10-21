@@ -1,6 +1,6 @@
 ---
 name: aisdlc-spec
-description: Write or repair an EARS specification (spec.md) that passes `npx aisdlc check spec`. Use when `aisdlc next` reports SPECIFY, the user says "write the spec", "spec it", "requirements", "to-spec", or a spec still has [NEEDS CLARIFICATION], a requirement without SHALL, or without a Scenario. Covers happy, failure and edge scenarios, non-functionals, test seams, the UI interaction contract and glossary terms, and runs a two-pass adversarial review for conflicts and vague quantifiers.
+description: Write or repair an EARS specification (spec.md) that passes `npx @anshroshan/aisdlc check spec`. Use when `aisdlc next` reports SPECIFY, the user says "write the spec", "spec it", "requirements", "to-spec", or a spec still has [NEEDS CLARIFICATION], a requirement without SHALL, or without a Scenario. Covers happy, failure and edge scenarios, non-functionals, test seams, the UI interaction contract and glossary terms, and runs a two-pass adversarial review for conflicts and vague quantifiers.
 license: MIT
 metadata:
   author: aisdlc
@@ -26,7 +26,7 @@ One SHALL per requirement. No "and/or", no "quickly", no "user-friendly", no "et
 
 ## File contract: `docs/features/<slug>/spec.md`
 
-Use this artifact shape; `npx aisdlc check spec docs/features/<slug>/spec.md` checks the EARS rules below, not every section:
+Use this artifact shape; `npx @anshroshan/aisdlc check spec docs/features/<slug>/spec.md` checks the EARS rules below, not every section:
 
 ```markdown
 # Spec: <title>
@@ -105,12 +105,12 @@ Rules the validator cannot check but the reviewer will:
 4. **Two adversarial passes** (do this yourself before asking a human):
    - **Within each requirement:** "what input breaks this?", "what if it happens twice?", "what if it happens while \<other state\>?", "who must not be able to do this?". Add scenarios or mark clarifications.
    - **Between requirements:** read every pair that could interact and ask "can both of these hold at once?" Contradictions, overlapping ownership ("who is responsible for X?" answered twice differently), and one requirement quietly superseding another all hide here. Also sweep for unnumbered quantifiers. Fix by merging, narrowing, or a `[NEEDS CLARIFICATION]` — never by picking a winner yourself.
-5. Run `npx aisdlc check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
+5. Run `npx @anshroshan/aisdlc check spec <path>`; fix until 0 errors. Paste the validator output in your reply. (CLI unavailable? Check the hard rules by hand and say you did.)
 6. Ask the human to sign §5 (name + date); `aisdlc approve` does not sign specs. Do not proceed until `aisdlc next` moves to PLAN (or TASKS/BUILD in the quick lane).
 
 ## Compact mode (lane `quick`)
 
-1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. §8 becomes one line for frontend/mobile kinds (journey + the two states you are most likely to get wrong: empty and error). Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx aisdlc lane <slug> standard`.
+1-3 requirements, each with a happy and a failure scenario, §4 with the auth/data lines, §7 with one seam. §8 becomes one line for frontend/mobile kinds (journey + the two states you are most likely to get wrong: empty and error). Skip §6 if empty. Same validator, same signature. Should take under ten minutes; if it is taking longer, the lane is wrong: upgrade with `npx @anshroshan/aisdlc lane <slug> standard`.
 
 ## Spike mode (lane `spike`)
 

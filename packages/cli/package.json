@@ -1,5 +1,5 @@
 {
-  "name": "aisdlc",
+  "name": "@anshroshan/aisdlc",
   "version": "0.3.0",
   "description": "Agents write code, aisdlc runs the process. Command: aisdlc (npx aisdlc). Harness-agnostic Agent Skills + a zero-dependency CLI for EARS specs, evidence gates G1-G6, segregation of duties and hash-chained approvals.",
   "type": "module",

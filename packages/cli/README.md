@@ -5,7 +5,7 @@
 A harness-agnostic process kit for AI-assisted engineering: twenty [Agent Skills](https://agentskills.io) plus a zero-dependency CLI that keeps the truth on disk. Lanes (spike, quick, standard, regulated) match the amount of process to the stakes, so it works for a one-line bug fix and for a regulated payments change. Works with Claude Code, Codex CLI, Cursor, Antigravity CLI, GitHub Copilot, Devin Desktop, OpenCode and any agent that reads `AGENTS.md`; the retired `gemini-cli` and `windsurf` layouts still install and say so. Approvals bind to the artifact hash and to the commit you signed. Evidence exports as in-toto/DSSE and SARIF and verifies offline. Bring your own model and your own subscription; nothing leaves your machine.
 
 ```bash
-npx aisdlc init            # installs skills + instructions into every harness it detects
+npx @anshroshan/aisdlc init            # installs skills + instructions into every harness it detects
 ```
 
 or, skills only, via the open skills CLI:
@@ -30,15 +30,15 @@ npx skills add AnshRoshan/aisdlc
 ## Ten-minute tour
 
 ```bash
-npx aisdlc init
-npx aisdlc new "Magic link login" --kind backend
-npx aisdlc next                              # → SPECIFY, load aisdlc-spec
+npx @anshroshan/aisdlc init
+npx @anshroshan/aisdlc new "Magic link login" --kind backend
+npx @anshroshan/aisdlc next                              # → SPECIFY, load aisdlc-spec
 # ... agent writes spec.md; you sign §5 ...
-npx aisdlc next                              # → PLAN (owner: human)
-npx aisdlc approve G1 magic-link-login --by "Priya"
-npx aisdlc next                              # → BUILD, next task T1, load aisdlc-implement
-npx aisdlc evidence magic-link-login --label full -- npm test
-npx aisdlc gates magic-link-login
+npx @anshroshan/aisdlc next                              # → PLAN (owner: human)
+npx @anshroshan/aisdlc approve G1 magic-link-login --by "Priya"
+npx @anshroshan/aisdlc next                              # → BUILD, next task T1, load aisdlc-implement
+npx @anshroshan/aisdlc evidence magic-link-login --label full -- npm test
+npx @anshroshan/aisdlc gates magic-link-login
 ```
 
 ## The eight invariants

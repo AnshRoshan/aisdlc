@@ -186,6 +186,6 @@ export function enforcement(root, { exists = (p) => existsSync(join(root, p)), t
       : id === "claude-code"
         ? "the guard ships with the aisdlc plugin, but nothing in this project proves it is loaded"
         : `no verified hook adapter for ${h.label}; hooks are tracked as an open assumption`;
-    return { id, label: h.label, enforcement: level, reason, install: `npx aisdlc init --harness ${id}`, retired: h.retired || null };
+    return { id, label: h.label, enforcement: level, reason, install: `npx @anshroshan/aisdlc init --harness ${id}`, retired: h.retired || null };
   });
 }

@@ -22,7 +22,7 @@ Specs change. Silent changes are the problem, not change itself. A delta makes t
 ## Before writing the delta
 
 - Load `aisdlc-grill` for one round if the change is not crisp: what exactly changes, for whom, what must keep working, what is the rejection criterion for the new behaviour. Give recommended answers.
-- Check the lane. A delta that adds a subsystem, touches auth/money/PII, or changes a public contract upgrades the lane (`npx aisdlc lane <slug> standard|regulated`); say so in the delta's Impact.
+- Check the lane. A delta that adds a subsystem, touches auth/money/PII, or changes a public contract upgrades the lane (`npx @anshroshan/aisdlc lane <slug> standard|regulated`); say so in the delta's Impact.
 - Ponytail check: is the lazier response to the trigger to *remove* scope rather than add it? Offer that option explicitly.
 
 ## Procedure
@@ -61,8 +61,8 @@ Specs change. Silent changes are the problem, not change itself. A delta makes t
 
 2. Present the delta and wait for the human's explicit agreement before editing the spec. Ask the human to clear the old spec signature in their own editor after agreeing; the guard blocks agent edits until they do. Apply only to that unsigned spec, and leave the new signature for the human. Apply the change to `spec.md` exactly as the table says. For `modify`, the After cell must contain the **full new requirement text** — a fragment loses the parts of the old wording you meant to keep, and the next reader cannot tell what survived. For `rename`, update every `[R:<name>]` in `tasks.md` and every traceability row to the new name; a rename that orphans references fails G2. Update `plan.md` traceability and `tasks.md` (reopen affected tasks by unchecking them; add new ones).
 3. **Re-read the change against the table, both directions** — every `Change` row has a corresponding edit, and every edit you made has a row. A row with no edit is a promise you did not keep; an edit with no row is an untraced change the reviewer will call fiction. `check delta` validates the table shape, not whether the edits match it.
-4. Run `npx aisdlc check delta docs/features/<slug>/deltas/D<n>-<short-slug>.md`, `npx aisdlc check spec <slug>` and `npx aisdlc trace <slug>`. All three clean. `check delta` is the mechanical half of step 3 — it parses the Change table and fails on an unknown Type, a `remove` without Reason/Migration, a `rename` without FROM/TO/Reason, an empty/unchanged `modify` After cell, an empty change, or a missing section; step 3's read is what it cannot see (an edit with no row).
-5. Tell the human which artifacts changed: G1 binds spec + plan, G4 spec + acceptance, G5 spec + acceptance + rollout. Rebuild affected acceptance rows and clear old signatures before re-review. Old-format approvals are stale; humans must re-approve, never rewrite the chain. Run `npx aisdlc next <slug>` to show the actual state.
+4. Run `npx @anshroshan/aisdlc check delta docs/features/<slug>/deltas/D<n>-<short-slug>.md`, `npx @anshroshan/aisdlc check spec <slug>` and `npx @anshroshan/aisdlc trace <slug>`. All three clean. `check delta` is the mechanical half of step 3 — it parses the Change table and fails on an unknown Type, a `remove` without Reason/Migration, a `rename` without FROM/TO/Reason, an empty/unchanged `modify` After cell, an empty change, or a missing section; step 3's read is what it cannot see (an edit with no row).
+5. Tell the human which artifacts changed: G1 binds spec + plan, G4 spec + acceptance, G5 spec + acceptance + rollout. Rebuild affected acceptance rows and clear old signatures before re-review. Old-format approvals are stale; humans must re-approve, never rewrite the chain. Run `npx @anshroshan/aisdlc next <slug>` to show the actual state.
 
 ## Bug-driven deltas
 

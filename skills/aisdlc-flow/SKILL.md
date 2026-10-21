@@ -1,6 +1,6 @@
 ---
 name: aisdlc-flow
-description: The aisdlc router. Use at the start of ANY engineering task in a repo with an aisdlc.json or docs/features/ directory, when the user says "next", "where are we", "what should I do", "continue", "status", or before any stage work. Reads state from disk via `npx aisdlc next` (or from the files by hand when the CLI is unavailable), respects the feature's lane, reads any handoff, then hands off to exactly one aisdlc-* skill. Never guesses state from chat history.
+description: The aisdlc router. Use at the start of ANY engineering task in a repo with an aisdlc.json or docs/features/ directory, when the user says "next", "where are we", "what should I do", "continue", "status", or before any stage work. Reads state from disk via `npx @anshroshan/aisdlc next` (or from the files by hand when the CLI is unavailable), respects the feature's lane, reads any handoff, then hands off to exactly one aisdlc-* skill. Never guesses state from chat history.
 license: MIT
 metadata:
   author: aisdlc
@@ -20,7 +20,7 @@ Your first job is always to find out **where the feature actually is**, from dis
 3. **Segregation of duties.** The approver is never the author or the prompter. You (the agent) never approve anything.
 4. **Humans own the acceptance bar.** `Approved-by:` lines are human-signed. Do not fill them in.
 5. **Stranger-trust.** "Done" means a run artifact exists in `evidence/`. Saying "tests pass" without a recorded run is the cardinal sin.
-6. **Disk is state. Chat is not.** Derive status from files and `npx aisdlc next`, never from what was said earlier.
+6. **Disk is state. Chat is not.** Derive status from files and `npx @anshroshan/aisdlc next`, never from what was said earlier.
 7. **Secrets never land in files.** Placeholders only. Fail closed.
 8. **Fail loud, never fake green.** If infra is down, the result is `IMPLEMENTED-NOT-VERIFIED`, not PASS.
 
@@ -36,20 +36,20 @@ run, open the delta, ask the human). It fails open when it cannot decide, so a h
    - "actually…", "can we also…", "that's not what I meant" on a signed spec → `aisdlc-delta`.
    - "grill me", "poke holes" → `aisdlc-grill`. "handoff", "I need to stop" → `aisdlc-handoff`. "retro" → `aisdlc-retro`.
    - "analyze", "is this consistent", "does the plan match the spec" → `aisdlc-tasks` (read-only consistency pass; it never edits).
-   - "how is it going", "where did the time go", "is the evidence stale", "how healthy is this repo" → run `npx aisdlc report` (all features) or `report <slug>`, and answer from its numbers. That is measurement, not a stage; do not move state on it.
+   - "how is it going", "where did the time go", "is the evidence stale", "how healthy is this repo" → run `npx @anshroshan/aisdlc report` (all features) or `report <slug>`, and answer from its numbers. That is measurement, not a stage; do not move state on it.
    - "the plan is wrong, not the spec", "we're going about it backwards", "this approach won't work" → `aisdlc-plan` in re-plan mode (see its Re-plan section; G1 goes stale on purpose, no delta unless behaviour changes).
    - anything else about an existing feature → continue below.
-2. Run `npx aisdlc status`. If the user named a feature (or only one exists), run `npx aisdlc next <feature> --json`.
+2. Run `npx @anshroshan/aisdlc status`. If the user named a feature (or only one exists), run `npx @anshroshan/aisdlc next <feature> --json`.
 3. Read the JSON: `state`, `lane`, `blocking[]`, `skill`, `owner`, `nextTask`, `gates`. Trust it over any prior conversation.
 4. If `docs/features/<slug>/handoff.md` exists and is newer than the latest evidence or approval, read it for **context** (decisions, gotchas, exact next steps). Disk wins on **state**; the handoff never overrides `aisdlc next`.
 5. Read `docs/taste.md` (calibration: verbosity, laziness level, review strictness) and `docs/glossary.md` (vocabulary) if present. Quote them when they drive a choice.
 6. Announce, in one short paragraph: lane, state, blocking items, and the **single** next action with its owner. Then load the skill named in `skill`.
 7. Never skip a stage. If `owner` is `human` (approval, signature, decision), stop and ask the human for exactly that; do not simulate it, do not "prepare it so it's ready", do not keep building.
 8. **Discovery may return "do not build".** `aisdlc-discover` closes with a verdict — build / spike first / defer / do not build. Only `build` creates a feature folder. If the brief's `## Verdict` says otherwise, report it and stop; do not route to SPECIFY to be helpful.
-9. When a stage's work is complete, re-run `npx aisdlc next <feature>` to confirm the transition happened on disk. Paste its output.
+9. When a stage's work is complete, re-run `npx @anshroshan/aisdlc next <feature>` to confirm the transition happened on disk. Paste its output.
 10. If context is getting long or the session is ending mid-stage, load `aisdlc-handoff` before you stop.
 
-## If `npx aisdlc` is unavailable (no network, no Node, restricted sandbox)
+## If `npx @anshroshan/aisdlc` is unavailable (no network, no Node, restricted sandbox)
 
 **Read `references/manual-derivation.md` in full and follow it before you do anything else.** It is
 the by-hand state order, and the list of things you may not simulate in that mode. Do not read it when
@@ -57,7 +57,7 @@ the CLI works; do not improvise the derivation from memory, because the order is
 
 ## Lanes (how much process a feature carries)
 
-Set at `aisdlc new --lane <lane>` and stored in `feature.json`. `aisdlc-brainstorm` chooses it; the ratchet only goes up (`npx aisdlc lane <slug> standard`).
+Set at `aisdlc new --lane <lane>` and stored in `feature.json`. `aisdlc-brainstorm` chooses it; the ratchet only goes up (`npx @anshroshan/aisdlc lane <slug> standard`).
 
 | lane | required gates | spec signature | typical |
 |---|---|---|---|
@@ -92,13 +92,13 @@ aisdlc bridges to four maintained third-party skills and degrades gracefully wit
 - **code-craft** (AnshRoshan/ansh-other-skills): line-level clean-code craft. `aisdlc-craft` uses the official one when installed.
 - **code-quality-tools** (AnshRoshan/ansh-other-skills): lint/dead-code/complexity/security CLI runner. `aisdlc-quality` uses the official one when installed.
 
-`npx aisdlc doctor` reports which are present; `npx aisdlc addon ponytail|grilling|code-craft|quality-tools|all` installs them. Never install without asking.
+`npx @anshroshan/aisdlc doctor` reports which are present; `npx @anshroshan/aisdlc addon ponytail|grilling|code-craft|quality-tools|all` installs them. Never install without asking.
 
 ## Output contract for every turn
 
 - One line: `lane · state → next action → who owns it (agent / human)`.
 - If blocked, name the blocker and exactly what unblocks it: who, what artifact or credential (name, never the value), and what you will do the moment it arrives. "Waiting" without that is not a status.
-- If you changed files, list them and re-run `npx aisdlc next`.
+- If you changed files, list them and re-run `npx @anshroshan/aisdlc next`.
 - Never write the words "approved", "signed", or "PASS" about work that has no artifact behind it.
 - Never say "should work", "probably passes", or "looks good" in place of a recorded run.
 
@@ -108,7 +108,7 @@ Read a file only when its trigger fires. They are paths relative to this skill's
 
 | file | read it when |
 |---|---|
-| `references/manual-derivation.md` | `npx aisdlc` cannot run at all |
+| `references/manual-derivation.md` | `npx @anshroshan/aisdlc` cannot run at all |
 
 ## Where things live
 
